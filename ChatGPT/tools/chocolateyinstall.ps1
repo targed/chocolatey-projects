@@ -12,10 +12,10 @@ $packageArgs = @{
 
   softwareName   = 'ChatGPT*'
 
-  checksum       = '013BA5ECB4258BA181FC61E54C644A6CA719A9BE02D174BA7EBCC237959AEE78'
+  checksum       = '01BAC6E0DEA113CFA6E3CC1CF6631B12B03CBBB30481695AAEC5E9E7291B4FF5'
   checksumType   = 'sha256'
   
-  silentArgs     = '/s /v"/qn"'
+  silentArgs     = '/quiet'
   validExitCodes = @(0, 3010, 1641)
 }
 
