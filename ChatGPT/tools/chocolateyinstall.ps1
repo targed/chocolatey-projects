@@ -2,7 +2,7 @@
 $ErrorActionPreference = 'Stop'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url = 'https://github.com/lencx/ChatGPT/releases/download/v0.8.1/ChatGPT_0.8.1_x64_en-US.msi'
+$url = 'https://github.com/lencx/ChatGPT/releases/download/v0.10.1/ChatGPT_0.10.1_x64_en-US.msi'
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
@@ -12,7 +12,7 @@ $packageArgs = @{
 
   softwareName   = 'ChatGPT*'
 
-  checksum       = '01BAC6E0DEA113CFA6E3CC1CF6631B12B03CBBB30481695AAEC5E9E7291B4FF5'
+  checksum       = 'F47A330A14633877EF5F7E369A0A03D39A07F8D0D3FA598BC0C3A14D531698B2'
   checksumType   = 'sha256'
   
   silentArgs     = '/quiet'

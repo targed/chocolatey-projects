@@ -26,8 +26,8 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
     <!-- version should MATCH as closely as possible with the underlying software -->
     <!-- Is the version a prerelease of a version? https://docs.nuget.org/create/versioning#creating-prerelease-packages -->
     <!-- Note that unstable versions like 0.0.1 can be considered a released version, but it's possible that one can release a 0.0.1-beta before you release a 0.0.1 version. If the version number is final, that is considered a released version and not a prerelease. -->
-    <version>0.8.1</version>
-    <!-- <packageSourceUrl>Where is this Chocolatey package located (think GitHub)? packageSourceUrl is highly recommended for the community feed</packageSourceUrl>-->
+    <version>0.10.1</version>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects</packageSourceUrl>
     <!-- owners is a poor name for maintainers of the package. It sticks around by this name for compatibility reasons. It basically means you. -->
     <!--<owners>Ltklionel</owners>-->
     <!-- ============================== -->
@@ -37,7 +37,7 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
     <title>ChatGPT Desktop</title>
     <authors>lencx, yixinBC, tk103331, Irene-123, VinchanGit, xueweiwujxw, manudss, turric4n, Sturlen, beilunyang, #11weltonrodrigo, JacobLinCool, danielbayley</authors>
     <!-- projectUrl is required for the community feed -->
-    <projectUrl>https://github.com/targed/chocolatey-projects</projectUrl>
+    <projectUrl>https://github.com/lencx/ChatGPT</projectUrl>
     <owners>ltklionel</owners>
     <!-- There are a number of CDN Services that can be used for hosting the Icon for a package. More information can be found here: https://docs.chocolatey.org/en-us/create/create-packages#package-icon-guidelines -->
     <!-- Here is an example using Githack -->
