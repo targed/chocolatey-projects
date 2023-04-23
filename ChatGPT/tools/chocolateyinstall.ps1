@@ -1,18 +1,14 @@
-
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url = 'https://github.com/lencx/ChatGPT/releases/download/v0.10.3/ChatGPT_0.10.3_x64_en-US.msi'
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'msi'
-  url            = $url
-
+  url = 'https://github.com/lencx/ChatGPT/releases/download/v0.12.0/ChatGPT_0.12.0_windows_x86_64.msi'
   softwareName   = 'ChatGPT*'
-
-  checksum       = '545E342C5E3F8133E63DF8C10E70AA2E4B08A01818F86678B189F49EDFB70428'
+  checksum       = 'ed09b660a16215844f5072e6ea4821c17dcaa3eb9e3a48e864d9428850d48973'
   checksumType   = 'sha256'
   
   silentArgs     = '/quiet'
@@ -20,20 +16,3 @@ $packageArgs = @{
 }
 
 Install-ChocolateyPackage @packageArgs
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

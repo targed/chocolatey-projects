@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url = 'https://content.vexrobotics.com/vexcode/v5blocks/'
+$url = 'https://content.vexrobotics.com/vexcode/v5blocks/VEXcodeV5-20220829.exe'
 
 $cert = Get-ChildItem Cert:\CurrentUser\TrustedPublisher -Recurse | Where-Object { $_.Thumbprint -eq 'f69c63f8bbfd55e3f7b326320f990c85ea937a89' }
 if (!$cert) {
@@ -17,11 +17,11 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = ''
+  url            = $url
 
   softwareName   = 'VEXcode*'
 
-  checksum       = ''
+  checksum       = '604CD7FF881084C36D9F95537FA2AF8DA52296AE57A9064E26C3E1900967CE59'
   checksumType   = 'sha256'
 
   silentArgs     = '/SD /v"/qn"'
