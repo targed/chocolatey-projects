@@ -1,7 +1,5 @@
-
 $ErrorActionPreference = 'Stop'
 
-$toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $url = 'https://github.com/lencx/nofwl/releases/download/v0.1.0/NoFWL_0.1.0_windows_x86_64.msi'
 
 $packageArgs = @{
