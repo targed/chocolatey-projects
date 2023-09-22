@@ -11,11 +11,11 @@ function global:au_SearchReplace {
 
 
 function global:au_GetLatest {
-    $domain = 'https://github.com'
-    $releases = "$domain/lencx/ChatGPT/releases/"
+    $domain = 'https://link.vex.com/vexcode-v5text-windows'
+    $releases = "$domain/vexcode-v5text-windows"
     $pattern = "/v(\d+\.\d+\.\d+)/"
     $download_page = Invoke-WebRequest -Uri $releases -UseBasicParsing #1
-    $re = '\.msi$'
+    $re = '\.exe$'
     $url = $download_page.links | Where-Object href -match $re | Select-Object -First 1 -expand href
     $url = $domain + $url
 
