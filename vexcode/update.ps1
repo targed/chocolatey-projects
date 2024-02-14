@@ -11,8 +11,8 @@ function global:au_SearchReplace {
 
 
 function global:au_GetLatest {
-    $domain = 'https://github.com'
-    $releases = "$domain/lencx/ChatGPT/releases/"
+    $domain = 'https://link.vex.com/'
+    $releases = "$domain/vexcode-v5blocks-msi"
     $pattern = "/v(\d+\.\d+\.\d+)/"
     $download_page = Invoke-WebRequest -Uri $releases -UseBasicParsing #1
     $re = '\.msi$'

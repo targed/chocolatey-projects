@@ -11,8 +11,8 @@ function global:au_SearchReplace {
 
 
 function global:au_GetLatest {
-    $domain = 'https://link.vex.com/vexcode-v5text-windows'
-    $releases = "$domain/vexcode-v5text-windows"
+    $domain = 'https://link.vex.com/'
+    $releases = "$domain/vexcode-v5text-msi"
     $pattern = "/v(\d+\.\d+\.\d+)/"
     $download_page = Invoke-WebRequest -Uri $releases -UseBasicParsing #1
     $re = '\.exe$'
