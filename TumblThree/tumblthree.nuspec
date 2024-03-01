@@ -7,7 +7,7 @@
         <title>TumblThree</title>
         <authors>thomas694, johanneszab, elipriaulx, arrowsmith001, amigre38, yfdyh000</authors>
         <owners>ltklionel</owners>
-        <iconUrl>https://cdn.statically.io/gh/asheroto/chocolatey-projects-forked/main/ChatGPT/logo.png</iconUrl>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/TumblThree/logo.png</iconUrl>
         <copyright>Copyright (c) 2016-2024 Johannes Meyer zum Alten Borgloh and others</copyright>
         <projectUrl>https://github.com/TumblThreeApp/TumblThree</projectUrl>
         <licenseUrl>https://github.com/TumblThreeApp/TumblThree/?tab=MIT-1-ov-file#readme</licenseUrl>
@@ -16,7 +16,7 @@
         <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/TumblThree</packageSourceUrl>
         <releaseNotes>https://github.com/TumblThreeApp/TumblThree/releases</releaseNotes>
         <summary>TumblThree is a free and open source Tumblr and Twitter blog backup application.</summary>
-        <description>![TumblThree Screenshot](https://cdn.statically.io/gh/asheroto/chocolatey-projects-forked/main/ChatGPT/screenshot.jpg)
+        <description>![TumblThree Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/TumblThree/screenshot.png)
         
 ## Summary
 
@@ -29,7 +29,7 @@ TumblThree is a free and open source Tumblr and Twitter blog backup application.
 -   A clipboard monitor that detects blogname.tumblr.com urls in the clipboard (copy and paste) and automatically adds the blog to the bloglist
 -   A settings panel (change download location, turn preview off/on, define number of concurrent downloads, set the imagesize of downloaded pictures, set download defaults, enable portable mode, etc.)
 -   An option to skip the download of a file if it has already been downloaded before in any currently added blog
--   Preview of photos & videos
+-   Preview of photos and videos
 -   Download of Gif instead of WebP/Gifv images from Tumblr
 -   File rename functionality
 -   Download of Twitter blogs
