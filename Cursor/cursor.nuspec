@@ -2,52 +2,40 @@
 <!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
-        <id>tumblthree</id>
-        <version>2.12.0</version>
-        <title>TumblThree</title>
-        <authors>thomas694, johanneszab, elipriaulx, arrowsmith001, amigre38, yfdyh000</authors>
+        <id>cursoride</id>
+        <version>0.32.2</version>
+        <title>Cursor</title>
+        <authors>getcursor</authors>
         <owners>ltklionel</owners>
-        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/TumblThree/logo.png</iconUrl>
-        <copyright>Copyright (c) 2016-2024 Johannes Meyer zum Alten Borgloh and others</copyright>
-        <projectUrl>https://github.com/TumblThreeApp/TumblThree</projectUrl>
-        <licenseUrl>https://github.com/TumblThreeApp/TumblThree/?tab=MIT-1-ov-file#readme</licenseUrl>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/logo.png</iconUrl>
+        <copyright>Copyright (c) 2023-2024 anysphere.inc/</copyright>
+        <projectUrl>https://github.com/getcursor/cursor</projectUrl>
+        <licenseUrl>https://github.com/getcursor/cursor/blob/main/LICENSE</licenseUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <tags>tumblr WAF downloader GUI windows open-source</tags>
-        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/TumblThree</packageSourceUrl>
-        <releaseNotes>https://github.com/TumblThreeApp/TumblThree/releases</releaseNotes>
-        <summary>TumblThree is a free and open source Tumblr and Twitter blog backup application.</summary>
-        <description>![TumblThree Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/TumblThree/screenshot.png)
+        <tags>IDE AI vscode</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/Cursor</packageSourceUrl>
+        <releaseNotes>https://changelog.cursor.sh/</releaseNotes>
+        <summary>Cursor is an AI-first Code Editor</summary>
+        <description>![Cursor Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/screenshot.png)
         
 ## Summary
 
-TumblThree is a free and open source Tumblr and Twitter blog backup application. It downloads photo, video, audio and text posts from a given Tumblr or Twitter blog.  It is the code rewrite of [TumblTwo](https://github.com/johanneszab/TumblTwo), using the [Win Application Framework](https://github.com/jbe2277/waf) (WAF) and C# with WPF and the MVVM pattern.
+Cursor is an AI-powered code editor that integrates advanced features to enhance software development efficiency. 
+It's built on top of VSCode, allowing users to easily migrate their favorite extensions, themes, and keybindings. 
+Cursor leverages OpenAI's GPT models, including GPT-4, to provide real-time coding assistance, bug detection, and fixes, as well as code generation capabilities from simple instructions
 
 ## Features
 
--   Source code at GitHub (written in C# using WPF and MVVM)
--   Multiple concurrent downloads of a single blog and/or different blogs
--   A clipboard monitor that detects blogname.tumblr.com urls in the clipboard (copy and paste) and automatically adds the blog to the bloglist
--   A settings panel (change download location, turn preview off/on, define number of concurrent downloads, set the imagesize of downloaded pictures, set download defaults, enable portable mode, etc.)
--   An option to skip the download of a file if it has already been downloaded before in any currently added blog
--   Preview of photos and videos
--   Download of Gif instead of WebP/Gifv images from Tumblr
--   File rename functionality
--   Download of Twitter blogs
--   Image viewer with slideshow mode 
--   Automated update process 
--   Group blogs into collections 
--   Choice of download format for .pnj links
--   Internationalization support (several languages available)
--   A download queue
--   Autosave of the queuelist
--   Save, clear and restore the queuelist
--   Uses Windows proxy settings
--   A bandwidth throttler
--   An option to download an url list instead of the actual files
--   Set of a start time for a automatic download (e.g. during nights)
--   Change of blog settings of multiple selected blogs at once
--   Uses SSL connections
--   Taskbar buttons and key bindings</description>
+- **Command K**: Enables editing and writing code with AI assistance. Users can select code to edit or generate new code by typing Command K without selecting anything.
+- **Copilot++**: A native autocomplete feature that suggests mid-line completions and entire diffs, trained to predict the next edit in a codebase.
+- **Chat**: Allows users to converse with an AI that understands their codebase, offering tailored advice and solutions.
+- **@ Symbols and Codebase Answers**: Facilitate easy navigation and querying of the codebase for information or code generation.
+- **Docs and Auto-Debug**: Improve understanding of third-party libraries and offer automatic debugging solutions.
+- **Fix Lints and Terminal Command K**: Help quickly fix lint errors and write terminal commands in plain English.
+- **Vision and Apply From Chat**: Support for image prompts and applying code suggestions from chat directly into the editor.
+- **Rules for AI**: Lets users set style guidelines and common gotchas for the AI to consider.
+
+</description>
     </metadata>
     <files>
         <file src="tools\**" target="tools" />
