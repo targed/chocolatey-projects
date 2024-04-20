@@ -9,29 +9,39 @@ function global:au_SearchReplace {
     }
 }
 
-
 function global:au_GetLatest {
-    $domain = 'https://github.com'
-    $releases = "$domain/TumblThreeApp/TumblThree/releases/"
-    $pattern = "/v(\d+\.\d+\.\d+)/"
-    $download_page = Invoke-WebRequest -Uri $releases -UseBasicParsing #1
+    $domain = "https://download.cursor.sh/windows/nsis/x64"
+    $pattern = "v(\d+\.\d+\.\d+)"
+    try {
+        $download_page = Invoke-WebRequest -Uri $domain -UseBasicParsing
+    }
+    catch {
+        Write-Host "Failed to retrieve releases page: $_"
+        return $null
+    }
     $re = '\.zip$'
-    $url = $download_page.links | Where-Object href -match $re | Select-Object -First 1 -expand href
+    $url = $download_page.Links | Where-Object href -match $re | Select-Object -First 1 -ExpandProperty href
     $url = $domain + $url
 
     if ($url -match $pattern) {
         $version = $Matches[1]
         Write-Host "Version: $version"
-    } else {
+    }
+    else {
         Write-Host "No version found in URL."
+        return $null
     }
 
-    return @{ Version = $version; URL32 = $url }
+    # Placeholder for checksum retrieval or calculation
+    $checksum = "YourMethodToGetChecksum"
+
+    return @{ Version = $version; URL32 = $url; Checksum32 = $checksum }
 }
 
 try {
     update -ChecksumFor 32
-} catch {
+}
+catch {
     $ignore = 'Unable to connect to the remote server'
     if ($_ -match $ignore) { Write-Host $ignore; 'ignore' }  else { throw $_ }
 }
