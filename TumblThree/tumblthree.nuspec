@@ -10,7 +10,7 @@
         <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/TumblThree/logo.png</iconUrl>
         <copyright>Copyright (c) 2016-2024 Johannes Meyer zum Alten Borgloh and others</copyright>
         <projectUrl>https://github.com/TumblThreeApp/TumblThree</projectUrl>
-        <licenseUrl>https://github.com/TumblThreeApp/TumblThree/?tab=MIT-1-ov-file#readme</licenseUrl>
+        <licenseUrl>https://github.com/TumblThreeApp/TumblThree/blob/master/LICENSE</licenseUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>tumblr WAF downloader GUI windows open-source</tags>
         <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/TumblThree</packageSourceUrl>

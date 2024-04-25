@@ -3,7 +3,6 @@ $VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $url = 'https://github.com/TumblThreeApp/TumblThree/releases/download/v2.12.0/TumblThree-v2.12.0-x64-Application.zip'
-$setupName = 'TumblThree.exe'
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
@@ -17,10 +16,7 @@ $packageArgs = @{
   validExitCodes = @(0, 3010, 1641)
 }
 
-
 Install-ChocolateyZipPackage @packageArgs
 
-$packageArgs.file = Join-Path -Path $toolsDir -ChildPath $setupName
-#Install-ChocolateyInstallPackage @packageArgs
-Start-ChocolateyProcessAsAdmin @packageArgs
-#Start-Process -FilePath $packageArgs.file -ArgumentList $packageArgs.silentArgs -NoNewWindow -Wait
+# Install a shortcut on the desktop
+Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\TumblThree.lnk" -targetPath "$($packageArgs.unzipLocation)\TumblThree.exe"

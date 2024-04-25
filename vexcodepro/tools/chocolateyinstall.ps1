@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url = 'https://content.vexrobotics.com/vexcode/v5code/VEXcodeProV5_2_0_5.exe'
+$url = 'https://content.vexrobotics.com/vexcode/v5code/VEXcodeProV5_2_0_6.exe'
 
 $cert = Get-ChildItem Cert:\CurrentUser\TrustedPublisher -Recurse | Where-Object { $_.Thumbprint -eq '548132fd02be43149355d0596c256c0fd4c5c578' }
 if (!$cert) {
@@ -21,7 +21,7 @@ $packageArgs = @{
 
   softwareName   = 'VEXcode Pro*'
 
-  checksum       = 'F56794057E91A101969D3185190730BF77DB0C13B85BE0F44040DF0D12F3A3C2'
+  checksum       = '77EA7499DFFC4B0992F311B79A32E813066D24A87D8BC257632679FF7732AB63'
   checksumType   = 'sha256'
 
   silentArgs     = "/SD /v/qn"

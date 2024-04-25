@@ -10,7 +10,7 @@
         <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/logo.png</iconUrl>
         <copyright>Copyright (c) 2023-2024 anysphere.inc/</copyright>
         <projectUrl>https://github.com/getcursor/cursor</projectUrl>
-        <licenseUrl>https://github.com/getcursor/cursor/blob/main/LICENSE</licenseUrl>
+        <licenseUrl>https://web.archive.org/web/20230324042038/https://github.com/getcursor/cursor/blob/main/LICENSE</licenseUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>IDE AI vscode</tags>
         <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/Cursor</packageSourceUrl>
