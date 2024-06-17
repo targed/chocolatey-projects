@@ -7,9 +7,8 @@ $ParentPath = Split-Path -Parent $ScriptPath
 
 # Create a hash table to store package information
 $packageInfo = @{
-    PackageName   = "ChatGPT"
-    FileUrl       = "https://github.com/lencx/ChatGPT/releases/download/v{VERSION}/ChatGPT_{VERSION}_windows_x86_64.msi"
-    GitHubRepoUrl = "https://github.com/lencx/ChatGPT"
+    PackageName   = "Cursor"
+    FileUrl       = "https://downloader.cursor.sh/windows/nsis/x64"
     Alert         = $true
 }
 

@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 
@@ -8,7 +8,7 @@ $packageArgs = @{
   fileType       = 'exe'
   url            = 'https://downloader.cursor.sh/windows/nsis/x64'
   softwareName   = 'Cursor*'
-  checksum       = '762C285F456FA8575D39BBBB3DE2B2C5999D883DC7D47D668EF903EAE5E4B84D'
+  checksum       = '2087A8CCF43A73C2C777BB03240E7209B2CA400588644878DE5594FAEB1BA51F'
   checksumType   = 'sha256'
   
   silentArgs     = '/S'

@@ -7,7 +7,9 @@ Set-Location $scriptPath
 
 # Update packages
 ./ChatGPT/updateNew.ps1
-./TumblThree/update.ps1
+./TumblThree/updateNew.ps1
+./Cursor/updateNew.ps1
+./NoFWL/updateNew.ps1
 
 # Return
 Pop-Location

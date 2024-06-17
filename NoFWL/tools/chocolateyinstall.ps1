@@ -4,7 +4,6 @@ $url = 'https://github.com/lencx/nofwl/releases/download/v0.1.0/NoFWL_0.1.0_wind
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
-  unzipLocation  = $toolsDir
   fileType       = 'msi'
   url            = $url
 

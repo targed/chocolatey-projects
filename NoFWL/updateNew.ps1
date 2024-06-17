@@ -7,9 +7,10 @@ $ParentPath = Split-Path -Parent $ScriptPath
 
 # Create a hash table to store package information
 $packageInfo = @{
-    PackageName   = "tumblthree"
-    FileUrl       = "https://github.com/TumblThreeApp/TumblThree/releases/download/v{VERSION}/TumblThree-v{VERSION}-x64-Application.zip"
-    GitHubRepoUrl = "https://github.com/TumblThreeApp/TumblThree"
+    PackageName   = "nofwl"
+    FileUrl       = "https://github.com/lencx/nofwl/releases/download/v{VERSION}/NoFWL_{VERSION}_windows_x86_64.msi"
+    GitHubRepoUrl = "https://github.com/lencx/nofwl"
+    Alert         = $true
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table
