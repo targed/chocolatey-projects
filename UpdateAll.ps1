@@ -10,6 +10,7 @@ Set-Location $scriptPath
 ./TumblThree/updateNew.ps1
 ./Cursor/updateNew.ps1
 ./NoFWL/updateNew.ps1
+./vexcode/updateNew.ps1
 
 # Return
 Pop-Location
