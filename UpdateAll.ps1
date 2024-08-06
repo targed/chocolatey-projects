@@ -11,6 +11,7 @@ Set-Location $scriptPath
 ./Cursor/updateNew.ps1
 ./NoFWL/updateNew.ps1
 ./vexcode/updateNew.ps1
+./vexcodepro/updateNew.ps1
 
 # Return
 Pop-Location
