@@ -2,16 +2,19 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
+$version = "2.15.1"
+$url = "https://github.com/TumblThreeApp/TumblThree/releases/download/v${version}/TumblThree-v${version}-x64-Application.zip"
+$checksum = "D9CB5692C9978E818238E63A6A3CA56029BE58E4641C4B7DA32B9EEE2117996D"
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
-  fileType       = 'EXE'
-  url            = 'https://github.com/TumblThreeApp/TumblThree/releases/download/v2.14.2/TumblThree-v2.14.2-x64-Application.zip'
-  softwareName   = 'TumblThree*'
-  checksum       = '0A5605EB49547F84D3A1E6A6E0551018CC890F03CAB1B37AD88926687B63E89A'
-  checksumType   = 'sha256'
-  silentArgs     = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /NOICONS /NOCANCEL /NOLOG'
+  fileType       = "EXE"
+  version        = $version
+  url            = $url
+  checksum       = $checksum
+  checksumType   = "sha256"
+  silentArgs     = "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /NOICONS /NOCANCEL /NOLOG"
   validExitCodes = @(0, 3010, 1641)
 }
 

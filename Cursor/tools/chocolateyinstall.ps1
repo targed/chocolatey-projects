@@ -8,7 +8,7 @@ $packageArgs = @{
   fileType       = 'exe'
   url            = 'https://downloader.cursor.sh/windows/nsis/x64'
   softwareName   = 'Cursor*'
-  checksum       = '40FEE0A2589BE9430C66F9558A3C8FF4A3F8ED3BFA7D961C20A8C80E4E78E280'
+  checksum       = 'B10D33AF5374DDA36EB5CD83869AD34066EA9FF2394B1F0BC605ED70EC03E0C0'
   checksumType   = 'sha256'
   
   silentArgs     = '/S'
