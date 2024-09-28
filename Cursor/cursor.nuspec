@@ -3,10 +3,10 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
         <id>cursoride</id>
-        <version>0.40.4</version>
+        <version>0.41.3</version>
         <title>Cursor</title>
         <authors>getcursor</authors>
-        <owners>ltklionel</owners>
+        <owners>ltklionel, publicfacingusername</owners>
         <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/logo.png</iconUrl>
         <copyright>Copyright (c) 2023-2024 anysphere.inc/</copyright>
         <projectUrl>https://github.com/getcursor/cursor</projectUrl>
