@@ -6,7 +6,7 @@ $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $scriptPath
 
 # Update packages
-./ChatGPT/updateNew.ps1
+./ChatGPT_Unofficial/updateNew.ps1
 ./TumblThree/updateNew.ps1
 ./Cursor/updateNew.ps1
 ./NoFWL/updateNew.ps1
