@@ -7,7 +7,7 @@
     <title>Claude Desktop</title>
     <authors>Anthropic</authors>
     <owners>ltklionel</owners>
-    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/ChatGPT_Official/logo.png</iconUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Claude/logo.png</iconUrl>
     <copyright>Copyright 2024 Anthropic</copyright>
     <projectUrl>https://claude.ai/download</projectUrl>
     <licenseUrl>https://www.anthropic.com/legal/aup</licenseUrl>
@@ -18,8 +18,8 @@
     <summary>Anthropic's Claude Desktop Application</summary>
     <description>
 
-![Claude Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/claude/screenshot.jpg)
-![Claude Screenshot1](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/claude/screenshot1.jpg)
+![Claude Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Claude/screenshot.jpg)
+![Claude Screenshot1](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Claude/screenshot1.jpg)
 
 Your AI partner on desktop. Fast, focused, and designed for deep work. Talk to Claude, anywhere you go. Brainstorm ideas, get answers, and analyze images on the go.
 
