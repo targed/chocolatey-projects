@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>claude</id>
+    <version>1.0</version>
+    <title>Claude Desktop</title>
+    <authors>Anthropic</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/ChatGPT_Official/logo.png</iconUrl>
+    <copyright>Copyright 2024 Anthropic</copyright>
+    <projectUrl>https://claude.ai/download</projectUrl>
+    <licenseUrl>https://www.anthropic.com/legal/aup</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>claude chatbot chat bot LLM AI machine-learning GUI Anthropic</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/claude</packageSourceUrl>
+    <releaseNotes>https://docs.anthropic.com/en/release-notes/overview</releaseNotes>
+    <summary>Anthropic's Claude Desktop Application</summary>
+    <description>
+
+![Claude Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/claude/screenshot.jpg)
+![Claude Screenshot1](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/claude/screenshot1.jpg)
+
+Your AI partner on desktop. Fast, focused, and designed for deep work. Talk to Claude, anywhere you go. Brainstorm ideas, get answers, and analyze images on the go.
+
+Claude is a desktop application that helps you focus on your work. It's designed to be fast, focused, and to help you get more done.
+
+Claude is built on top of the latest AI models from Anthropic, including access to Anthropic's newest and smartest model.
+
+Do more on your PC with Claude:
+
+- Instant answers—Use the [Control + Alt + Space] keyboard shortcut for faster access to Claude
+- Stay productive—Keep Claude easily accessible next to your open apps with the companion window
+- Upload files and photos—Summarize and analyze multiple documents
+
+</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
