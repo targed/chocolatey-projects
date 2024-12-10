@@ -16,3 +16,5 @@ Set-Location $scriptPath
 
 # Return
 Pop-Location
+
+# Set-ExecutionPolicy Bypass -Scope CurrentUser
