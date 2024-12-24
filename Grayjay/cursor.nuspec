@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+    <metadata>
+        <id>grayjay</id>
+        <version>0.43.6</version>
+        <title>Grayjay</title>
+        <authors>Futo</authors>
+        <owners>ltklionel</owners>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Grayjay/logo.png</iconUrl>
+        <copyright>Copyright © 2024 FUTO. All rights reserved.</copyright>
+        <projectUrl>https://gitlab.futo.org/videostreaming/Grayjay.Desktop</projectUrl>
+        <licenseUrl>https://gitlab.futo.org/videostreaming/Grayjay.Desktop/-/raw/master/LICENSE.md?ref_type=heads</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>Streaming YouTube Video</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/Grayjay</packageSourceUrl>
+        <releaseNotes>https://www.reddit.com/r/grayjay/wiki/changelogs/</releaseNotes>
+        <summary> Watch content on your own terms, ensuring you retain full ownership and control over what you watch. Your content, your way.</summary>
+        <description>![Cursor Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/screenshot.png)
+        
+## Multi-Platform Integration
+
+Grayjay combines video content from multiple platforms, such as YouTube, PeerTube, Twitch, and others, into one app, removing the need to switch between different platforms.
+
+## Enjoy content in a personalized content feed
+The app provides a single feed displaying all videos from your subscriptions, ensuring you stay updated with new content efficiently.
+
+## Follow Creators. Not Platforms
+Watch content on your own terms, ensuring you retain full ownership and control over what you watch. Your content, your way.
+
+## Multi-Platform Integration
+Grayjay combines video content from multiple platforms, such as YouTube, PeerTube, Twitch, and others, into one app, removing the need to switch between different platforms.
+
+## Enjoy content in a personalized content feed
+The app provides a single feed displaying all videos from your subscriptions, ensuring you stay updated with new content efficiently.
+
+## Your accounts and data
+- Import your data and access your recommendations
+- Import data from another platforms, import your subscriptions and playlists from supported sources and configure the way you like to use them
+- Import from platform
+- Import your data from a specific source like Youtube or Twitch
+- Import Grayjay Auto-Backup (.ezip)
+- Pick a Grayjay auto-backup encrypted zip file
+- Import from .zip file
+- Import zip file from another app instance or another device
+
+## Add and configure sources
+Simply enable the plugins for the platforms you are interested in, and you are ready to start watching.
+
+## Privacy-Focused Design
+Grayjay prioritizes your privacy by storing your watch history locally on your device. Your viewing habits remain private, giving you full control over your data.
+
+## Watch it on big screen
+Enjoy your favorite videos and content on the big screen for an immersive experience. Stream directly to your TV and watch everything you love, larger than life.
+
+## Claim your identity on the internet using Harbor
+Harbor is a service which enables you to preserve your identity on the internet
+
+- Link your identity across apps
+- Directly connect with your audience
+- Monitize your content
+
+</description>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
+</package>
