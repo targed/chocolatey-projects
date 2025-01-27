@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>lm-studio</id>
+    <version>0.3.8</version>
+    <title>LM Studio</title>
+    <authors>lmstudio-ai</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/LM_Studio/logo.png</iconUrl>
+    <copyright>Copyright 2025 lmstudio-ai</copyright>
+    <projectUrl>https://lmstudio.ai/download</projectUrl>
+    <licenseUrl>https://lmstudio.ai/terms</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>chatbot chat bot LLM AI machine-learning GUI</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/LM_Studio</packageSourceUrl>
+    <releaseNotes>https://lmstudio.ai/blog</releaseNotes>
+    <summary>Discover, download, and run local LLMs</summary>
+    <description>
+
+![LM_Studio Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/LM_Studio/screenshot.jpg)
+
+# With LM Studio, you can ...
+
+🤖 • Run LLMs on your laptop, entirely offline
+
+📚 • Chat with your local documents (new in 0.3)
+
+👾 • Use models through the in-app Chat UI or an OpenAI compatible local server
+
+📂 • Download any compatible model files from Hugging Face 🤗 repositories
+
+🔭 • Discover new and noteworthy LLMs right inside the app's Discover page
+
+LM Studio supports any GGUF Llama, Mistral, Phi, Gemma, StarCoder, etc model on Hugging Face
+
+</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
