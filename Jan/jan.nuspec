@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+    <metadata>
+        <id>jan</id>
+        <version>0.5.14</version>
+        <title>Jan</title>
+        <authors>JanAi</authors>
+        <owners>ltklionel</owners>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Jan/logo.png</iconUrl>
+        <copyright>©2025 Homebrew Computer Company</copyright>
+        <projectUrl>https://github.com/janhq/jan</projectUrl>
+        <licenseUrl>https://github.com/janhq/jan?tab=AGPL-3.0-1-ov-file#readme</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>chatbot chat bot LLM AI machine-learning GUI</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/Jan</packageSourceUrl>
+        <releaseNotes>https://jan.ai/changelog</releaseNotes>
+        <summary>Jan is a ChatGPT-alternative that runs 100% offline on your device</summary>
+        <description>![Jan Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Jan/screenshot.png)
+        
+## Summary
+
+Chat with AI without privacy concerns
+Jan is an open source ChatGPT-alternative that runs 100% offline.
+
+## Features
+
+-   Chat with AI: Ask your questions, brainstorm, and learn from the AI running on your device to be more productive.
+-   Model Hub: Download and Run powerful models like Llama3, Gemma or Mistral on your computer.
+-   Connect to Cloud AIs: You can also route to more powerful cloud models, like OpenAI, Groq, Cohere etc., when needed.
+-   Local API Server: Set up and run your own OpenAI-compatible API server using local models with just one click.
+-   Chat with your files: Set up and run your own OpenAI-compatible API server using local models with just one click.
+
+## Highly Customizable
+Customize Jan to match your needs and preferences.
+
+### Assistants and Memory
+-   Create personalized AI assistants that remember your conversations and execute specific tasks across your systems.
+
+### Extensions
+-   Customize Jan with Extensions, that range from Cloud AI connectors, tools, data connectors.
+
+</description>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
+</package>
