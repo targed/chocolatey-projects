@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
         <id>cursoride</id>
-        <version>0.43.5</version>
+        <version>0.46.7</version>
         <title>Cursor</title>
         <authors>getcursor</authors>
         <owners>ltklionel, publicfacingusername</owners>
