@@ -6,12 +6,12 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = 'https://downloader.cursor.sh/windows/nsis/x64'
+  url            = 'https://anysphere-binaries.s3.us-east-1.amazonaws.com/production/3611c5390c448b242ab97e328493bb8ef7241e61/win32/x64/user-setup/CursorUserSetup-x64-0.46.7.exe'
   softwareName   = 'Cursor*'
-  checksum       = 'E9E4A5D48C7803BA8422A098933DD5EDC04C599A4FD7E1A1CB883BA812EDCE41'
+  checksum       = '81DAB6FE2C887A5BB8C0245F8AB2C26D898711397FC30442B656CC9971E20334'
   checksumType   = 'sha256'
   
-  silentArgs     = '/S'
+  silentArgs     = '/SILENT'
   validExitCodes = @(0, 3010, 1641)
 }
 
