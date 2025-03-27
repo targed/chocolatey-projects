@@ -8,10 +8,10 @@ $packageArgs = @{
   fileType       = 'exe'
   url            = 'https://jmars.asu.edu/downloads/jmars_5/jmars_public/jmars_5_public.exe'
   softwareName   = 'JMARS*'
-  checksum       = 'E9E4A5D48C7803BA8422A098933DD5EDC04C599A4FD7E1A1CB883BA812EDCE41'
+  checksum       = '31DAD8AAD37C27A423765F53C473DAB1A4AE8A4F3629584A58385A3A68C352BC'
   checksumType   = 'sha256'
   
-  silentArgs     = '/S'
+  silentArgs     = '/S /VERYSILENT /SUPPRESSMSGBOXES /norestart /quiet /qn /norestart /l*v /SP- $locale'
   validExitCodes = @(0, 3010, 1641)
 }
 
