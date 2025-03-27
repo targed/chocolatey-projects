@@ -2,14 +2,15 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
+$checksum = 'D98B164AAD09E0F3FF4031A6E519E3D783594A0DE058CD1E63079577E11705B7'
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
-  fileType       = 'exe'
+  fileType       = 'EXE'
   url            = 'https://updater.grayjay.app/Apps/Grayjay.Desktop/Grayjay.Desktop-win-x64.zip'
   softwareName   = 'Grayjay*'
-  checksum       = 'F9A18730F17917CB8B55613EAC5EAAC895CBE778FAF39B63BE142E700C492E80'
+  checksum       = $checksum
   checksumType   = 'sha256'
   
   silentArgs     = '/S'
@@ -18,7 +19,7 @@ $packageArgs = @{
 
 Install-ChocolateyZipPackage @packageArgs
 
-Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v2\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v2"
+Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v5\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v5"
 
 # Set "Run as Administrator" flag on the shortcut
 $shell = New-Object -ComObject WScript.Shell
