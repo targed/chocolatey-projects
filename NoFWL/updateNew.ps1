@@ -10,7 +10,7 @@ $packageInfo = @{
     PackageName   = "nofwl"
     FileUrl       = "https://github.com/lencx/nofwl/releases/download/v{VERSION}/NoFWL_{VERSION}_windows_x86_64.msi"
     GitHubRepoUrl = "https://github.com/lencx/nofwl"
-    Alert         = $true
+    Alert         = $false
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table

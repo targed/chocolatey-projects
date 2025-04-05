@@ -11,9 +11,9 @@ $downloadLink = ($downloadPage.Links | Where-Object { $_.href -like "*LM-Studio-
 
 # Create a hash table to store package information
 $packageInfo = @{
-    PackageName = "LM-Studio*"
-    FileUrl     = "https://installers.lmstudio.ai/win32/x64/0.3.14-5/LM-Studio-0.3.14-5-x64.exe"
-    Alert       = $true
+    PackageName = "LMStudio"
+    FileUrl     = $downloadLink
+    Alert       = $false
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table

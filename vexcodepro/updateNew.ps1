@@ -7,9 +7,9 @@ $ParentPath = Split-Path -Parent $ScriptPath
 
 # Create a hash table to store package information
 $packageInfo = @{
-    PackageName   = "vexcode"
-    FileUrl       = "https://link.vex.com/vexcode-v5text-windows"
-    Alert         = $true
+    PackageName = "vexcode"
+    FileUrl     = "https://link.vex.com/vexcode-v5text-windows"
+    Alert       = $false
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table

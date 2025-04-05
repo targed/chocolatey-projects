@@ -2,8 +2,8 @@ $ErrorActionPreference = 'Stop'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $version = "0.3.8"
-$url = 'https://installers.lmstudio.ai/win32/x64/0.3.8-4/LM-Studio-0.3.8-4-x64.exe'
-$checksum = '7B2A5ADF1796BBB5A618356735C6CF35BC1337613313ADDF9EEE98DC293A2786'
+$url = 'https://installers.lmstudio.ai/win32/x64/0.3.14-5/LM-Studio-0.3.14-5-x64.exe'
+$checksum = 'B9DE1A02697822A3C5455A91163E8AE7B425DCE4059AA8B1B7BB359CFFEB2D8A'
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName

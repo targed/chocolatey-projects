@@ -7,10 +7,11 @@ Set-Location $scriptPath
 
 # Update packages
 ./ChatGPT_Unofficial/updateNew.ps1
-./TumblThree/updateNew.ps1
 ./Claude/updateNew.ps1
 ./Cursor/updateNew.ps1
+./LM_Studio/updateNew.ps1
 ./NoFWL/updateNew.ps1
+./TumblThree/updateNew.ps1
 ./vexcode/updateNew.ps1
 ./vexcodepro/updateNew.ps1
 

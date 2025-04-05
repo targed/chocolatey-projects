@@ -13,7 +13,7 @@ $packageInfo = @{
     PackageName   = "tumblthree"
     FileUrl       = "https://github.com/TumblThreeApp/TumblThree/releases/download/v{VERSION}/TumblThree-v{VERSION}-x64-Application.zip"
     GitHubRepoUrl = "https://github.com/TumblThreeApp/TumblThree"
-    Alert         = $true
+    Alert         = $false
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table
