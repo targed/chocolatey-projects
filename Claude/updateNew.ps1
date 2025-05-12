@@ -1,3 +1,4 @@
+$ErrorActionPreference = 'Stop'
 # Set vars to the script and the parent path ($ScriptPath MUST be defined for the UpdateChocolateyPackage function to work)
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ParentPath = Split-Path -Parent $ScriptPath

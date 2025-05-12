@@ -49,26 +49,65 @@ jobs:
       # Test the packages
       - name: Test updated packages
         run: |
-          # Get all updated package directories
-          $updatedPackages = Get-ChildItem -Path . -Directory | 
-            Where-Object { Test-Path (Join-Path $_.FullName "*.nupkg") } |
-            Select-Object -ExpandProperty Name
+          # Extract package directories from UpdateAll.ps1
+          $updateAllContent = Get-Content -Path .\UpdateAll.ps1 -Raw
+          $packageDirs = $updateAllContent -split "`n" | 
+                        Where-Object { $_ -match '\\([^\\]+)\\updateNew\.ps1' } | 
+                        ForEach-Object { $matches[1] }
 
-          foreach ($package in $updatedPackages) {
-            Write-Host "Testing package: $package"
-            $nupkgFile = Get-ChildItem -Path "$package/*.nupkg" | Select-Object -First 1
-            if ($nupkgFile) {
-              choco install $package -y -s .
-              if ($LASTEXITCODE -ne 0) {
-                Write-Error "Package installation failed: $package"
-                exit 1
-              }
+          Write-Host "Packages to check based on UpdateAll.ps1: $($packageDirs -join ', ')"
+
+          # Find updated packages (those with new .nupkg files) from our target list
+          $updatedPackages = @()
+
+          foreach ($dir in $packageDirs) {
+            if (Test-Path (Join-Path $dir "*.nupkg")) {
+              Write-Host "Found .nupkg in directory: $dir"
               
-              choco uninstall $package -y
-              if ($LASTEXITCODE -ne 0) {
-                Write-Error "Package uninstallation failed: $package"
-                exit 1
+              # Extract packageId from nuspec file
+              $nuspecFile = Get-ChildItem -Path "$dir/*.nuspec" | Select-Object -First 1
+              
+              if ($nuspecFile) {
+                [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+                $packageId = $nuspecContent.package.metadata.id
+                
+                if ($packageId) {
+                  $updatedPackages += [PSCustomObject]@{
+                    Directory = $dir
+                    PackageId = $packageId
+                    NupkgFile = (Get-ChildItem -Path "$dir/*.nupkg" | Select-Object -First 1).FullName
+                  }
+                } else {
+                  Write-Warning "Could not extract package ID from nuspec file in $dir"
+                }
+              } else {
+                Write-Warning "No nuspec file found in $dir"
               }
+            }
+          }
+
+          Write-Host "Updated packages found: $($updatedPackages.Count)"
+
+          # Test each updated package
+          foreach ($package in $updatedPackages) {
+            Write-Host "Testing package: $($package.PackageId) from directory $($package.Directory)"
+            
+            # Install package by ID, not directory name
+            Write-Host "Installing package: $($package.PackageId)"
+            choco install $($package.PackageId) -y -s .
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Package installation failed: $($package.PackageId)"
+              exit 1
+            }
+            
+            # Uninstall the package 
+            Write-Host "Uninstalling package: $($package.PackageId)"
+            choco uninstall $($package.PackageId) -y
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Package uninstallation failed: $($package.PackageId)"
+              exit 1
             }
           }
 
@@ -78,17 +117,34 @@ jobs:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
           DRY_RUN: true # Set to false when ready for production
         run: |
-          $updatedPackages = Get-ChildItem -Path . -Recurse -Filter "*.nupkg" | 
-            Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
+          # Extract package directories from UpdateAll.ps1
+          $updateAllContent = Get-Content -Path .\UpdateAll.ps1 -Raw
+          $packageDirs = $updateAllContent -split "`n" | 
+                        Where-Object { $_ -match '\\([^\\]+)\\updateNew\.ps1' } | 
+                        ForEach-Object { $matches[1] }
+
+          # Find updated packages
+          $updatedPackages = @()
+
+          foreach ($dir in $packageDirs) {
+            $nupkgFiles = Get-ChildItem -Path "$dir/*.nupkg" -ErrorAction SilentlyContinue | 
+                          Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
+            
+            foreach ($nupkg in $nupkgFiles) {
+              $updatedPackages += $nupkg.FullName
+            }
+          }
 
           if ($updatedPackages.Count -gt 0) {
             Write-Host "Found $($updatedPackages.Count) updated packages to push"
-            foreach ($package in $updatedPackages) {
-              Write-Host "Pushing package: $($package.FullName)"
+            
+            foreach ($packagePath in $updatedPackages) {
+              Write-Host "Pushing package: $packagePath"
+              
               if ($env:DRY_RUN -ne "true") {
-                choco push $package.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+                choco push $packagePath --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
               } else {
-                Write-Host "DRY RUN: Would have pushed $($package.FullName) to Chocolatey"
+                Write-Host "DRY RUN: Would have pushed $packagePath to Chocolatey"
               }
             }
           } else {
