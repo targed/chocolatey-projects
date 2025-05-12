@@ -94,7 +94,7 @@ jobs:
             
             # Install package by ID, not directory name
             Write-Host "Installing package: $($package.PackageId)"
-            choco install $($package.PackageId) -y -s .
+            choco install $($package.PackageId) -y --debug --verbose --source .
             
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Package installation failed: $($package.PackageId)"
