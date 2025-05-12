@@ -1,0 +1,136 @@
+name: Claude Package Update
+
+on:
+  # Run on manual trigger
+  workflow_dispatch:
+
+  # Run daily at 1 AM UTC
+  schedule:
+    - cron: "0 1 * * *"
+
+jobs:
+  update-packages:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full git history for potential version tagging
+
+      # Check PowerShell version to confirm we're using PowerShell Core (7+)
+      - name: Check PowerShell version
+        run: |
+          $PSVersionTable.PSVersion
+          if ($PSVersionTable.PSVersion.Major -lt 7) {
+            Write-Error "PowerShell 7 or higher is required"
+            exit 1
+          }
+
+      # Install Chocolatey AU (Automatic Updater) module
+      - name: Install prerequisites
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          powershell.exe Install-PackageProvider -Name NuGet -Force
+          Install-Module AU -Force
+          choco install checksum -y
+
+      # Run the Claude update script
+      - name: Run Claude update script
+        working-directory: ./Claude
+        run: |
+          Unblock-File -Path .\updateNew.ps1
+          .\updateNew.ps1
+
+      # Test the Claude package if updated
+      - name: Test Claude package
+        run: |
+          $packageDir = "Claude"
+          $updatedPackage = $null
+
+          if (Test-Path (Join-Path $packageDir "*.nupkg")) {
+            Write-Host "Found .nupkg in Claude directory"
+            
+            # Extract packageId from nuspec file
+            $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
+            
+            if ($nuspecFile) {
+              [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+              $packageId = $nuspecContent.package.metadata.id
+              
+              if ($packageId) {
+                $updatedPackage = [PSCustomObject]@{
+                  Directory = $packageDir
+                  PackageId = $packageId
+                  NupkgFile = (Get-ChildItem -Path "$packageDir/*.nupkg" | Select-Object -First 1).FullName
+                }
+                
+                Write-Host "Updated package found: $packageId"
+                
+                # Install package by ID
+                Write-Host "Installing package: $($updatedPackage.PackageId)"
+                choco install $($updatedPackage.PackageId) -y --debug --verbose --source .
+                
+                if ($LASTEXITCODE -ne 0) {
+                  Write-Error "Package installation failed: $($updatedPackage.PackageId)"
+                  exit 1
+                }
+                
+                # Uninstall the package 
+                Write-Host "Uninstalling package: $($updatedPackage.PackageId)"
+                choco uninstall $($updatedPackage.PackageId) -y
+                
+                if ($LASTEXITCODE -ne 0) {
+                  Write-Error "Package uninstallation failed: $($updatedPackage.PackageId)"
+                  exit 1
+                }
+              } else {
+                Write-Warning "Could not extract package ID from nuspec file"
+              }
+            } else {
+              Write-Warning "No nuspec file found in Claude directory"
+            }
+          } else {
+            Write-Host "No .nupkg found in Claude directory - no update needed"
+          }
+
+      # Push to Chocolatey if Claude was updated
+      - name: Push to Chocolatey (Test Mode)
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+          DRY_RUN: true # Set to false when ready for production
+        run: |
+          $packageDir = "Claude"
+          $nupkgFiles = Get-ChildItem -Path "$packageDir/*.nupkg" -ErrorAction SilentlyContinue | 
+                        Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
+
+          if ($nupkgFiles.Count -gt 0) {
+            Write-Host "Found updated Claude package to push"
+            
+            foreach ($nupkg in $nupkgFiles) {
+              Write-Host "Pushing package: $($nupkg.FullName)"
+              
+              if ($env:DRY_RUN -ne "true") {
+                choco push $nupkg.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+              } else {
+                Write-Host "DRY RUN: Would have pushed $($nupkg.FullName) to Chocolatey"
+              }
+            }
+          } else {
+            Write-Host "No updated Claude package found to push"
+          }
+
+      # Commit changes back to the repository
+      - name: Commit changes
+        if: success()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add ./Claude
+          git commit -m "Auto-update Claude package [skip ci]" || echo "No changes to commit"
+          git push
