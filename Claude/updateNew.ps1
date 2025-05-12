@@ -1,3 +1,6 @@
+[CmdletBinding()] # Enables -Debug parameter for troubleshooting
+param ()
+
 $ErrorActionPreference = 'Stop'
 # Set vars to the script and the parent path ($ScriptPath MUST be defined for the UpdateChocolateyPackage function to work)
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition

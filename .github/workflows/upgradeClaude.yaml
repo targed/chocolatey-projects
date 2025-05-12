@@ -49,7 +49,7 @@ jobs:
           # Assuming UpdateAll.ps1 is in the root. Adjust if it's elsewhere.
           Unblock-File -Path ./UpdateAll.ps1
           # Execute the script using its path relative to the root
-          ./Claude/updateNew.ps1 -Verbose -Force -SkipInstall
+          ./Claude/updateNew.ps1 -debug
 
       # Test the Claude package if updated
       - name: Test Claude package
