@@ -43,6 +43,7 @@ jobs:
       # Run the update script
       - name: Run package update script
         run: |
+          Unblock-File -Path .\UpdateAll.ps1
           .\UpdateAll.ps1
 
       # Test the packages
