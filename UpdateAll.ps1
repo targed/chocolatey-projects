@@ -1,9 +1,9 @@
-# Remember location
-Push-Location
+# # Remember location
+# Push-Location
 
-# Change to script directory
-$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Set-Location $scriptPath
+# # Change to script directory
+# $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
+# Set-Location $scriptPath
 
 # Update packages
 ./ChatGPT_Unofficial/updateNew.ps1
@@ -16,6 +16,6 @@ Set-Location $scriptPath
 ./vexcodepro/updateNew.ps1
 
 # Return
-Pop-Location
+# Pop-Location
 
 # Set-ExecutionPolicy Bypass -Scope CurrentUser

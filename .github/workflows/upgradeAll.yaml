@@ -45,7 +45,6 @@ jobs:
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           ./UpdateAll.ps1
-          Chocolatey-Package-Updater -CheckForUpdate
 
       # Test the packages
       - name: Test updated packages
