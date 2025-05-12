@@ -36,8 +36,23 @@ jobs:
       - name: Install prerequisites
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
-          Install-PackageProvider -Name NuGet -Force
-          Install-Module AU -Force
+
+          # Install NuGet provider using alternative approach
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.208 -Force -Scope CurrentUser
+
+          # Register PSGallery if needed
+          if (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+            Register-PSRepository -Default -Verbose
+          }
+
+          # Trust PSGallery
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+
+          # Install AU module
+          Install-Module AU -Force -Verbose
+
+          # Install checksum tool
           choco install checksum -y
 
       # Run the update script
