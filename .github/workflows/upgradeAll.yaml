@@ -44,7 +44,7 @@ jobs:
       - name: Run package update script
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
-          ./UpdateAll.ps1
+          ./Claude/updateNew.ps1
 
       # Test the packages
       - name: Test updated packages
