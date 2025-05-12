@@ -8,7 +8,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Create a hash table to store package information
 $packageInfo = @{
     PackageName = "vexcode"
-    FileUrl     = "https://link.vex.com/vexcode-v5blocks-windows"
+    FileUrl     = "https://content.vexrobotics.com/vexcode/4/v5/VEXcode%20V5-4.0.7-latest-win-x64.exe"
     Alert       = $false
 }
 

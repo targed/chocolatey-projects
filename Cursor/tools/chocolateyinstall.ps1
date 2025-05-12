@@ -34,5 +34,5 @@ while ($timer.Elapsed.TotalSeconds -lt $timeout) {
 }
 
 if ($timer.Elapsed.TotalSeconds -ge $timeout) {
-  Write-Warning "Timeout waiting for Claude process"
+  Write-Warning "Timeout waiting for Cursor process"
 }
