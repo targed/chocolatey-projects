@@ -42,11 +42,14 @@ jobs:
 
       # Run the Claude update script
       - name: Run Claude update script
-        working-directory: ./Claude
+        # REMOVED: working-directory: ./Claude
         run: |
-          Unblock-File -Path .\updateNew.ps1
-          Unblock-File -Path ../UpdateAll.ps1
-          .\updateNew.ps1 -Verbose -Force -SkipInstall
+          # Paths are now relative to the checkout root
+          Unblock-File -Path ./Claude/updateNew.ps1
+          # Assuming UpdateAll.ps1 is in the root. Adjust if it's elsewhere.
+          Unblock-File -Path ./UpdateAll.ps1
+          # Execute the script using its path relative to the root
+          ./Claude/updateNew.ps1 -Verbose -Force -SkipInstall
 
       # Test the Claude package if updated
       - name: Test Claude package
