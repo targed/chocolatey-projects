@@ -13,8 +13,8 @@ jobs:
     runs-on: windows-latest
 
     defaults:
-      shell: pwsh7
-      run: $PSVersionTable.PSVersion
+      run:
+        shell: pwsh
 
     steps:
       # Checkout repository
@@ -22,6 +22,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full git history for potential version tagging
+
+      # Check PowerShell version to confirm we're using PowerShell Core (7+)
+      - name: Check PowerShell version
+        run: |
+          $PSVersionTable.PSVersion
+          if ($PSVersionTable.PSVersion.Major -lt 7) {
+            Write-Error "PowerShell 7 or higher is required"
+            exit 1
+          }
 
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
