@@ -43,7 +43,23 @@ jobs:
       # Run the update script
       - name: Run package update script
         run: |
-          .\UpdateAll.ps1
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+
+          Write-Host "Warning: Alert functionality is disabled in GitHub Actions environment."
+
+          # Create a dummy environment variable to prevent errors
+          [Environment]::SetEnvironmentVariable('EMAIL_NOTIFICATION_CREDS_PATH', 'C:\dummy\path.txt', 'User')
+
+          # Run the update script
+          try {
+            ./UpdateAll.ps1
+          } catch {
+            if ($_.Exception.Message -like "*Cannot bind argument to parameter 'Path' because it is null*") {
+              Write-Host "Ignoring expected alert error in GitHub Actions environment."
+            } else {
+              throw $_
+            }
+          }
 
       # Test the packages
       - name: Test updated packages
