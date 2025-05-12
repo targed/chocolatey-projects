@@ -101,6 +101,7 @@ jobs:
 
       # Push to Chocolatey if Claude was updated
       - name: Push to Chocolatey (Test Mode)
+        if: success() && steps.test-claude-package.outputs.updatedPackage != ''
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
           DRY_RUN: true # Set to false when ready for production
