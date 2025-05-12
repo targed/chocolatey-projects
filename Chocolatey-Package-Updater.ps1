@@ -1,6 +1,6 @@
 <#PSScriptInfo
 
-.VERSION 0.0.11
+.VERSION 0.1.1
 
 .GUID 9b612c16-25c0-4a40-afc7-f876274e7e8c
 
@@ -24,6 +24,9 @@
 [Version 0.0.9] - Improved ProductVersion/FileVersion detection, only returns applicable Chocolatey version number despite the version provided in the metadata of the file/installer.
 [Version 0.0.10] - Added disable IPv6 to aria2c args.
 [Version 0.0.11] - Added ignore version.
+[Version 0.0.12] - Added AutoPush for automatic pushing to Chocolatey community repository.
+[Version 0.1.0] - Added Mailjet support for alerting.
+[Version 0.1.1] - Fix bug with FileDestinationPath occurring after choco pack.
 
 #>
 
@@ -65,7 +68,7 @@ $packageInfo = @{
     PackageName         = "fxsound"
     FileUrl             = 'https://download.fxsound.com/fxsoundlatest'   # URL to download the file from
     FileDestinationPath = '.\tools\fxsound_setup.exe'                    # Path to move/rename the temporary file to (if EXE is distributed in package
-    Alert               = $true                                          # If the package is updated, send a message to the maintainer for review
+    EnvFilePath         = '..\.env'                                      # Path to the .env file containing environment variables
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table
@@ -73,14 +76,14 @@ UpdateChocolateyPackage @packageInfo
 
 .EXAMPLE
 To update a Chocolatey package, run the following command:
-UpdateChocolateyPackage -PackageName "fxsound" -FileUrl "https://download.fxsound.com/fxsoundlatest" -Alert $true
+UpdateChocolateyPackage -PackageName "fxsound" -FileUrl "https://download.fxsound.com/fxsoundlatest" -Alert $true -EnvFilePath "..\.env"
 
 .EXAMPLE
 To update a Chocolatey package with additional parameters, run the following command:
-UpdateChocolateyPackage -PackageName "fxsound" -FileUrl "https://download.fxsound.com/fxsoundlatest" -FileDownloadTempPath ".\fxsound_setup_temp.exe" -FileDestinationPath ".\tools\fxsound_setup.exe" -NuspecPath ".\fxsound.nuspec" -InstallScriptPath ".\tools\ChocolateyInstall.ps1" -VerificationPath ".\tools\VERIFICATION.txt" -Alert $true
+UpdateChocolateyPackage -PackageName "fxsound" -FileUrl "https://download.fxsound.com/fxsoundlatest" -FileDownloadTempPath ".\fxsound_setup_temp.exe" -FileDestinationPath ".\tools\fxsound_setup.exe" -NuspecPath ".\fxsound.nuspec" -InstallScriptPath ".\tools\ChocolateyInstall.ps1" -VerificationPath ".\tools\VERIFICATION.txt" -Alert $true -EnvFilePath "..\.env"
 
 .NOTES
-- Version: 0.0.11
+- Version: 0.1.1
 - Created by: asheroto
 - See project site for instructions on how to use including full parameter list and examples.
 
@@ -99,7 +102,7 @@ param (
 # Initial vars
 # ============================================================================ #
 
-$CurrentVersion = '0.0.11'
+$CurrentVersion = '0.1.1'
 $RepoOwner = 'asheroto'
 $RepoName = 'Chocolatey-Package-Updater'
 $SoftwareName = 'Chocolatey Package Updater'
@@ -269,49 +272,78 @@ function HandleUpdateResult {
     }
 }
 
-function SendAlertRaw {
+function SendEmailMailjet {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
         [string]$Subject,
 
         [Parameter(Mandatory = $true)]
-        [string]$Message
+        [string]$TextContent,
+
+        [Parameter(Mandatory = $false)]
+        [string]$HtmlContent,
+
+        [Parameter(Mandatory = $false)]
+        [string]$EnvFilePath
     )
 
-    # Note - you might consider using ntfy.sh, it's an awesome tool
-    # In this script, however, I'm using a custom service that I built
-    # This function gets the URL from a secure string file (encrypted) and sends the alert by making a POST request to the URL
-    # If you just want to make a GET/POST request, comment out the lines below until you get to the if($alertUrl)/Invoke-WebRequest section and replace with your own code
+    # Load environment variables from the specified file if specified
+    if ($EnvFilePath) {
+        Load-DotEnv -Path $EnvFilePath
+    }
 
-    # To save the URL as a secure string, run the following command in the comment block:
-    <#
-        # Connect
-        $CredsFile = "C:\Path\To\SecureString\Folder\SecretURL.txt"
+    $ApiKey = $env:MAILJET_API_KEY
+    $ApiSecret = $env:MAILJET_API_SECRET
+    $FromEmail = $env:MAILJET_FROM_EMAIL
+    $FromName = $env:MAILJET_FROM_NAME
+    $ToEmail = $env:MAILJET_TO_EMAIL
+    $ToName = $env:MAILJET_TO_NAME
 
-        # Store credential in a file as secure string
-        Read-Host "Secret URL" -AsSecureString | ConvertFrom-SecureString | Out-File $CredsFile
-    #>
+    if (-not $ApiKey -or -not $ApiSecret -or -not $FromEmail -or -not $FromName -or -not $ToEmail -or -not $ToName) {
+        Write-Warning "One or more required environment variables are missing."
+        return
+    }
 
-    # Environment variable contains path to $CredsFile (create or change below as needed)
-    # Get the secret URL from the secure string file using the path in the environment variable
-    $CredsFile = [System.Environment]::GetEnvironmentVariable('EMAIL_NOTIFICATION_CREDS_PATH', [System.EnvironmentVariableTarget]::User)
+    $url = "https://api.mailjet.com/v3.1/send"
 
-    # Convert the secure string to a string
-    $secret = Get-Content $CredsFile | ConvertTo-SecureString
-    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secret)
-    $alertUrl = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+    $body = @{
+        Messages    = @(
+            @{
+                From     = @{
+                    Email = $FromEmail
+                    Name  = $FromName
+                }
+                To       = @(
+                    @{
+                        Email = $ToEmail
+                        Name  = $ToName
+                    }
+                )
+                Subject  = $Subject
+                TextPart = $TextContent
+                HTMLPart = $HtmlContent
+            }
+        )
+        SandboxMode = $false
+    } | ConvertTo-Json -Depth 10
 
-    # Replace {SUBJECT} and {MESSAGE} in the URL
-    $alertUrl = $alertUrl -replace '{SUBJECT}', $Subject
-    $alertUrl = $alertUrl -replace '{MESSAGE}', $Message
+    $headers = @{
+        "Authorization" = "Basic $([Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${ApiKey}:${ApiSecret}")))"
+        "Content-Type"  = "application/json"
+    }
 
-    if ($alertUrl) {
-        try {
-            Invoke-WebRequest -Uri $alertUrl -Method Post -Body $Message -ContentType "text/plain" | Out-Null
-            Write-Output "Alert sent."
-        } catch {
-            Write-Warning "Failed to send alert."
+    try {
+        $response = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $body
+        Write-Output "Email sent successfully."
+        if ($PSCmdlet.MyInvocation.BoundParameters['Debug']) {
+            Write-Debug "Response: $($response | ConvertTo-Json -Depth 3)"
+        }
+    } catch {
+        Write-Warning "Failed to send email."
+        Write-Warning "Error details: $_"
+        if ($PSCmdlet.MyInvocation.BoundParameters['Debug']) {
+            Write-Debug $_.Exception.Message
         }
     }
 }
@@ -326,32 +358,78 @@ function SendAlert {
         [string]$Message,
 
         [Parameter(Mandatory = $false)]
-        [boolean]$Alert = $true
+        [boolean]$Alert = $true,
+
+        [Parameter(Mandatory = $false)]
+        [string]$EnvFilePath
     )
 
-    # If Alert is false, let the user know that the alert is disabled
     if (!$Alert) {
         Write-Output "Alert disabled. Skipping alert."
         return
     }
 
-    # Output sending alert
     Write-Output "Sending alert..."
 
-    # Create the HTML body for the notification
     $date = Get-Date -Format "yyyy-MM-dd hh:mm:ss tt"
-    $body = "<html><body>"
-    $body += "<font face='Arial'>"
-    $body += "<p>$Message</p>"
-    $body += "<p><strong>Time:</strong> $date</p>"
-    $body += "</font>"
-    $body += "</body></html>"
+    $body = "$Message`n`nTime: $date"
 
     Write-Verbose "Sending alert with subject: $Subject"
     Write-Verbose "Sending alert with body:`n$body"
 
-    # Send the alert
-    SendAlertRaw -Subject $Subject -Message $body
+    SendEmailMailjet -Subject $Subject -TextContent $body -EnvFilePath $EnvFilePath
+}
+
+function Load-DotEnv {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("Process", "User", "Machine")]
+        [string]$Scope = "Process"  # Default scope is Process
+    )
+
+    # Determine if the given path is a file or a directory
+    if (Test-Path -Path $Path -PathType Container) {
+        $envFilePath = Join-Path -Path $Path -ChildPath ".env"
+    } elseif (Test-Path -Path $Path -PathType Leaf) {
+        $envFilePath = $Path
+    } else {
+        Write-Warning "The specified path does not exist: $Path"
+        return
+    }
+
+    if (-not (Test-Path -Path $envFilePath)) {
+        Write-Warning "The .env file does not exist at the specified location: $envFilePath"
+        return
+    }
+
+    Get-Content $envFilePath | ForEach-Object {
+        $_.Trim() | ForEach-Object {
+            if ($_ -match '^\s*#' -or $_ -eq '') {
+                # Skip comments and empty lines
+                return
+            }
+            if ($_ -match '^\s*([^=]+?)\s*=\s*(.*?)\s*$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+
+                # Remove surrounding quotes if they exist
+                if ($value.StartsWith('"') -and $value.EndsWith('"')) {
+                    $value = $value.Substring(1, $value.Length - 2)
+                } elseif ($value.StartsWith("'") -and $value.EndsWith("'")) {
+                    $value = $value.Substring(1, $value.Length - 2)
+                }
+
+                # Set the environment variable with the specified scope
+                [System.Environment]::SetEnvironmentVariable($key, $value, $Scope)
+            }
+        }
+    }
+
+    Write-Debug "Environment variables loaded from $envFilePath with scope $Scope"
 }
 
 function Write-Section {
@@ -488,6 +566,9 @@ function UpdateChocolateyPackage {
         [boolean]$Alert = $true,
 
         [Parameter(Mandatory = $false)]
+        [string]$AlertEmailAddress,
+
+        [Parameter(Mandatory = $false)]
         [string]$ScrapeUrl,
 
         [Parameter(Mandatory = $false)]
@@ -503,7 +584,13 @@ function UpdateChocolateyPackage {
         [string]$GitHubRepoUrl,
 
         [Parameter(Mandatory = $false)]
-        [string]$IgnoreVersion
+        [string]$IgnoreVersion,
+
+        [Parameter(Mandatory = $false)]
+        [boolean]$AutoPush,
+
+        [Parameter(Mandatory = $false)]
+        [string]$EnvFilePath
     )
 
     function Try-DeleteFile {
@@ -674,6 +761,18 @@ function UpdateChocolateyPackage {
         return $result
     }
 
+    function Remove-LeadingZeroesFromVersion {
+        param (
+            [string]$VersionNumber
+        )
+
+        $versionParts = $VersionNumber -split '\.'
+        $cleanedVersionParts = $versionParts | ForEach-Object { [int]$_ }
+        $cleanedVersion = ($cleanedVersionParts -join '.')
+
+        return $cleanedVersion
+    }
+
     # ============================================================================ #
     #  Main Script
     # ============================================================================ #
@@ -765,6 +864,12 @@ function UpdateChocolateyPackage {
         if ($FileUrl64) {
             DownloadFile -Url $FileUrl64 -TempPath $FileDownloadTempPath64 -Is64Bit $true
             $ProductVersion64 = Get-ProductVersion -FileDownloadTempPath $FileDownloadTempPath64 -ForceVersionNumber $ForceVersionNumber
+        }
+
+        # Remove leading zeroes from version numbers
+        $ProductVersion = Remove-LeadingZeroesFromVersion -VersionNumber $ProductVersion
+        if ($ProductVersion64) {
+            $ProductVersion64 = Remove-LeadingZeroesFromVersion -VersionNumber $ProductVersion64
         }
 
         # Nuspec Version and Checksums
@@ -919,26 +1024,6 @@ function UpdateChocolateyPackage {
                     }
                 }
 
-                # Write the new version to the console
-                Write-Output "Updated to version $ProductVersion"
-
-                # Delete any nupkg files in the package folder if it exists
-                $nupkgFiles = Get-ChildItem -Path $ScriptPath -Filter "$PackageName.*.nupkg" -File
-                if ($nupkgFiles) {
-                    foreach ($nupkgFile in $nupkgFiles) {
-                        Write-Output "Deleting old nupkg file: $nupkgFile"
-                        Remove-Item -Path $nupkgFile.FullName -Force
-                    }
-                }
-
-                # Run 'choco pack' to create the nupkg file
-                Write-Output "Creating nupkg file..."
-                choco pack
-
-                # Send an alert if enabled
-                Write-Debug "Sending alert..."
-                SendAlert -Subject "$PackageName Package Updated" -Message "$PackageName has been updated to version $ProductVersion. It is now ready for testing." -Alert $Alert
-
                 # If the destination path is specified, move the downloaded file to the specified destination
                 if ($FileDestinationPath) {
                     Write-Debug "Moving file `"${FileDownloadTempPath}`" to `"${FileDestinationPath}`""
@@ -958,6 +1043,37 @@ function UpdateChocolateyPackage {
                         throw "Failed to move file `"${FileDownloadTempPath64}`" to `"${FileDestinationPath64}`" with error: $_"
                     }
                 }
+
+                # Write the new version to the console
+                Write-Output "Updated to version $ProductVersion"
+
+                # Delete any nupkg files in the package folder if it exists
+                $nupkgFiles = Get-ChildItem -Path $ScriptPath -Filter "$PackageName.*.nupkg" -File
+                if ($nupkgFiles) {
+                    foreach ($nupkgFile in $nupkgFiles) {
+                        Write-Output "Deleting old nupkg file: $nupkgFile"
+                        Remove-Item -Path $nupkgFile.FullName -Force
+                    }
+                }
+
+                # Run 'choco pack' to create the nupkg file
+                Write-Output "Creating nupkg file..."
+                choco pack
+
+                # If AutoPush is enabled, push the package to Chocolatey
+                if ($AutoPush) {
+                    $filename = "$PackageName.$ProductVersion.nupkg"
+                    Write-Output "Pushing $filename to Chocolatey..."
+                    choco push $filename
+                }
+
+                # Determine the push status
+                $pushStatus = if ($AutoPush) { "Pushed: TRUE" } else { "Pushed: FALSE" }
+
+                # Send an alert if enabled
+                Write-Debug "Sending alert..."
+                $alertMessage = "$PackageName has been updated to version $ProductVersion.`n$pushStatus"
+                SendAlert -Subject "$PackageName Package Updated" -Message $alertMessage -Alert $Alert -EnvFilePath $EnvFilePath
             } else {
                 # Package is up to date
                 Write-Output "No update needed. No alert sent."
@@ -968,12 +1084,12 @@ function UpdateChocolateyPackage {
 
             # Send an alert if enabled
             Write-Debug "Sending package error alert..."
-            SendAlert -Subject "$PackageName Package Error" -Message "$PackageName detected an invalid version format. Please check the update script and files." -Alert $Alert
+            SendAlert -Subject "$PackageName Package Error" -Message "$PackageName detected an invalid version format. Please check the update script and files." -Alert $Alert -EnvFilePath $EnvFilePath
         }
     } catch {
         # Send an alert if enabled
         Write-Debug "Sending package error alert..."
-        SendAlert -Subject "$PackageName Package Error" -Message "$PackageName had an error when checking for updates. Please check the update script and files.<br><br><strong>Error:</strong> $_" -Alert $Alert
+        SendAlert -Subject "$PackageName Package Error" -Message "$PackageName had an error when checking for updates. Please check the update script and files.`n`nError: $_" -Alert $Alert -EnvFilePath $EnvFilePath
 
         # Write the error to the console
         Write-Warning "An error occurred: $_"
@@ -988,182 +1104,3 @@ function UpdateChocolateyPackage {
 }
 
 Write-Output ""
-# SIG # Begin signature block
-# MIIhGAYJKoZIhvcNAQcCoIIhCTCCIQUCAQExDzANBglghkgBZQMEAgIFADCBiQYK
-# KwYBBAGCNwIBBKB7MHkwNAYKKwYBBAGCNwIBHjAmAgMBAAAEEB/MO2BZSwhOtyTS
-# xil+81ECAQACAQACAQACAQACAQAwQTANBglghkgBZQMEAgIFAAQwt1I5lFVaQyav
-# UxuekACsDQeQ5GOGjhx8SyFwnlg5E9jLiSfx68mJqsZbWGTCic1PoIIHZDCCA1kw
-# ggLfoAMCAQICEA+4p0C5FY0DUUO8WdnwQCkwCgYIKoZIzj0EAwMwYTELMAkGA1UE
-# BhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3LmRpZ2lj
-# ZXJ0LmNvbTEgMB4GA1UEAxMXRGlnaUNlcnQgR2xvYmFsIFJvb3QgRzMwHhcNMjEw
-# NDI5MDAwMDAwWhcNMzYwNDI4MjM1OTU5WjBkMQswCQYDVQQGEwJVUzEXMBUGA1UE
-# ChMORGlnaUNlcnQsIEluYy4xPDA6BgNVBAMTM0RpZ2lDZXJ0IEdsb2JhbCBHMyBD
-# b2RlIFNpZ25pbmcgRUNDIFNIQTM4NCAyMDIxIENBMTB2MBAGByqGSM49AgEGBSuB
-# BAAiA2IABLu0rCelSA2iU1+PLoE+L1N2uAiUopqqiouYtbHw/CoVu7mzpSIv/WrA
-# veJVaGBrlzTBZlNxI/wa1cogDwJAoqNKWkajkVMrlfID6aum04d2L+dkn541UfzD
-# YzV4duT4d6OCAVcwggFTMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFJtf
-# sDa6nQauGSe9wKAiwIuLOHftMB8GA1UdIwQYMBaAFLPbSKT5ocXYrjZBzBFjaWIp
-# vEvGMA4GA1UdDwEB/wQEAwIBhjATBgNVHSUEDDAKBggrBgEFBQcDAzB2BggrBgEF
-# BQcBAQRqMGgwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmRpZ2ljZXJ0LmNvbTBA
-# BggrBgEFBQcwAoY0aHR0cDovL2NhY2VydHMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0
-# R2xvYmFsUm9vdEczLmNydDBCBgNVHR8EOzA5MDegNaAzhjFodHRwOi8vY3JsMy5k
-# aWdpY2VydC5jb20vRGlnaUNlcnRHbG9iYWxSb290RzMuY3JsMBwGA1UdIAQVMBMw
-# BwYFZ4EMAQMwCAYGZ4EMAQQBMAoGCCqGSM49BAMDA2gAMGUCMHi9SZVlcQHQRldo
-# ZQ5oqdw2CMHu/dSO20BlPw3/k6/CrmOGo37LtJFaeOwHA2cHfAIxAOefH/EHW6w0
-# xji8taVQzubqOH4+eZDkpFurAg3oB/xWplqK3bNQst3y+mZ0ntAWYzCCBAMwggOJ
-# oAMCAQICEAExw+sKUABDj0yZt5afTZQwCgYIKoZIzj0EAwMwZDELMAkGA1UEBhMC
-# VVMxFzAVBgNVBAoTDkRpZ2lDZXJ0LCBJbmMuMTwwOgYDVQQDEzNEaWdpQ2VydCBH
-# bG9iYWwgRzMgQ29kZSBTaWduaW5nIEVDQyBTSEEzODQgMjAyMSBDQTEwHhcNMjQw
-# MzA3MDAwMDAwWhcNMjUwMzA4MjM1OTU5WjBvMQswCQYDVQQGEwJVUzERMA8GA1UE
-# CBMIT2tsYWhvbWExETAPBgNVBAcTCE11c2tvZ2VlMRwwGgYDVQQKExNBc2hlciBT
-# b2x1dGlvbnMgSW5jMRwwGgYDVQQDExNBc2hlciBTb2x1dGlvbnMgSW5jMHYwEAYH
-# KoZIzj0CAQYFK4EEACIDYgAExsP0nyCZ1QtY7aXin+tdZVcF0uPHJJjRpjVVgUmb
-# 3iKJeKapvWBSAbroBouKIP9+Qoz197aNbZCSOBQsWX53SUyTu1Trvwku7ksL+eQh
-# bJvnRJ20UqF566z5KbniyLrAo4IB8zCCAe8wHwYDVR0jBBgwFoAUm1+wNrqdBq4Z
-# J73AoCLAi4s4d+0wHQYDVR0OBBYEFNdgDYHKEBunNDYgivfxKeS4YX0/MD4GA1Ud
-# IAQ3MDUwMwYGZ4EMAQQBMCkwJwYIKwYBBQUHAgEWG2h0dHA6Ly93d3cuZGlnaWNl
-# cnQuY29tL0NQUzAOBgNVHQ8BAf8EBAMCB4AwEwYDVR0lBAwwCgYIKwYBBQUHAwMw
-# gasGA1UdHwSBozCBoDBOoEygSoZIaHR0cDovL2NybDMuZGlnaWNlcnQuY29tL0Rp
-# Z2lDZXJ0R2xvYmFsRzNDb2RlU2lnbmluZ0VDQ1NIQTM4NDIwMjFDQTEuY3JsME6g
-# TKBKhkhodHRwOi8vY3JsNC5kaWdpY2VydC5jb20vRGlnaUNlcnRHbG9iYWxHM0Nv
-# ZGVTaWduaW5nRUNDU0hBMzg0MjAyMUNBMS5jcmwwgY4GCCsGAQUFBwEBBIGBMH8w
-# JAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmRpZ2ljZXJ0LmNvbTBXBggrBgEFBQcw
-# AoZLaHR0cDovL2NhY2VydHMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0R2xvYmFsRzND
-# b2RlU2lnbmluZ0VDQ1NIQTM4NDIwMjFDQTEuY3J0MAkGA1UdEwQCMAAwCgYIKoZI
-# zj0EAwMDaAAwZQIxAJHtFqbIBTSZ6AiYEyHsjjlZ7treTZfTSPiyyr8KAKBPKVXt
-# B2859Jj8A3c9lEXrLgIwGTu2YV8DhFy9OqIDwkCZfoYH8oMo1LRtYhYZtVzkr3WF
-# er8mkmAdOyNbW/DI0pZPMYIY+TCCGPUCAQEweDBkMQswCQYDVQQGEwJVUzEXMBUG
-# A1UEChMORGlnaUNlcnQsIEluYy4xPDA6BgNVBAMTM0RpZ2lDZXJ0IEdsb2JhbCBH
-# MyBDb2RlIFNpZ25pbmcgRUNDIFNIQTM4NCAyMDIxIENBMQIQATHD6wpQAEOPTJm3
-# lp9NlDANBglghkgBZQMEAgIFAKCBjDAQBgorBgEEAYI3AgEMMQIwADAZBgkqhkiG
-# 9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIB
-# FTA/BgkqhkiG9w0BCQQxMgQwJ5+ngv65QHzK70qDGKH0fj96cQCuEFybpF/tULT7
-# 4Vz0KUtzvabSI2P7jroPOI1wMAsGByqGSM49AgEFAARnMGUCMQDc+ot5iNPZcz3N
-# LS5/kkXF8ztnE3L+KfK1wEDYBqRzHO0Re61nAyA4qd9p0456Gs8CMEthTDRGzQOF
-# 7oNn+dLLaMnoo1qYFKrBaHUqlBluU3yD14mz7zbdbpd+nuw+celBE6GCF2Awghdc
-# BgorBgEEAYI3AwMBMYIXTDCCF0gGCSqGSIb3DQEHAqCCFzkwghc1AgEDMQ8wDQYJ
-# YIZIAWUDBAICBQAwgYcGCyqGSIb3DQEJEAEEoHgEdjB0AgEBBglghkgBhv1sBwEw
-# QTANBglghkgBZQMEAgIFAAQwx9gKheT3gikrkCfO34YAekMvVEhuKkztipz48I93
-# 08e4FRC2TPXFjuBZQdPfmZPWAhBUgvIqN0sbGON1pE/PEGhtGA8yMDI0MDYwOTIy
-# NDkzM1qgghMJMIIGwjCCBKqgAwIBAgIQBUSv85SdCDmmv9s/X+VhFjANBgkqhkiG
-# 9w0BAQsFADBjMQswCQYDVQQGEwJVUzEXMBUGA1UEChMORGlnaUNlcnQsIEluYy4x
-# OzA5BgNVBAMTMkRpZ2lDZXJ0IFRydXN0ZWQgRzQgUlNBNDA5NiBTSEEyNTYgVGlt
-# ZVN0YW1waW5nIENBMB4XDTIzMDcxNDAwMDAwMFoXDTM0MTAxMzIzNTk1OVowSDEL
-# MAkGA1UEBhMCVVMxFzAVBgNVBAoTDkRpZ2lDZXJ0LCBJbmMuMSAwHgYDVQQDExdE
-# aWdpQ2VydCBUaW1lc3RhbXAgMjAyMzCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCC
-# AgoCggIBAKNTRYcdg45brD5UsyPgz5/X5dLnXaEOCdwvSKOXejsqnGfcYhVYwamT
-# EafNqrJq3RApih5iY2nTWJw1cb86l+uUUI8cIOrHmjsvlmbjaedp/lvD1isgHMGX
-# lLSlUIHyz8sHpjBoyoNC2vx/CSSUpIIa2mq62DvKXd4ZGIX7ReoNYWyd/nFexAaa
-# PPDFLnkPG2ZS48jWPl/aQ9OE9dDH9kgtXkV1lnX+3RChG4PBuOZSlbVH13gpOWvg
-# eFmX40QrStWVzu8IF+qCZE3/I+PKhu60pCFkcOvV5aDaY7Mu6QXuqvYk9R28mxyy
-# t1/f8O52fTGZZUdVnUokL6wrl76f5P17cz4y7lI0+9S769SgLDSb495uZBkHNwGR
-# Dxy1Uc2qTGaDiGhiu7xBG3gZbeTZD+BYQfvYsSzhUa+0rRUGFOpiCBPTaR58ZE2d
-# D9/O0V6MqqtQFcmzyrzXxDtoRKOlO0L9c33u3Qr/eTQQfqZcClhMAD6FaXXHg2TW
-# dc2PEnZWpST618RrIbroHzSYLzrqawGw9/sqhux7UjipmAmhcbJsca8+uG+W1eEQ
-# E/5hRwqM/vC2x9XH3mwk8L9CgsqgcT2ckpMEtGlwJw1Pt7U20clfCKRwo+wK8REu
-# ZODLIivK8SgTIUlRfgZm0zu++uuRONhRB8qUt+JQofM604qDy0B7AgMBAAGjggGL
-# MIIBhzAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAWBgNVHSUBAf8EDDAK
-# BggrBgEFBQcDCDAgBgNVHSAEGTAXMAgGBmeBDAEEAjALBglghkgBhv1sBwEwHwYD
-# VR0jBBgwFoAUuhbZbU2FL3MpdpovdYxqII+eyG8wHQYDVR0OBBYEFKW27xPn783Q
-# ZKHVVqllMaPe1eNJMFoGA1UdHwRTMFEwT6BNoEuGSWh0dHA6Ly9jcmwzLmRpZ2lj
-# ZXJ0LmNvbS9EaWdpQ2VydFRydXN0ZWRHNFJTQTQwOTZTSEEyNTZUaW1lU3RhbXBp
-# bmdDQS5jcmwwgZAGCCsGAQUFBwEBBIGDMIGAMCQGCCsGAQUFBzABhhhodHRwOi8v
-# b2NzcC5kaWdpY2VydC5jb20wWAYIKwYBBQUHMAKGTGh0dHA6Ly9jYWNlcnRzLmRp
-# Z2ljZXJ0LmNvbS9EaWdpQ2VydFRydXN0ZWRHNFJTQTQwOTZTSEEyNTZUaW1lU3Rh
-# bXBpbmdDQS5jcnQwDQYJKoZIhvcNAQELBQADggIBAIEa1t6gqbWYF7xwjU+KPGic
-# 2CX/yyzkzepdIpLsjCICqbjPgKjZ5+PF7SaCinEvGN1Ott5s1+FgnCvt7T1Ijrhr
-# unxdvcJhN2hJd6PrkKoS1yeF844ektrCQDifXcigLiV4JZ0qBXqEKZi2V3mP2yZW
-# K7Dzp703DNiYdk9WuVLCtp04qYHnbUFcjGnRuSvExnvPnPp44pMadqJpddNQ5EQS
-# viANnqlE0PjlSXcIWiHFtM+YlRpUurm8wWkZus8W8oM3NG6wQSbd3lqXTzON1I13
-# fXVFoaVYJmoDRd7ZULVQjK9WvUzF4UbFKNOt50MAcN7MmJ4ZiQPq1JE3701S88lg
-# IcRWR+3aEUuMMsOI5ljitts++V+wQtaP4xeR0arAVeOGv6wnLEHQmjNKqDbUuXKW
-# fpd5OEhfysLcPTLfddY2Z1qJ+Panx+VPNTwAvb6cKmx5AdzaROY63jg7B145WPR8
-# czFVoIARyxQMfq68/qTreWWqaNYiyjvrmoI1VygWy2nyMpqy0tg6uLFGhmu6F/3E
-# d2wVbK6rr3M66ElGt9V/zLY4wNjsHPW2obhDLN9OTH0eaHDAdwrUAuBcYLso/zjl
-# UlrWrBciI0707NMX+1Br/wd3H3GXREHJuEbTbDJ8WC9nR2XlG3O2mflrLAZG70Ee
-# 8PBf4NvZrZCARK+AEEGKMIIGrjCCBJagAwIBAgIQBzY3tyRUfNhHrP0oZipeWzAN
-# BgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQg
-# SW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMSEwHwYDVQQDExhEaWdpQ2Vy
-# dCBUcnVzdGVkIFJvb3QgRzQwHhcNMjIwMzIzMDAwMDAwWhcNMzcwMzIyMjM1OTU5
-# WjBjMQswCQYDVQQGEwJVUzEXMBUGA1UEChMORGlnaUNlcnQsIEluYy4xOzA5BgNV
-# BAMTMkRpZ2lDZXJ0IFRydXN0ZWQgRzQgUlNBNDA5NiBTSEEyNTYgVGltZVN0YW1w
-# aW5nIENBMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxoY1BkmzwT1y
-# SVFVxyUDxPKRN6mXUaHW0oPRnkyibaCwzIP5WvYRoUQVQl+kiPNo+n3znIkLf50f
-# ng8zH1ATCyZzlm34V6gCff1DtITaEfFzsbPuK4CEiiIY3+vaPcQXf6sZKz5C3GeO
-# 6lE98NZW1OcoLevTsbV15x8GZY2UKdPZ7Gnf2ZCHRgB720RBidx8ald68Dd5n12s
-# y+iEZLRS8nZH92GDGd1ftFQLIWhuNyG7QKxfst5Kfc71ORJn7w6lY2zkpsUdzTYN
-# XNXmG6jBZHRAp8ByxbpOH7G1WE15/tePc5OsLDnipUjW8LAxE6lXKZYnLvWHpo9O
-# dhVVJnCYJn+gGkcgQ+NDY4B7dW4nJZCYOjgRs/b2nuY7W+yB3iIU2YIqx5K/oN7j
-# PqJz+ucfWmyU8lKVEStYdEAoq3NDzt9KoRxrOMUp88qqlnNCaJ+2RrOdOqPVA+C/
-# 8KI8ykLcGEh/FDTP0kyr75s9/g64ZCr6dSgkQe1CvwWcZklSUPRR8zZJTYsg0ixX
-# NXkrqPNFYLwjjVj33GHek/45wPmyMKVM1+mYSlg+0wOI/rOP015LdhJRk8mMDDtb
-# iiKowSYI+RQQEgN9XyO7ZONj4KbhPvbCdLI/Hgl27KtdRnXiYKNYCQEoAA6EVO7O
-# 6V3IXjASvUaetdN2udIOa5kM0jO0zbECAwEAAaOCAV0wggFZMBIGA1UdEwEB/wQI
-# MAYBAf8CAQAwHQYDVR0OBBYEFLoW2W1NhS9zKXaaL3WMaiCPnshvMB8GA1UdIwQY
-# MBaAFOzX44LScV1kTN8uZz/nupiuHA9PMA4GA1UdDwEB/wQEAwIBhjATBgNVHSUE
-# DDAKBggrBgEFBQcDCDB3BggrBgEFBQcBAQRrMGkwJAYIKwYBBQUHMAGGGGh0dHA6
-# Ly9vY3NwLmRpZ2ljZXJ0LmNvbTBBBggrBgEFBQcwAoY1aHR0cDovL2NhY2VydHMu
-# ZGlnaWNlcnQuY29tL0RpZ2lDZXJ0VHJ1c3RlZFJvb3RHNC5jcnQwQwYDVR0fBDww
-# OjA4oDagNIYyaHR0cDovL2NybDMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0VHJ1c3Rl
-# ZFJvb3RHNC5jcmwwIAYDVR0gBBkwFzAIBgZngQwBBAIwCwYJYIZIAYb9bAcBMA0G
-# CSqGSIb3DQEBCwUAA4ICAQB9WY7Ak7ZvmKlEIgF+ZtbYIULhsBguEE0TzzBTzr8Y
-# +8dQXeJLKftwig2qKWn8acHPHQfpPmDI2AvlXFvXbYf6hCAlNDFnzbYSlm/EUExi
-# HQwIgqgWvalWzxVzjQEiJc6VaT9Hd/tydBTX/6tPiix6q4XNQ1/tYLaqT5Fmniye
-# 4Iqs5f2MvGQmh2ySvZ180HAKfO+ovHVPulr3qRCyXen/KFSJ8NWKcXZl2szwcqMj
-# +sAngkSumScbqyQeJsG33irr9p6xeZmBo1aGqwpFyd/EjaDnmPv7pp1yr8THwcFq
-# cdnGE4AJxLafzYeHJLtPo0m5d2aR8XKc6UsCUqc3fpNTrDsdCEkPlM05et3/JWOZ
-# Jyw9P2un8WbDQc1PtkCbISFA0LcTJM3cHXg65J6t5TRxktcma+Q4c6umAU+9Pzt4
-# rUyt+8SVe+0KXzM5h0F4ejjpnOHdI/0dKNPH+ejxmF/7K9h+8kaddSweJywm228V
-# ex4Ziza4k9Tm8heZWcpw8De/mADfIBZPJ/tgZxahZrrdVcA6KYawmKAr7ZVBtzrV
-# FZgxtGIJDwq9gdkT/r+k0fNX2bwE+oLeMt8EifAAzV3C+dAjfwAL5HYCJtnwZXZC
-# pimHCUcr5n8apIUP/JiW9lVUKx+A+sDyDivl1vupL0QVSucTDh3bNzgaoSv27dZ8
-# /DCCBY0wggR1oAMCAQICEA6bGI750C3n79tQ4ghAGFowDQYJKoZIhvcNAQEMBQAw
-# ZTELMAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQ
-# d3d3LmRpZ2ljZXJ0LmNvbTEkMCIGA1UEAxMbRGlnaUNlcnQgQXNzdXJlZCBJRCBS
-# b290IENBMB4XDTIyMDgwMTAwMDAwMFoXDTMxMTEwOTIzNTk1OVowYjELMAkGA1UE
-# BhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3LmRpZ2lj
-# ZXJ0LmNvbTEhMB8GA1UEAxMYRGlnaUNlcnQgVHJ1c3RlZCBSb290IEc0MIICIjAN
-# BgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAv+aQc2jeu+RdSjwwIjBpM+zCpyUu
-# ySE98orYWcLhKac9WKt2ms2uexuEDcQwH/MbpDgW61bGl20dq7J58soR0uRf1gU8
-# Ug9SH8aeFaV+vp+pVxZZVXKvaJNwwrK6dZlqczKU0RBEEC7fgvMHhOZ0O21x4i0M
-# G+4g1ckgHWMpLc7sXk7Ik/ghYZs06wXGXuxbGrzryc/NrDRAX7F6Zu53yEioZldX
-# n1RYjgwrt0+nMNlW7sp7XeOtyU9e5TXnMcvak17cjo+A2raRmECQecN4x7axxLVq
-# GDgDEI3Y1DekLgV9iPWCPhCRcKtVgkEy19sEcypukQF8IUzUvK4bA3VdeGbZOjFE
-# mjNAvwjXWkmkwuapoGfdpCe8oU85tRFYF/ckXEaPZPfBaYh2mHY9WV1CdoeJl2l6
-# SPDgohIbZpp0yt5LHucOY67m1O+SkjqePdwA5EUlibaaRBkrfsCUtNJhbesz2cXf
-# SwQAzH0clcOP9yGyshG3u3/y1YxwLEFgqrFjGESVGnZifvaAsPvoZKYz0YkH4b23
-# 5kOkGLimdwHhD5QMIR2yVCkliWzlDlJRR3S+Jqy2QXXeeqxfjT/JvNNBERJb5RBQ
-# 6zHFynIWIgnffEx1P2PsIV/EIFFrb7GrhotPwtZFX50g/KEexcCPorF+CiaZ9eRp
-# L5gdLfXZqbId5RsCAwEAAaOCATowggE2MA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0O
-# BBYEFOzX44LScV1kTN8uZz/nupiuHA9PMB8GA1UdIwQYMBaAFEXroq/0ksuCMS1R
-# i6enIZ3zbcgPMA4GA1UdDwEB/wQEAwIBhjB5BggrBgEFBQcBAQRtMGswJAYIKwYB
-# BQUHMAGGGGh0dHA6Ly9vY3NwLmRpZ2ljZXJ0LmNvbTBDBggrBgEFBQcwAoY3aHR0
-# cDovL2NhY2VydHMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0QXNzdXJlZElEUm9vdENB
-# LmNydDBFBgNVHR8EPjA8MDqgOKA2hjRodHRwOi8vY3JsMy5kaWdpY2VydC5jb20v
-# RGlnaUNlcnRBc3N1cmVkSURSb290Q0EuY3JsMBEGA1UdIAQKMAgwBgYEVR0gADAN
-# BgkqhkiG9w0BAQwFAAOCAQEAcKC/Q1xV5zhfoKN0Gz22Ftf3v1cHvZqsoYcs7IVe
-# qRq7IviHGmlUIu2kiHdtvRoU9BNKei8ttzjv9P+Aufih9/Jy3iS8UgPITtAq3vot
-# Vs/59PesMHqai7Je1M/RQ0SbQyHrlnKhSLSZy51PpwYDE3cnRNTnf+hZqPC/Lwum
-# 6fI0POz3A8eHqNJMQBk1RmppVLC4oVaO7KTVPeix3P0c2PR3WlxUjG/voVA9/HYJ
-# aISfb8rbII01YBwCA8sgsKxYoA5AY8WYIsGyWfVVa88nq2x2zm8jLfR+cWojayL/
-# ErhULSd+2DrZ8LaHlv1b0VysGMNNn3O3AamfV6peKOK5lDGCA4YwggOCAgEBMHcw
-# YzELMAkGA1UEBhMCVVMxFzAVBgNVBAoTDkRpZ2lDZXJ0LCBJbmMuMTswOQYDVQQD
-# EzJEaWdpQ2VydCBUcnVzdGVkIEc0IFJTQTQwOTYgU0hBMjU2IFRpbWVTdGFtcGlu
-# ZyBDQQIQBUSv85SdCDmmv9s/X+VhFjANBglghkgBZQMEAgIFAKCB4TAaBgkqhkiG
-# 9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTI0MDYwOTIyNDkz
-# M1owKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQUZvArMsLCyQ+CXc6qisnGTxmcz0Aw
-# NwYLKoZIhvcNAQkQAi8xKDAmMCQwIgQg0vbkbe10IszR1EBXaEE2b4KK2lWarjMW
-# r00amtQMeCgwPwYJKoZIhvcNAQkEMTIEMG635Dqqsfw4i+04cbi+ITDOsjSZiUhF
-# dNVsfS4RXRfd3roduTcYQxg3ZZvVxGfZ2zANBgkqhkiG9w0BAQEFAASCAgAqIjcY
-# YCy0iWmPFydk7vK8xIKWmIG9s4W+67scgvREm7gJg7t46/YcRYjNXPFGqzn+SUql
-# sxCez0Kefc+vlNUXmPwwVJHiyOzkhETL4hVheNrRC6XjsccDZPEUnMdVEvSOrjaH
-# 3Ha6nPjny82I5mRTwQWk84ev8risk7Irv0ajlpJhAHkzcZfMEl3+ZCEEITRYWx/r
-# 3tlndDVIzuHuiIYlI3nJ5/kS+zXbZdvpxV1KgVB8MeoEZ6+aHq2mwMvRfg2EA1M3
-# hz2hKACXXTXdjBPMyyKUqMRUUux7pbWe5Wky3x2FFUIamVZxY5BPy7E860mLZvSM
-# v1T6qqbltT1AVP15TXUH98e8vnQsxkInNSF0r20CgLdS2fssHh72xEKAS03tM60w
-# Qv5B3D7CRpC7P5/CYM+S250cN6veMFIWf+L2NLEYASRMFMQG2on52NOzFBTunYsf
-# fqeeOHTRXURP6pBA6R45McfwJBMRED0dROtxgsw2g5GSINI9MZoxnhKKQjbmEE1t
-# 4MxLOWayQ4bzeou8XEiJ+ltXCyUddgOU3ijmok/iixpEn+6Kta5SouAojs/GCe23
-# O8Wazv6tXLgE96ad7hBfKzbNUSvi/jTbUU8bo+iVLX1BzT9YszOhyEx4oIOFuZQB
-# 7URDE25Uz+RrH5TNy46dlzc+j34SY9SqESdc1Q==
-# SIG # End signature block
