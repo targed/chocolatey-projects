@@ -13,8 +13,8 @@ jobs:
     runs-on: windows-latest
 
     defaults:
-      run:
-        shell: pwsh
+      shell: pwsh7
+      run: $PSVersionTable.PSVersion
 
     steps:
       # Checkout repository
