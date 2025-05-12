@@ -43,8 +43,7 @@ jobs:
       # Run the update script
       - name: Run package update script
         run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          ./Claude/updateNew.ps1
+          .\UpdateAll.ps1
 
       # Test the packages
       - name: Test updated packages
