@@ -1,0 +1,97 @@
+name: Chocolatey Package Update
+
+on:
+  # Run on manual trigger
+  workflow_dispatch:
+
+  # Run daily at midnight UTC
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  update-packages:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: powershell
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full git history for potential version tagging
+
+      # Install Chocolatey AU (Automatic Updater) module
+      - name: Install prerequisites
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          Install-PackageProvider -Name NuGet -Force
+          Install-Module AU -Force
+          choco install checksum -y
+
+      # Run the update script
+      - name: Run package update script
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          ./UpdateAll.ps1
+
+      # Test the packages
+      - name: Test updated packages
+        run: |
+          # Get all updated package directories
+          $updatedPackages = Get-ChildItem -Path . -Directory | 
+            Where-Object { Test-Path (Join-Path $_.FullName "*.nupkg") } |
+            Select-Object -ExpandProperty Name
+
+          foreach ($package in $updatedPackages) {
+            Write-Host "Testing package: $package"
+            $nupkgFile = Get-ChildItem -Path "$package/*.nupkg" | Select-Object -First 1
+            if ($nupkgFile) {
+              choco install $package -y -s .
+              if ($LASTEXITCODE -ne 0) {
+                Write-Error "Package installation failed: $package"
+                exit 1
+              }
+              
+              choco uninstall $package -y
+              if ($LASTEXITCODE -ne 0) {
+                Write-Error "Package uninstallation failed: $package"
+                exit 1
+              }
+            }
+          }
+
+      # Push to Chocolatey if updates were found
+      - name: Push to Chocolatey (Test Mode)
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+          DRY_RUN: true # Set to false when ready for production
+        run: |
+          $updatedPackages = Get-ChildItem -Path . -Recurse -Filter "*.nupkg" | 
+            Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
+
+          if ($updatedPackages.Count -gt 0) {
+            Write-Host "Found $($updatedPackages.Count) updated packages to push"
+            foreach ($package in $updatedPackages) {
+              Write-Host "Pushing package: $($package.FullName)"
+              if ($env:DRY_RUN -ne "true") {
+                choco push $package.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+              } else {
+                Write-Host "DRY RUN: Would have pushed $($package.FullName) to Chocolatey"
+              }
+            }
+          } else {
+            Write-Host "No updated packages found to push"
+          }
+
+      # Commit changes back to the repository
+      - name: Commit changes
+        if: success()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "Auto-update packages [skip ci]" -a || echo "No changes to commit"
+          git push
