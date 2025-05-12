@@ -127,7 +127,6 @@ jobs:
 
       # Commit changes back to the repository
       - name: Commit changes
-        DRY_RUN: true # Set to false when ready for production
         if: success()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
