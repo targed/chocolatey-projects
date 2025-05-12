@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 
@@ -37,7 +37,7 @@ Write-Host "Waiting for Claude process to start..."
 while ($timer.Elapsed.TotalSeconds -lt $timeout) {
   $process = Get-Process -Name "claude" -ErrorAction SilentlyContinue
   if ($process) {
-    Start-Sleep -Seconds 5  # Give it a few seconds to fully initialize
+    Start-Sleep -Seconds 10  # Give it a few seconds to fully initialize
     Write-Host "Terminating Claude process..."
     taskkill /F /IM "claude.exe" /T
     break
