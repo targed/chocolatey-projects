@@ -10,8 +10,7 @@ on:
 
 jobs:
   update-packages:
-    container:
-      image: https://app.vagrantup.com/chocolatey/boxes/test-environment
+    runs-on: https://app.vagrantup.com/chocolatey/boxes/test-environment
 
     defaults:
       run:
