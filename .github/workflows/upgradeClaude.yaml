@@ -34,6 +34,7 @@ jobs:
 
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
+        if: success()
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           powershell.exe Install-PackageProvider -Name NuGet -Force
@@ -42,6 +43,7 @@ jobs:
 
       # Run the Claude update script
       - name: Run Claude update script
+        if: success()
         # REMOVED: working-directory: ./Claude
         run: |
           # Paths are now relative to the checkout root
@@ -53,6 +55,7 @@ jobs:
 
       # Test the Claude package if updated
       - name: Test Claude package
+        if: success()
         run: |
           $packageDir = "Claude"
           $updatedPackage = $null
