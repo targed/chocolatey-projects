@@ -10,7 +10,8 @@ on:
 
 jobs:
   update-packages:
-    runs-on: windows-latest
+    container:
+      image: https://app.vagrantup.com/chocolatey/boxes/test-environment
 
     defaults:
       run:
