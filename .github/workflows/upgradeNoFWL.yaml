@@ -12,10 +12,6 @@ jobs:
   update-packages:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        shell: pwsh
-
     steps:
       # Checkout repository
       - name: Checkout repository
@@ -42,6 +38,7 @@ jobs:
 
       # Check PowerShell version to confirm we're using PowerShell Core (7+)
       - name: Check PowerShell version
+        shell: pwsh
         run: |
           $PSVersionTable.PSVersion
           if ($PSVersionTable.PSVersion.Major -lt 7) {
