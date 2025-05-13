@@ -11,8 +11,6 @@ on:
 jobs:
   update-packages:
     runs-on: ubuntu-latest
-    container:
-      image: https://app.vagrantup.com/chocolatey/boxes/test-environment
 
     defaults:
       run:
@@ -24,6 +22,23 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full git history for potential version tagging
+
+      - name: Cache Vagrant boxes
+        uses: actions/cache@v3
+        with:
+          path: ~/.vagrant.d/boxes
+          key: ${{ runner.os }}-vagrant-${{ hashFiles('Vagrantfile') }}
+          restore-keys: |
+            ${{ runner.os }}-vagrant-
+
+      - name: Show Vagrant version
+        run: vagrant --version
+
+      - name: Run vagrant up
+        run: vagrant up
+
+      - name: ssh into box after boot
+        run: vagrant ssh -c "echo 'hello world!'"
 
       # Check PowerShell version to confirm we're using PowerShell Core (7+)
       - name: Check PowerShell version
