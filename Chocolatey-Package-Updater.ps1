@@ -161,7 +161,8 @@ function Get-GitHubRelease {
             LatestVersion     = $latestVersion
             PublishedDateTime = $PublishedLocalDateTime
         }
-    } catch {
+    }
+    catch {
         Write-Error "Unable to check for updates.`nError: $_"
         exit 1
     }
@@ -187,7 +188,8 @@ function CheckForUpdate {
             Write-Output "Or you can run the following command to update:"
             Write-Output "Install-Script $PowerShellGalleryName -Force`n"
         }
-    } else {
+    }
+    else {
         Write-Output "`n$RepoName is up to date.`n"
         Write-Output "Current version: $CurrentVersion."
         Write-Output "Latest version: $($Data.LatestVersion)."
@@ -234,7 +236,8 @@ function UpdateFileContent {
             if ($matchedText -eq $Replacement) {
                 Write-Debug "Replacement text is the same as the existing text. No changes needed."
                 return "No changes needed"
-            } else {
+            }
+            else {
                 $updatedContent = $fileContent -replace $Pattern, $Replacement
                 [System.IO.File]::WriteAllText($absolutePath, $updatedContent)
                 $verifyContent = Get-Content $absolutePath -Raw
@@ -244,14 +247,17 @@ function UpdateFileContent {
                 if ($verifyContent -match $escapedReplacement) {
                     Write-Debug "Replacement verified in file"
                     return "true"
-                } else {
+                }
+                else {
                     return "Replacement not found in file"
                 }
             }
-        } else {
+        }
+        else {
             return "Pattern not found in file"
         }
-    } else {
+    }
+    else {
         return "File not found"
     }
 }
@@ -265,9 +271,11 @@ function HandleUpdateResult {
 
     if ($Result -eq "true") {
         Write-Output $SuccessMessage
-    } elseif ($Result -eq "No changes needed") {
+    }
+    elseif ($Result -eq "No changes needed") {
         Write-Output "No changes were needed."
-    } else {
+    }
+    else {
         Write-Output $FailureMessage
     }
 }
@@ -339,7 +347,8 @@ function SendEmailMailjet {
         if ($PSCmdlet.MyInvocation.BoundParameters['Debug']) {
             Write-Debug "Response: $($response | ConvertTo-Json -Depth 3)"
         }
-    } catch {
+    }
+    catch {
         Write-Warning "Failed to send email."
         Write-Warning "Error details: $_"
         if ($PSCmdlet.MyInvocation.BoundParameters['Debug']) {
@@ -394,9 +403,11 @@ function Load-DotEnv {
     # Determine if the given path is a file or a directory
     if (Test-Path -Path $Path -PathType Container) {
         $envFilePath = Join-Path -Path $Path -ChildPath ".env"
-    } elseif (Test-Path -Path $Path -PathType Leaf) {
+    }
+    elseif (Test-Path -Path $Path -PathType Leaf) {
         $envFilePath = $Path
-    } else {
+    }
+    else {
         Write-Warning "The specified path does not exist: $Path"
         return
     }
@@ -419,7 +430,8 @@ function Load-DotEnv {
                 # Remove surrounding quotes if they exist
                 if ($value.StartsWith('"') -and $value.EndsWith('"')) {
                     $value = $value.Substring(1, $value.Length - 2)
-                } elseif ($value.StartsWith("'") -and $value.EndsWith("'")) {
+                }
+                elseif ($value.StartsWith("'") -and $value.EndsWith("'")) {
                     $value = $value.Substring(1, $value.Length - 2)
                 }
 
@@ -524,7 +536,8 @@ function Get-LatestGitHubReleaseVersion {
     # Use regex to extract version number
     if ($latestVersionTag -match '(\d+\.\d+\.\d+)') {
         return $matches[1]
-    } else {
+    }
+    else {
         throw "Failed to extract version from tag: $latestVersionTag"
     }
 }
@@ -601,7 +614,8 @@ function UpdateChocolateyPackage {
         try {
             Remove-Item -Path $filePath -Force -ErrorAction Stop
             return $true
-        } catch {
+        }
+        catch {
             return $false
         }
     }
@@ -651,7 +665,8 @@ function UpdateChocolateyPackage {
 
         if ($Is64Bit -eq $false) {
             Write-Output "Downloading file: $url"
-        } else {
+        }
+        else {
             Write-Output "Downloading file (64-bit): $url"
         }
 
@@ -675,7 +690,8 @@ function UpdateChocolateyPackage {
 
             # Run aria2c
             & 'aria2c' $aria2cArgs
-        } else {
+        }
+        else {
             Write-Debug "Using Invoke-WebRequest to download the file."
             Invoke-WebRequest -Uri $url -OutFile $tempPath
         }
@@ -683,7 +699,8 @@ function UpdateChocolateyPackage {
         # Verify the file exists
         if (Test-Path $tempPath) {
             Write-Debug "File exists: $tempPath"
-        } else {
+        }
+        else {
             throw "File not found: $tempPath"
         }
     }
@@ -699,7 +716,8 @@ function UpdateChocolateyPackage {
 
         if ($ForceVersionNumber) {
             $ProductVersion = $ForceVersionNumber
-        } else {
+        }
+        else {
             $fileInfo = (Get-Command $FileDownloadTempPath).FileVersionInfo
 
             if ($fileInfo.ProductVersion) {
@@ -786,9 +804,6 @@ function UpdateChocolateyPackage {
         Set-Location $ScriptPath
         Write-Debug "Current directory: $pwd"
 
-        # Temporary File Cleanup
-        CleanupFileDownload
-
         # FileDownloadTempPath Management
         if (-not $FileDownloadTempPath) {
             $FileDownloadTempPath = Join-Path -Path $env:TEMP -ChildPath "${PackageName}_setup_temp.exe"
@@ -797,6 +812,9 @@ function UpdateChocolateyPackage {
         if ($FileUrl64 -and -not $FileDownloadTempPath64) {
             $FileDownloadTempPath64 = Join-Path -Path $env:TEMP -ChildPath "${PackageName}_setup_temp_64.exe"
         }
+
+        # Temporary File Cleanup (moved after path variables are potentially initialized)
+        CleanupFileDownload
 
         # Scrape Version if Applicable
         $ForceVersionNumber = ''
@@ -808,7 +826,8 @@ function UpdateChocolateyPackage {
             if ($page.Content -match $ScrapePattern -and $matches[0] -match '^\d+(\.\d+){1,3}$') {
                 Write-Output "Scraped version: $($matches[0])"
                 $ForceVersionNumber = $matches[0]
-            } else {
+            }
+            else {
                 throw "No match found or invalid version."
             }
         }
@@ -822,7 +841,8 @@ function UpdateChocolateyPackage {
             if ($page.Content -match $DownloadUrlScrapePattern) {
                 Write-Output "Scraped download URL: $($matches[0])"
                 $FileUrl = $matches[0]
-            } else {
+            }
+            else {
                 throw "No match found or invalid version."
             }
 
@@ -835,7 +855,8 @@ function UpdateChocolateyPackage {
                 if ($page.Content -match $DownloadUrlScrapePattern64) {
                     Write-Output "Scraped 64-bit download URL: $($matches[0])"
                     $FileUrl64 = $matches[0]
-                } else {
+                }
+                else {
                     throw "No match found or invalid version."
                 }
             }
@@ -977,7 +998,8 @@ function UpdateChocolateyPackage {
                     $chocolateyInstallUrlPattern = '(?i)(?<=(url\s*=\s*)["''])(.*?)(?=["''])'
                     $chocolateyInstallUrlResult = UpdateFileContent -FilePath $InstallScriptPath -Pattern $chocolateyInstallUrlPattern -Replacement $FileUrl
                     HandleUpdateResult -Result $chocolateyInstallUrlResult -SuccessMessage "Updated URL in ChocolateyInstall.ps1 script" -FailureMessage "Did not update version in ChocolateyInstall.ps1 script, ignore error if not used`nMessage: $chocolateyInstallUrlResult"
-                } else {
+                }
+                else {
                     Write-Output "Version replacement is occurring in ChocolateyInstall.ps1 script. Skipping URL update in script."
                 }
 
@@ -996,7 +1018,8 @@ function UpdateChocolateyPackage {
                         $chocolateyInstallUrl64Pattern = '(?i)(?<=(url64bit\s*=\s*)["''])(.*?)(?=["''])|(?i)(?<=(url64\s*=\s*)["''])(.*?)(?=["''])'
                         $chocolateyInstallUrl64Result = UpdateFileContent -FilePath $InstallScriptPath -Pattern $chocolateyInstallUrl64Pattern -Replacement $FileUrl64
                         HandleUpdateResult -Result $chocolateyInstallUrl64Result -SuccessMessage "Updated URL64 in ChocolateyInstall.ps1 script" -FailureMessage "Did not update URL64 in ChocolateyInstall.ps1 script, ignore error if not used`nMessage: $chocolateyInstallUrl64Result"
-                    } else {
+                    }
+                    else {
                         Write-Output "Version replacement is occurring in ChocolateyInstall.ps1 script. Skipping URL64 update in script."
                     }
 
@@ -1029,7 +1052,8 @@ function UpdateChocolateyPackage {
                     Write-Debug "Moving file `"${FileDownloadTempPath}`" to `"${FileDestinationPath}`""
                     try {
                         Move-Item $FileDownloadTempPath -Destination $FileDestinationPath -Force
-                    } catch {
+                    }
+                    catch {
                         throw "Failed to move file `"${FileDownloadTempPath}`" to `"${FileDestinationPath}`" with error: $_"
                     }
                 }
@@ -1039,7 +1063,8 @@ function UpdateChocolateyPackage {
                     Write-Debug "Moving file `"${FileDownloadTempPath64}`" to `"${FileDestinationPath64}`""
                     try {
                         Move-Item $FileDownloadTempPath64 -Destination $FileDestinationPath64 -Force
-                    } catch {
+                    }
+                    catch {
                         throw "Failed to move file `"${FileDownloadTempPath64}`" to `"${FileDestinationPath64}`" with error: $_"
                     }
                 }
@@ -1074,11 +1099,13 @@ function UpdateChocolateyPackage {
                 Write-Debug "Sending alert..."
                 $alertMessage = "$PackageName has been updated to version $ProductVersion.`n$pushStatus"
                 SendAlert -Subject "$PackageName Package Updated" -Message $alertMessage -Alert $Alert -EnvFilePath $EnvFilePath
-            } else {
+            }
+            else {
                 # Package is up to date
                 Write-Output "No update needed. No alert sent."
             }
-        } else {
+        }
+        else {
             # Invalid version format
             Write-Output "Invalid version format. Skipping update."
 
@@ -1086,7 +1113,8 @@ function UpdateChocolateyPackage {
             Write-Debug "Sending package error alert..."
             SendAlert -Subject "$PackageName Package Error" -Message "$PackageName detected an invalid version format. Please check the update script and files." -Alert $Alert -EnvFilePath $EnvFilePath
         }
-    } catch {
+    }
+    catch {
         # Send an alert if enabled
         Write-Debug "Sending package error alert..."
         SendAlert -Subject "$PackageName Package Error" -Message "$PackageName had an error when checking for updates. Please check the update script and files.`n`nError: $_" -Alert $Alert -EnvFilePath $EnvFilePath
@@ -1094,7 +1122,8 @@ function UpdateChocolateyPackage {
         # Write the error to the console
         Write-Warning "An error occurred: $_"
         Write-Warning "Line number : $($_.InvocationInfo.ScriptLineNumber)"
-    } finally {
+    }
+    finally {
         CleanupFileDownload
         Write-Output "Done."
 
