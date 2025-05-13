@@ -44,6 +44,7 @@ jobs:
 
       - name: Set up Chocolatey environment
         shell: pwsh
+        run: |
           refreshenv
           $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
