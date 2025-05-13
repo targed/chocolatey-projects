@@ -40,6 +40,8 @@ jobs:
           powershell.exe Install-PackageProvider -Name NuGet -Force
           Install-Module AU -Force
           choco install checksum -y
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
       # Run the Claude update script
       - name: Run Claude update script
