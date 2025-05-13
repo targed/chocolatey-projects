@@ -13,7 +13,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 $packageInfo = @{
     PackageName = "Claude"
     FileUrl     = "https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe"
-    Alert       = $false
+    Alert       = $true
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table
