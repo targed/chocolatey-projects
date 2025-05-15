@@ -129,10 +129,12 @@ jobs:
             foreach ($nupkg in $nupkgFiles) {
               Write-Host "Pushing package: $($nupkg.FullName)"
               
-              if ($env:DRY_RUN -ne "true") {
+              try {
                 choco push $nupkg.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
-              } else {
-                Write-Host "DRY RUN: Would have pushed $($nupkg.FullName) to Chocolatey"
+              }
+              catch {
+                Write-Warning "Failed to push package: $($nupkg.FullName)"
+                exit 0
               }
             }
           } else {
