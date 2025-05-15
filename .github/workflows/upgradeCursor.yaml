@@ -118,7 +118,7 @@ jobs:
         if: success() && steps.test-Cursor-package.outputs.updatedPackage != ''
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
-          DRY_RUN: true # Set to false when ready for production
+          DRY_RUN: false # Set to false when ready for production
         run: |
           $packageDir = "Cursor"
           $nupkgFiles = Get-ChildItem -Path "$packageDir/*.nupkg" -ErrorAction SilentlyContinue | 
