@@ -64,7 +64,7 @@ jobs:
       # Test the Claude package if updated
       - name: Test Claude package
         if: success()
-        run: ..\..\scripts\TestClaude.ps1
+        run: .\scripts\TestClaude.ps1
 
       # Push to Chocolatey if Claude was updated
       - name: Push to Chocolatey (Test Mode)
