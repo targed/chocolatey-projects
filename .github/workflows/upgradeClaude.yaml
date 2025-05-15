@@ -63,13 +63,6 @@ jobs:
 
       - name: Run Long Claude Update script
         run: |
-          [CmdletBinding()]
-          param (
-              [switch]$CheckForUpdate,
-              [switch]$Version,
-              [switch]$Help
-          )
-
           <#PSScriptInfo
 
           .VERSION 0.1.1
