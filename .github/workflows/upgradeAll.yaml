@@ -39,15 +39,25 @@ jobs:
           powershell.exe Install-PackageProvider -Name NuGet -Force
           Install-Module AU -Force
           choco install checksum -y
+          exit 0
+
+      - name: Set up Chocolatey environment
+        shell: pwsh
+        run: |
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
       # Run the update script
       - name: Run package update script
+        if: success()
         run: |
           Unblock-File -Path .\UpdateAll.ps1
           .\UpdateAll.ps1
 
       # Test the packages
       - name: Test updated packages
+        if: success()
         run: |
           # Extract package directories from UpdateAll.ps1
           $updateAllContent = Get-Content -Path .\UpdateAll.ps1 -Raw
@@ -113,6 +123,7 @@ jobs:
 
       # Push to Chocolatey if updates were found
       - name: Push to Chocolatey (Test Mode)
+        if: success() && steps.test-updated-packages.outputs.updatedPackages != ''
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
           DRY_RUN: true # Set to false when ready for production

@@ -34,15 +34,24 @@ jobs:
 
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
+        if: success()
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           powershell.exe Install-PackageProvider -Name NuGet -Force
           Install-Module AU -Force
           choco install checksum -y
+          exit 0
+
+      - name: Set up Chocolatey environment
+        shell: pwsh
+        run: |
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
       # Run the Cursor update script
       - name: Run Cursor update script
-        # REMOVED: working-directory: ./Cursor
+        if: success()
         run: |
           # Paths are now relative to the checkout root
           Unblock-File -Path ./Cursor/updateNew.ps1
@@ -53,6 +62,7 @@ jobs:
 
       # Test the Cursor package if updated
       - name: Test Cursor package
+        if: success()
         run: |
           $packageDir = "Cursor"
           $updatedPackage = $null

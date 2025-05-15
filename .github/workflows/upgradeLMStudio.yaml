@@ -34,15 +34,24 @@ jobs:
 
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
+        if: success()
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           powershell.exe Install-PackageProvider -Name NuGet -Force
           Install-Module AU -Force
           choco install checksum -y
+          exit 0
+
+      - name: Set up Chocolatey environment
+        shell: pwsh
+        run: |
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
       # Run the LM_Studio update script
       - name: Run LM_Studio update script
-        # REMOVED: working-directory: ./LM_Studio
+        if: success()
         run: |
           # Paths are now relative to the checkout root
           Unblock-File -Path ./LM_Studio/updateNew.ps1
@@ -53,6 +62,7 @@ jobs:
 
       # Test the LM_Studio package if updated
       - name: Test LM_Studio package
+        if: success()
         run: |
           $packageDir = "LM_Studio"
           $updatedPackage = $null

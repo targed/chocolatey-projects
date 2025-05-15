@@ -10,153 +10,146 @@ on:
 
 jobs:
   update-packages:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
-    steps: # Install vagrant and virtualbox
-      - name: Install Vagrant and VirtualBox
-        run: |
-          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-          sudo apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-          sudo apt-get update
-          sudo apt-get install -y virtualbox vagrant
+    defaults:
+      run:
+        shell: pwsh
 
-      # Checkout our repository
+    steps:
+      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full git history for potential version tagging
-          path: "chocolatey-projects"
 
-      # Clone chocolatey test environment repository
-      - name: Clone Chocolatey Test Environment
+      # Check PowerShell version to confirm we're using PowerShell Core (7+)
+      - name: Check PowerShell version
         run: |
-          git clone https://github.com/chocolatey-community/chocolatey-test-environment.git test-environment
+          $PSVersionTable.PSVersion
+          if ($PSVersionTable.PSVersion.Major -lt 7) {
+            Write-Error "PowerShell 7 or higher is required"
+            exit 1
+          }
 
-      # Create packages directory in test environment repo
-      - name: Prepare test environment
+      # Install Chocolatey AU (Automatic Updater) module
+      - name: Install prerequisites
+        if: success()
         run: |
-          mkdir -p test-environment/packages
-          # Copy our NoFWL package to the test environment packages directory
-          cp -r chocolatey-projects/NoFWL test-environment/packages/
-          ls -la test-environment/packages/
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          powershell.exe Install-PackageProvider -Name NuGet -Force
+          Install-Module AU -Force
+          choco install checksum -y
+          exit 0
 
-      # Cache Vagrant boxes to speed up future runs
-      - name: Cache Vagrant boxes
-        uses: actions/cache@v3
-        with:
-          path: ~/.vagrant.d/boxes
-          key: ${{ runner.os }}-vagrant-${{ hashFiles('test-environment/Vagrantfile') }}
-          restore-keys: |
-            ${{ runner.os }}-vagrant-
-
-      # Show vagrant version for debugging
-      - name: Show Vagrant version
-        run: vagrant --version
-        working-directory: test-environment
-
-      # Run vagrant in the test environment directory
-      - name: Run vagrant up
-        run: |
-          # Modify Vagrantfile to test our NoFWL package
-          sed -i 's/#choco.exe install -fdvy INSERT_NAME  --allow-downgrade --source "'\''c:\\\\packages;http:\\/\\/chocolatey.org\\/api\\/v2\\/'"'\''/choco.exe install -fdvy nofwl --allow-downgrade --source "'\''c:\\\\packages;http:\\/\\/chocolatey.org\\/api\\/v2\\/'"'\''/g' Vagrantfile
-          vagrant up
-        working-directory: test-environment
-
-      # Verify vagrant is working and test our setup
-      - name: Test Vagrant setup
-        run: |
-          vagrant status
-          vagrant ssh -c "echo 'hello world!'"
-        working-directory: test-environment # Run update script in the Vagrant VM (outside VM, we need to go to our original repo)
-      - name: Run NoFWL update script
-        working-directory: chocolatey-projects
+      - name: Set up Chocolatey environment
         shell: pwsh
         run: |
-          # Update NoFWL package
-          Write-Host "Running NoFWL update script..."
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
-          # First unblock the PowerShell script if needed
-          Unblock-File -Path ./NoFWL/updateNew.ps1 -ErrorAction SilentlyContinue
-
-          # Run the update script
+      # Run the NoFWL update script
+      - name: Run NoFWL update script
+        if: success()
+        run: |
+          # Paths are now relative to the checkout root
+          Unblock-File -Path ./NoFWL/updateNew.ps1
+          # Assuming UpdateAll.ps1 is in the root. Adjust if it's elsewhere.
+          Unblock-File -Path ./UpdateAll.ps1
+          # Execute the script using its path relative to the root
           ./NoFWL/updateNew.ps1 -debug
 
-          # Copy updated nupkg files to the test environment packages directory if they were created
-          if (Test-Path "./NoFWL/*.nupkg") {
-            Write-Host "Copying updated nupkg files to test environment..."
-            Copy-Item -Path "./NoFWL/*.nupkg" -Destination "../test-environment/packages/NoFWL/" -Force
-          }
-
-      # The package has already been tested inside Vagrant via the provisioning script
-      # Let's extract the results and shut down the VM
-
-      # Get NoFWL package info for upload
-      - name: Get NoFWL package info
-        working-directory: chocolatey-projects
-        shell: pwsh
-        id: package-info
+      # Test the NoFWL package if updated
+      - name: Test NoFWL package
+        if: success()
         run: |
           $packageDir = "NoFWL"
-          $nupkgFile = Get-ChildItem -Path "$packageDir/*.nupkg" | Select-Object -First 1
+          $updatedPackage = $null
 
-          if ($nupkgFile) {
-            # Extract packageId from nuspec file
-            $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
-            
-            if ($nuspecFile) {
-              [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
-              $packageId = $nuspecContent.package.metadata.id
-              $packageVersion = $nuspecContent.package.metadata.version
-              
-              Write-Host "Package found: $packageId v$packageVersion at $($nupkgFile.FullName)"
-              echo "PACKAGE_ID=$packageId" >> $env:GITHUB_OUTPUT
-              echo "PACKAGE_VERSION=$packageVersion" >> $env:GITHUB_OUTPUT
-              echo "PACKAGE_PATH=$($nupkgFile.FullName)" >> $env:GITHUB_OUTPUT
-              echo "UPDATED=true" >> $env:GITHUB_OUTPUT
-            } else {
-              Write-Warning "No nuspec file found in $packageDir directory"
-              echo "UPDATED=false" >> $env:GITHUB_OUTPUT
-            }
-          } else {
-            Write-Host "No .nupkg found in $packageDir directory - no update needed"
-            echo "UPDATED=false" >> $env:GITHUB_OUTPUT
+          if (Test-Path (Join-Path $packageDir "*.nupkg")) {
+              Write-Host "Found .nupkg in NoFWL directory"
+                      
+              # Extract packageId from nuspec file
+              $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
+                      
+              if ($nuspecFile) {
+                  [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+                  $packageId = $nuspecContent.package.metadata.id
+                        
+                  if ($packageId) {
+                      $updatedPackage = [PSCustomObject]@{
+                          Directory = $packageDir
+                          PackageId = $packageId
+                          NupkgFile = (Get-ChildItem -Path "$packageDir/*.nupkg" | Select-Object -First 1).FullName
+                      }
+                          
+                      Write-Host "Updated package found: $packageId"
+                          
+                      # Install package by ID
+                      Write-Host "Installing package: $($updatedPackage.PackageId)"
+                      choco install $($updatedPackage.PackageId) -y --debug --verbose --source .
+                          
+                      if ($LASTEXITCODE -ne 0) {
+                          Write-Error "Package installation failed: $($updatedPackage.PackageId)"
+                          exit 1
+                      }
+                          
+                      # Uninstall the package 
+                      Write-Host "Uninstalling package: $($updatedPackage.PackageId)"
+                      choco uninstall $($updatedPackage.PackageId) -y
+                          
+                      if ($LASTEXITCODE -ne 0) {
+                          Write-Error "Package uninstallation failed: $($updatedPackage.PackageId)"
+                          exit 1
+                      }
+                  }
+                  else {
+                      Write-Warning "Could not extract package ID from nuspec file"
+                  }
+              }
+              else {
+                  Write-Warning "No nuspec file found in NoFWL directory"
+              }
+          }
+          else {
+              Write-Host "No .nupkg found in NoFWL directory - no update needed"
           }
 
-      # Shut down Vagrant VM
-      - name: Shut down Vagrant VM
-        if: always()
-        run: vagrant halt
-        working-directory: test-environment
-
       # Push to Chocolatey if NoFWL was updated
-      - name: Push to Chocolatey
-        if: success() && steps.package-info.outputs.UPDATED == 'true'
+      - name: Push to Chocolatey (Test Mode)
+        if: success() && steps.test-NoFWL-package.outputs.updatedPackage != ''
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
           DRY_RUN: true # Set to false when ready for production
-        working-directory: chocolatey-projects
-        shell: pwsh
         run: |
-          $packageId = "${{ steps.package-info.outputs.PACKAGE_ID }}"
-          $packagePath = "${{ steps.package-info.outputs.PACKAGE_PATH }}"
-          $packageVersion = "${{ steps.package-info.outputs.PACKAGE_VERSION }}"
+          $packageDir = "NoFWL"
+          $nupkgFiles = Get-ChildItem -Path "$packageDir/*.nupkg" -ErrorAction SilentlyContinue | 
+                        Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
 
-          Write-Host "Ready to push package: $packageId v$packageVersion"
-
-          if ($env:DRY_RUN -ne "true") {
-            Write-Host "Pushing package to Chocolatey..."
-            choco push $packagePath --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+          if ($nupkgFiles.Count -gt 0) {
+            Write-Host "Found updated NoFWL package to push"
+            
+            foreach ($nupkg in $nupkgFiles) {
+              Write-Host "Pushing package: $($nupkg.FullName)"
+              
+              if ($env:DRY_RUN -ne "true") {
+                choco push $nupkg.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+              } else {
+                Write-Host "DRY RUN: Would have pushed $($nupkg.FullName) to Chocolatey"
+              }
+            }
           } else {
-            Write-Host "DRY RUN: Would have pushed $packagePath to Chocolatey"
+            Write-Host "No updated NoFWL package found to push"
           }
 
       # Commit changes back to the repository
       - name: Commit changes
-        if: success() && steps.package-info.outputs.UPDATED == 'true'
-        working-directory: chocolatey-projects
+        if: success()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git fetch origin
           git add ./NoFWL
-          git commit -m "Auto-update NoFWL package to v${{ steps.package-info.outputs.PACKAGE_VERSION }} [skip ci]" || echo "No changes to commit"
+          git commit -m "Auto-update NoFWL package [skip ci]" || echo "No changes to commit"
           git push

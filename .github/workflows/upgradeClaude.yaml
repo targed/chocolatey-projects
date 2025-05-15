@@ -52,7 +52,6 @@ jobs:
       # Run the Claude update script
       - name: Run Claude update script
         if: success()
-        # REMOVED: working-directory: ./Claude
         run: |
           # Paths are now relative to the checkout root
           Unblock-File -Path ./Claude/updateNew.ps1

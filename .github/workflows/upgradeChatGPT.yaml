@@ -39,17 +39,25 @@ jobs:
           powershell.exe Install-PackageProvider -Name NuGet -Force
           Install-Module AU -Force
           choco install checksum -y
+          exit 0
+
+      - name: Set up Chocolatey environment
+        shell: pwsh
+        run: |
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
       # Run the ChatGPT update script
       - name: Run ChatGPT update script
-        # REMOVED: working-directory: ./ChatGPT
+        if: success()
         run: |
           # Paths are now relative to the checkout root
-          Unblock-File -Path .\ChatGPT_Unofficial\updateNew.ps1
+          Unblock-File -Path ./ChatGPT_Unofficial/updateNew.ps1
           # Assuming UpdateAll.ps1 is in the root. Adjust if it's elsewhere.
           Unblock-File -Path ./UpdateAll.ps1
           # Execute the script using its path relative to the root
-          .\ChatGPT_Unofficial\updateNew.ps1 -debug
+          ./ChatGPT_Unofficial/updateNew.ps1 -debug
 
       # Test the ChatGPT package if updated
       - name: Test ChatGPT package
