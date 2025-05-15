@@ -65,6 +65,64 @@ jobs:
         if: success()
         run: |
           $packageDir = "Cursor"
+          $updatedPackage = $null
+
+          if (Test-Path (Join-Path $packageDir "*.nupkg")) {
+              Write-Host "Found .nupkg in Cursor directory"
+                      
+              # Extract packageId from nuspec file
+              $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
+                      
+              if ($nuspecFile) {
+                  [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+                  $packageId = $nuspecContent.package.metadata.id
+                        
+                  if ($packageId) {
+                      $updatedPackage = [PSCustomObject]@{
+                          Directory = $packageDir
+                          PackageId = $packageId
+                          NupkgFile = (Get-ChildItem -Path "$packageDir/*.nupkg" | Select-Object -First 1).FullName
+                      }
+                          
+                      Write-Host "Updated package found: $packageId"
+                          
+                      # Install package by ID
+                      Write-Host "Installing package: $($updatedPackage.PackageId)"
+                      choco install $($updatedPackage.PackageId) -y --debug --verbose --source .
+                          
+                      if ($LASTEXITCODE -ne 0) {
+                          Write-Error "Package installation failed: $($updatedPackage.PackageId)"
+                          exit 1
+                      }
+                          
+                      # Uninstall the package 
+                      Write-Host "Uninstalling package: $($updatedPackage.PackageId)"
+                      choco uninstall $($updatedPackage.PackageId) -y
+                          
+                      if ($LASTEXITCODE -ne 0) {
+                          Write-Error "Package uninstallation failed: $($updatedPackage.PackageId)"
+                          exit 1
+                      }
+                  }
+                  else {
+                      Write-Warning "Could not extract package ID from nuspec file"
+                  }
+              }
+              else {
+                  Write-Warning "No nuspec file found in Cursor directory"
+              }
+          }
+          else {
+              Write-Host "No .nupkg found in Cursor directory - no update needed"
+          }
+
+      # Push to Chocolatey if Cursor was updated
+      - name: Push to Chocolatey (Test Mode)
+        if: success()
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+        run: |
+          $packageDir = "Cursor"
           # Extract packageVersion from nuspec file
           $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
               
@@ -128,47 +186,6 @@ jobs:
                   Write-Host "No updated Cursor package found to push"
               }
           }
-
-      # Push to Chocolatey if Cursor was updated
-      - name: Push to Chocolatey (Test Mode)
-        if: success()
-        env:
-          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
-        run: |
-          $packageDir = "Cursor"
-          # Extract packageVersion from nuspec file
-          $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
-              
-          if ($nuspecFile) {
-              [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
-
-              $packageVersion = $nuspecContent.package.metadata.version
-              
-              $nupkgFiles = Get-ChildItem -Path "$packageDir/*$packageVersion.nupkg" -ErrorAction SilentlyContinue | 
-              Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
-              if ($nupkgFiles.Count -gt 0) {
-                  Write-Host "Found updated Cursor package to push"
-            
-                  foreach ($nupkg in $nupkgFiles) {
-                      Write-Host "Pushing package: $($nupkg.FullName)"
-              
-                      try {
-                          choco push $nupkg.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
-                      }
-                      catch {
-                          Write-Warning "Failed to push package: $($nupkg.FullName)"
-                          exit 0
-                      }
-                  }
-              }
-              else {
-                  Write-Host "No updated Cursor package found to push"
-              }
-          }
-          else {
-              Write-Warning "No nuspec file found in Cursor directory"
-          }
-
       # Commit changes back to the repository
       - name: Commit changes
         if: success()
