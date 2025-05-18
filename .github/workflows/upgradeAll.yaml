@@ -127,7 +127,7 @@ jobs:
         if: success()
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
-          DRY_RUN: true # Set to false when ready for production
+          DRY_RUN: flase # Set to false when ready for production
         run: |
           # Extract package directories from UpdateAll.ps1
           $updateAllContent = Get-Content -Path .\UpdateAll.ps1 -Raw
