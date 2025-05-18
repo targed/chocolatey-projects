@@ -4,10 +4,6 @@ on:
   # Run on manual trigger
   workflow_dispatch:
 
-  # Run daily at 1 AM UTC
-  schedule:
-    - cron: "0 1 * * *"
-
 jobs:
   update-packages:
     runs-on: windows-latest
