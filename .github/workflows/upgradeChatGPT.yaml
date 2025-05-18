@@ -115,7 +115,7 @@ jobs:
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
         run: |
-          $packageDir = "ChatGPT_Official"
+          $packageDir = "ChatGPT_Unofficial"
           # Extract packageVersion from nuspec file
           $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
               
