@@ -4,9 +4,9 @@ on:
   # Run on manual trigger
   workflow_dispatch:
 
-  # Run daily at midnight UTC
+  # Run daily at 1PM UTC
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 13 * * *"
 
 jobs:
   update-packages:
@@ -34,6 +34,7 @@ jobs:
 
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
+        if: success()
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           powershell.exe Install-PackageProvider -Name NuGet -Force
@@ -121,9 +122,9 @@ jobs:
             }
           }
 
-      # Push to Chocolatey if updates were found
+        # Push to Chocolatey if updates were found
       - name: Push to Chocolatey (Test Mode)
-        if: success() && steps.test-updated-packages.outputs.updatedPackages != ''
+        if: success()
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
           DRY_RUN: true # Set to false when ready for production
@@ -134,32 +135,89 @@ jobs:
                         Where-Object { $_ -match '\\([^\\]+)\\updateNew\.ps1' } | 
                         ForEach-Object { $matches[1] }
 
-          # Find updated packages
-          $updatedPackages = @()
+          Write-Host "Found package directories: $($packageDirs -join ', ')"
 
+          # Process each package directory
           foreach ($dir in $packageDirs) {
-            $nupkgFiles = Get-ChildItem -Path "$dir/*.nupkg" -ErrorAction SilentlyContinue | 
-                          Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
+            Write-Host "Processing package directory: $dir"
             
-            foreach ($nupkg in $nupkgFiles) {
-              $updatedPackages += $nupkg.FullName
-            }
-          }
+            # Extract packageVersion from nuspec file
+            $nuspecFile = Get-ChildItem -Path "$dir/*.nuspec" | Select-Object -First 1
+                
+            if ($nuspecFile) {
+                [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
 
-          if ($updatedPackages.Count -gt 0) {
-            Write-Host "Found $($updatedPackages.Count) updated packages to push"
-            
-            foreach ($packagePath in $updatedPackages) {
-              Write-Host "Pushing package: $packagePath"
-              
-              if ($env:DRY_RUN -ne "true") {
-                choco push $packagePath --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
-              } else {
-                Write-Host "DRY RUN: Would have pushed $packagePath to Chocolatey"
-              }
+                $packageId = $nuspecContent.package.metadata.id
+                Write-Host "Package ID: $packageId"
+
+                $localPackageVersion = $nuspecContent.package.metadata.version
+                Write-Host "Local package version: $localPackageVersion"
+                
+                # Check if the package version is already in the remote chocolatey repository
+                $chocoInfoOutput = choco info $packageId
+                
+                # Extract remote version from the choco info output
+                $remoteVersionLine = $chocoInfoOutput | Select-String -Pattern "^$packageId\s+([0-9]+\.[0-9]+\.[0-9]+)" | Select-Object -First 1
+                
+                if ($remoteVersionLine) {
+                    $remoteVersionMatch = $remoteVersionLine -match "^$packageId\s+([0-9]+\.[0-9]+\.[0-9]+)"
+                    $remotePackageVersion = $matches[1]
+                    Write-Host "Remote package version: $remotePackageVersion"
+                    
+                    # Compare versions correctly using System.Version for proper semantic versioning comparison
+                    $localVersion = [System.Version]$localPackageVersion
+                    $remoteVersion = [System.Version]$remotePackageVersion
+                    
+                    if ($localVersion -le $remoteVersion) {
+                        Write-Host "Package version $localPackageVersion is not newer than remote version $remotePackageVersion."
+                        Write-Host "Skipping package: $packageId"
+                        continue
+                    }
+                    else {
+                        Write-Host "Package version $localPackageVersion is newer than remote version $remotePackageVersion."
+                        Write-Host "Package needs to be pushed: $packageId"
+                    }
+                }
+                else {
+                    Write-Host "Could not find remote package version or package does not exist yet."
+                    Write-Host "Will push package: $packageId"
+                }
+                
+                # Find nupkg files that match this version and were recently created
+                $nupkgFiles = Get-ChildItem -Path "$dir/*$localPackageVersion.nupkg" -ErrorAction SilentlyContinue | 
+                                Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
+                
+                if ($nupkgFiles.Count -gt 0) {
+                    Write-Host "Found updated $packageId package to push"
+                    
+                    foreach ($nupkg in $nupkgFiles) {
+                        Write-Host "Pushing package: $($nupkg.FullName)"
+                        
+                        if ($env:DRY_RUN -ne "true") {
+                            try {
+                                choco push $nupkg.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+                                if ($LASTEXITCODE -ne 0) {
+                                    Write-Warning "Push failed with exit code: $LASTEXITCODE"
+                                } else {
+                                    Write-Host "Successfully pushed $packageId v$localPackageVersion to Chocolatey"
+                                }
+                            }
+                            catch {
+                                Write-Warning "Failed to push package: $($nupkg.FullName)"
+                                Write-Warning "Error: $_"
+                            }
+                        } else {
+                            Write-Host "DRY RUN: Would have pushed $($nupkg.FullName) to Chocolatey"
+                        }
+                    }
+                }
+                else {
+                    Write-Host "No updated $packageId package found to push"
+                }
             }
-          } else {
-            Write-Host "No updated packages found to push"
+            else {
+                Write-Warning "No nuspec file found for $dir"
+            }
           }
 
       # Commit changes back to the repository
