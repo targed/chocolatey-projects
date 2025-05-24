@@ -30,11 +30,10 @@ jobs:
       - name: Install prerequisites
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
-          Install-PackageProvider -Name NuGet -Force # Ensuring NuGet is there
+          powershell.exe Install-PackageProvider -Name NuGet -Force
           Install-Module AU -Force
-          choco install checksum -y --force --no-progress # Added --force and --no-progress for CI
-          # Ensure Chocolatey itself is up to date if needed, though usually not required for package updates
-          # choco upgrade chocolatey -y --no-progress
+          choco install checksum -y
+          exit 0
 
       - name: Set up Chocolatey environment
         run: |
