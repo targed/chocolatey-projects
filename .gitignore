@@ -10,3 +10,8 @@
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# MISC
+*.exe
+*.dll
+/actions-runner
