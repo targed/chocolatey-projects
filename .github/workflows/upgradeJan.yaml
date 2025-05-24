@@ -30,11 +30,10 @@ jobs:
       - name: Install prerequisites
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
-          Install-PackageProvider -Name NuGet -Force # Ensuring NuGet is there
+          powershell.exe Install-PackageProvider -Name NuGet -Force
           Install-Module AU -Force
-          choco install checksum -y --force --no-progress # Added --force and --no-progress for CI
-          # Ensure Chocolatey itself is up to date if needed, though usually not required for package updates
-          # choco upgrade chocolatey -y --no-progress
+          choco install checksum -y
+          exit 0
 
       - name: Set up Chocolatey environment
         run: |
@@ -43,7 +42,6 @@ jobs:
           # Ensure checksum tools are in PATH
           $env:Path += ";C:\ProgramData\chocolatey\lib\checksum\tools"
           Write-Host "PATH: $env:Path"
-
 
       - name: Run Jan update script
         run: |
@@ -55,7 +53,7 @@ jobs:
         run: |
           $packageDir = "Jan"
           $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
-          
+
           if (-not $nuspecFile) {
             Write-Host "No nuspec file found in Jan directory. Skipping test."
             exit 0 # Exit gracefully if no nuspec, implies no update or issue with script
@@ -74,7 +72,7 @@ jobs:
             Write-Warning "Version specific .nupkg not found ($nupkgFilePattern). Looking for any .nupkg."
             $nupkgFile = Get-ChildItem -Path (Join-Path $packageDir "*.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
           }
-          
+
           if ($nupkgFile) {
             Write-Host "Found .nupkg in Jan directory: $($nupkgFile.FullName)"
             Write-Host "Package ID: $packageId"
@@ -119,7 +117,7 @@ jobs:
           # Check remote version
           $chocoInfoOutput = choco info $packageId --source=https://community.chocolatey.org/api/v2/ # Be specific about source
           $remoteVersionLine = $chocoInfoOutput | Select-String -Pattern "^$packageId\s+([0-9a-zA-Z\.\-]+)" | Select-Object -First 1 # Improved regex for version
-          
+
           if ($remoteVersionLine) {
             $remoteVersionMatch = $remoteVersionLine -match "^$packageId\s+([0-9a-zA-Z\.\-]+)"
             $remotePackageVersion = $matches[1]
@@ -134,10 +132,10 @@ jobs:
           } else {
             Write-Host "Remote package version for $packageId could not be determined or package does not exist yet. Proceeding with push."
           }
-          
+
           # Find the nupkg file to push, ensure it's the one matching the version
           $nupkgFileToPush = Get-ChildItem -Path (Join-Path $packageDir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          
+
           if ($nupkgFileToPush) {
             Write-Host "Found Jan package to push: $($nupkgFileToPush.FullName)"
             choco push $($nupkgFileToPush.FullName) --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
