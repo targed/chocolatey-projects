@@ -193,6 +193,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git pull
           git fetch origin
           git add ./NoFWL
           git commit -m "Auto-update NoFWL package [skip ci]" || echo "No changes to commit"
