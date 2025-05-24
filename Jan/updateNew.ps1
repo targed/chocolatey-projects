@@ -1,6 +1,3 @@
-[CmdletBinding()] # Enables -Debug parameter for troubleshooting
-param ()
-
 # Set vars to the script and the parent path ($ScriptPath MUST be defined for the UpdateChocolateyPackage function to work)
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ParentPath = Split-Path -Parent $ScriptPath
@@ -10,10 +7,10 @@ $ParentPath = Split-Path -Parent $ScriptPath
 
 # Create a hash table to store package information
 $packageInfo = @{
-    PackageName   = "tumblthree"
-    FileUrl       = "https://github.com/TumblThreeApp/TumblThree/releases/download/v{VERSION}/TumblThree-v{VERSION}-x64-Application.zip"
-    GitHubRepoUrl = "https://github.com/TumblThreeApp/TumblThree"
-    Alert         = $true
+    PackageName   = "jan"
+    FileUrl       = "https://github.com/janhq/jan/releases/download/v{VERSION}/jan-win-x64-{VERSION}.exe"
+    GitHubRepoUrl = "https://github.com/janhq/jan"
+    Alert         = $true # Or $false, depending on preference for notifications
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table
