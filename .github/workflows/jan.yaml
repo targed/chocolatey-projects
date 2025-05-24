@@ -1,0 +1,166 @@
+name: Jan Package Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * *" # Runs daily at 1 AM UTC
+
+jobs:
+  update-package: # Changed job name to be more specific
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PowerShell version
+        run: |
+          $PSVersionTable.PSVersion
+          if ($PSVersionTable.PSVersion.Major -lt 7) {
+            Write-Error "PowerShell 7 or higher is required"
+            exit 1
+          }
+
+      - name: Install prerequisites
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          Install-PackageProvider -Name NuGet -Force # Ensuring NuGet is there
+          Install-Module AU -Force
+          choco install checksum -y --force --no-progress # Added --force and --no-progress for CI
+          # Ensure Chocolatey itself is up to date if needed, though usually not required for package updates
+          # choco upgrade chocolatey -y --no-progress
+
+      - name: Set up Chocolatey environment
+        run: |
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          refreshenv
+          # Ensure checksum tools are in PATH
+          $env:Path += ";C:\ProgramData\chocolatey\lib\checksum\tools"
+          Write-Host "PATH: $env:Path"
+
+
+      - name: Run Jan update script
+        run: |
+          Unblock-File -Path ./Jan/updateNew.ps1
+          Unblock-File -Path ./UpdateAll.ps1 # This might not be strictly necessary if not directly used by Jan's script but good for consistency
+          ./Jan/updateNew.ps1 -debug # Added -debug for more verbose output if issues arise
+
+      - name: Test Jan package
+        run: |
+          $packageDir = "Jan"
+          $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
+          
+          if (-not $nuspecFile) {
+            Write-Host "No nuspec file found in Jan directory. Skipping test."
+            exit 0 # Exit gracefully if no nuspec, implies no update or issue with script
+          }
+
+          [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+          $packageId = $nuspecContent.package.metadata.id
+          $packageVersion = $nuspecContent.package.metadata.version # Get version for nupkg name
+
+          # Try to find the nupkg file using the version
+          $nupkgFilePattern = "$packageDir/*.$packageVersion.nupkg" # More specific pattern
+          $nupkgFile = Get-ChildItem -Path $nupkgFilePattern | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+          if (-not $nupkgFile) {
+            # Fallback to any nupkg if version specific not found (e.g. if version wasn't updated in nuspec correctly)
+            Write-Warning "Version specific .nupkg not found ($nupkgFilePattern). Looking for any .nupkg."
+            $nupkgFile = Get-ChildItem -Path (Join-Path $packageDir "*.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          }
+          
+          if ($nupkgFile) {
+            Write-Host "Found .nupkg in Jan directory: $($nupkgFile.FullName)"
+            Write-Host "Package ID: $packageId"
+            Write-Host "Package Version: $packageVersion"
+            
+            Write-Host "Installing package: $packageId"
+            choco install $packageId -y --debug --verbose --source . --pre # Added --pre in case of pre-releases
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Package installation failed: $packageId"
+              exit 1
+            }
+            
+            Write-Host "Uninstalling package: $packageId"
+            choco uninstall $packageId -y --debug --verbose
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Package uninstallation failed: $packageId"
+              exit 1
+            }
+          } else {
+            Write-Host "No .nupkg found in Jan directory that was recently modified or matches version $packageVersion - assuming no update was made or script failed before packaging."
+          }
+
+      - name: Push to Chocolatey
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }} # Ensure this secret is set in GitHub repo settings
+        run: |
+          $packageDir = "Jan"
+          $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
+              
+          if (-not $nuspecFile) {
+            Write-Host "No nuspec file found in Jan directory. Skipping push."
+            exit 0
+          }
+
+          [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+          $packageId = $nuspecContent.package.metadata.id
+          $localPackageVersion = $nuspecContent.package.metadata.version
+          Write-Host "Local package version for $packageId is: $localPackageVersion"
+
+          # Check remote version
+          $chocoInfoOutput = choco info $packageId --source=https://community.chocolatey.org/api/v2/ # Be specific about source
+          $remoteVersionLine = $chocoInfoOutput | Select-String -Pattern "^$packageId\s+([0-9a-zA-Z\.\-]+)" | Select-Object -First 1 # Improved regex for version
+          
+          if ($remoteVersionLine) {
+            $remoteVersionMatch = $remoteVersionLine -match "^$packageId\s+([0-9a-zA-Z\.\-]+)"
+            $remotePackageVersion = $matches[1]
+            Write-Host "Remote package version for $packageId is: $remotePackageVersion"
+            
+            if ([System.Version]$localPackageVersion -le [System.Version]$remotePackageVersion) {
+                Write-Host "Local package version $localPackageVersion is not newer than remote version $remotePackageVersion. No push needed."
+                exit 0
+            } else {
+                Write-Host "Local package version $localPackageVersion is newer. Proceeding with push."
+            }
+          } else {
+            Write-Host "Remote package version for $packageId could not be determined or package does not exist yet. Proceeding with push."
+          }
+          
+          # Find the nupkg file to push, ensure it's the one matching the version
+          $nupkgFileToPush = Get-ChildItem -Path (Join-Path $packageDir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          
+          if ($nupkgFileToPush) {
+            Write-Host "Found Jan package to push: $($nupkgFileToPush.FullName)"
+            choco push $($nupkgFileToPush.FullName) --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to push package: $($nupkgFileToPush.FullName)"
+                exit 1 # Exit with error if push fails
+            }
+          } else {
+            Write-Warning "No Jan package found matching version $localPackageVersion to push. This might indicate an issue with the update script or versioning."
+            # Consider exiting with an error or specific code if a push was expected
+          }
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull # Ensure local repo is up-to-date before attempting to commit/push
+          git add ./Jan/* # Add all changes in the Jan directory
+          # Check for staged changes before committing
+          $changes = git diff --staged --name-only
+          if ($changes) {
+            git commit -m "Auto-update Jan package [skip ci]"
+            git push
+          } else {
+            echo "No changes to commit for Jan package."
+          }
