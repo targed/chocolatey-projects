@@ -42,7 +42,7 @@ jobs:
         env:
           REPO_SCRIPT_PATH: ${{ env.REPO_SCRIPT_PATH }}
         run: |
-          $scriptPath = Join-Path $env:GITHUB_WORKSPACE "$env:REPO_SCRIPT_PATH\Install-prerequisites.ps1"
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE "$env:REPO_SCRIPT_PATH\InstallPrerequisites.ps1"
           Write-Host "Looking for script at: $scriptPath"
 
           if (Test-Path $scriptPath) {
