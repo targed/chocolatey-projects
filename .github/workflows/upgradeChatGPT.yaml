@@ -40,8 +40,11 @@ jobs:
       - name: Install prerequisites
         if: success()
         run: |
-          script_path = "$env:REPO_SCRIPT_PATH"
-          Install_prerequisites_ScriptPath = $script_path + "Install-prerequisites.ps1"
+          $script_folder_from_env = $env:REPO_SCRIPT_PATH
+          $script_file_name = "Install-prerequisites.ps1"
+          $Install_prerequisites_ScriptPath = Join-Path $script_folder_from_env $script_file_name
+          Write-Host "Attempting to execute script: $Install_prerequisites_ScriptPath"
+          & $Install_prerequisites_ScriptPath
 
       - name: Set up Chocolatey environment
         shell: pwsh
