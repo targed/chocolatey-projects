@@ -9,8 +9,8 @@ on:
     - cron: "0 1 * * *"
 
 env:
-  REPO_ROOT_PATH: ../../
-  REPO_SCRIPT_PATH: ../../scripts
+  REPO_ROOT_PATH: .
+  REPO_SCRIPT_PATH: scripts
 
 jobs:
   update-packages:
@@ -42,7 +42,7 @@ jobs:
         env:
           REPO_SCRIPT_PATH: ${{ env.REPO_SCRIPT_PATH }}
         run: |
-          $scriptPath = "$env:REPO_SCRIPT_PATH/InstallPrerequisites.ps1"
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE "$env:REPO_SCRIPT_PATH\Install-prerequisites.ps1"
           Write-Host "Looking for script at: $scriptPath"
 
           if (Test-Path $scriptPath) {
