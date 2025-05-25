@@ -40,7 +40,7 @@ jobs:
       - name: Install prerequisites
         if: success()
         run: |
-          $script_folder_from_env = $env:REPO_SCRIPT_PATH
+          $script_folder_from_env = $REPO_SCRIPT_PATH
           $script_file_name = "Install-prerequisites.ps1"
           $Install_prerequisites_ScriptPath = Join-Path $script_folder_from_env $script_file_name
           Write-Host "Attempting to execute script: $Install_prerequisites_ScriptPath"
