@@ -8,10 +8,6 @@ on:
   schedule:
     - cron: "0 1 * * *"
 
-env:
-  REPO_ROOT_PATH: .
-  REPO_SCRIPT_PATH: scripts
-
 jobs:
   update-packages:
     runs-on: windows-latest
@@ -39,10 +35,8 @@ jobs:
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
         if: success()
-        env:
-          REPO_SCRIPT_PATH: ${{ env.REPO_SCRIPT_PATH }}
         run: |
-          $scriptPath = Join-Path $env:GITHUB_WORKSPACE "$env:REPO_SCRIPT_PATH\InstallPrerequisites.ps1"
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE "scripts\InstallPrerequisites.ps1"
           Write-Host "Looking for script at: $scriptPath"
 
           if (Test-Path $scriptPath) {
