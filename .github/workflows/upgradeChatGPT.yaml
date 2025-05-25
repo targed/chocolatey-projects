@@ -39,7 +39,9 @@ jobs:
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
         if: success()
-        run: $REPO_SCRIPT_PATH + Installprerequisites.ps1
+        run: |
+          script_path = "$env:REPO_SCRIPT_PATH"
+          Install_prerequisites_ScriptPath = $script_path + "Install-prerequisites.ps1"
 
       - name: Set up Chocolatey environment
         shell: pwsh
