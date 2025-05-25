@@ -39,12 +39,19 @@ jobs:
       # Install Chocolatey AU (Automatic Updater) module
       - name: Install prerequisites
         if: success()
+        env:
+          REPO_SCRIPT_PATH: ${{ env.REPO_SCRIPT_PATH }}
         run: |
-          $script_folder_from_env = $REPO_SCRIPT_PATH
-          $script_file_name = "Install-prerequisites.ps1"
-          $Install_prerequisites_ScriptPath = Join-Path $script_folder_from_env $script_file_name
-          Write-Host "Attempting to execute script: $Install_prerequisites_ScriptPath"
-          & $Install_prerequisites_ScriptPath
+          $scriptPath = "$env:REPO_SCRIPT_PATH\Install-prerequisites.ps1"
+          Write-Host "Looking for script at: $scriptPath"
+
+          if (Test-Path $scriptPath) {
+            Write-Host "Executing Install-prerequisites.ps1"
+            & $scriptPath
+          } else {
+            Write-Error "Install-prerequisites.ps1 not found at $scriptPath"
+            exit 1
+          }
 
       - name: Set up Chocolatey environment
         shell: pwsh
