@@ -42,7 +42,7 @@ jobs:
         env:
           REPO_SCRIPT_PATH: ${{ env.REPO_SCRIPT_PATH }}
         run: |
-          $scriptPath = "$env:REPO_SCRIPT_PATH/Install-prerequisites.ps1"
+          $scriptPath = "$env:REPO_SCRIPT_PATH/InstallPrerequisites.ps1"
           Write-Host "Looking for script at: $scriptPath"
 
           if (Test-Path $scriptPath) {
