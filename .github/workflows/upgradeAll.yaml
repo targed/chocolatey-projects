@@ -151,68 +151,58 @@ jobs:
                 Write-Host "Package ID: $packageId"
 
                 $localPackageVersion = $nuspecContent.package.metadata.version
-                Write-Host "Local package version: $localPackageVersion"
-                
-                # Check if the package version is already in the remote chocolatey repository
-                $chocoInfoOutput = choco info $packageId
-                
-                # Extract remote version from the choco info output
-                $remoteVersionLine = $chocoInfoOutput | Select-String -Pattern "^$packageId\s+([0-9]+\.[0-9]+\.[0-9]+)" | Select-Object -First 1
-                
-                if ($remoteVersionLine) {
-                    $remoteVersionMatch = $remoteVersionLine -match "^$packageId\s+([0-9]+\.[0-9]+\.[0-9]+)"
-                    $remotePackageVersion = $matches[1]
-                    Write-Host "Remote package version: $remotePackageVersion"
-                    
-                    # Compare versions correctly using System.Version for proper semantic versioning comparison
-                    $localVersion = [System.Version]$localPackageVersion
-                    $remoteVersion = [System.Version]$remotePackageVersion
-                    
-                    if ($localVersion -le $remoteVersion) {
-                        Write-Host "Package version $localPackageVersion is not newer than remote version $remotePackageVersion."
-                        Write-Host "Skipping package: $packageId"
-                        continue
-                    }
-                    else {
-                        Write-Host "Package version $localPackageVersion is newer than remote version $remotePackageVersion."
-                        Write-Host "Package needs to be pushed: $packageId"
-                    }
+                Write-Host "Local package version for $packageId is: $localPackageVersion"
+
+                # Call Check-ChocolateyStatus.ps1
+                $statusScriptPath = Resolve-Path (Join-Path $env:GITHUB_WORKSPACE "scripts/Check-ChocolateyStatus.ps1")
+                Write-Host "Checking Chocolatey status for $packageId version $localPackageVersion using $statusScriptPath..."
+                $pushStatus = & $statusScriptPath -PackageId $packageId -PackageVersion $localPackageVersion
+                Write-Host "Push status for $packageId/$localPackageVersion is: $pushStatus"
+
+                if ($pushStatus -eq "SKIP_PUSH") {
+                    Write-Host "Skipping push for $packageId version $localPackageVersion as per status check."
+                    continue # Skip to the next package in the loop
                 }
-                else {
-                    Write-Host "Could not find remote package version or package does not exist yet."
-                    Write-Host "Will push package: $packageId"
-                }
+
+                # If PROCEED_WITH_PUSH:
+                # Find nupkg file that matches this version.
+                $nupkgFileToPush = Get-ChildItem -Path (Join-Path $dir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
                 
-                # Find nupkg files that match this version and were recently created
-                $nupkgFiles = Get-ChildItem -Path "$dir/*$localPackageVersion.nupkg" -ErrorAction SilentlyContinue | 
-                                Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
-                
-                if ($nupkgFiles.Count -gt 0) {
-                    Write-Host "Found updated $packageId package to push"
+                if ($nupkgFileToPush) {
+                    Write-Host "Found $packageId package to push: $($nupkgFileToPush.FullName)"
                     
-                    foreach ($nupkg in $nupkgFiles) {
-                        Write-Host "Pushing package: $($nupkg.FullName)"
-                        
-                        if ($env:DRY_RUN -ne "true") {
-                            try {
-                                choco push $nupkg.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
-                                if ($LASTEXITCODE -ne 0) {
-                                    Write-Warning "Push failed with exit code: $LASTEXITCODE"
-                                } else {
-                                    Write-Host "Successfully pushed $packageId v$localPackageVersion to Chocolatey"
-                                }
+                    if ($env:DRY_RUN -ne "true") {
+                        try {
+                            Write-Host "Pushing package: $($nupkgFileToPush.FullName)"
+                            choco push $($nupkgFileToPush.FullName) --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+                            if ($LASTEXITCODE -ne 0) {
+                                Write-Warning "Push failed for $packageId with exit code: $LASTEXITCODE"
+                                # Do not log if push failed
+                            } else {
+                                Write-Host "Successfully pushed $packageId v$localPackageVersion to Chocolatey"
+                                # Log successful push
+                                $logDir = Join-Path $env:GITHUB_WORKSPACE "logs"
+                                $logFile = Join-Path $logDir "pushed-versions.log"
+                                if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+                                Add-Content -Path $logFile -Value "$packageId/$localPackageVersion"
+                                Write-Host "Logged successful push of $packageId/$localPackageVersion to $logFile"
                             }
-                            catch {
-                                Write-Warning "Failed to push package: $($nupkg.FullName)"
-                                Write-Warning "Error: $_"
-                            }
-                        } else {
-                            Write-Host "DRY RUN: Would have pushed $($nupkg.FullName) to Chocolatey"
                         }
+                        catch {
+                            Write-Warning "Exception during push for package: $($nupkgFileToPush.FullName)"
+                            Write-Warning "Error: $_"
+                        }
+                    } else {
+                        Write-Host "DRY RUN: Would have pushed $($nupkgFileToPush.FullName) to Chocolatey"
+                        # Optional: Simulate logging for dry run if needed for testing workflow logic
+                        # $logDir = Join-Path $env:GITHUB_WORKSPACE "logs"; $logFile = Join-Path $logDir "pushed-versions.log"
+                        # if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+                        # Add-Content -Path $logFile -Value "$packageId/$localPackageVersion"
+                        # Write-Host "DRY RUN: Logged (simulated) push of $packageId/$localPackageVersion to $logFile"
                     }
                 }
                 else {
-                    Write-Host "No updated $packageId package found to push"
+                    Write-Warning "No .nupkg found for $packageId version $localPackageVersion in $dir to push."
                 }
             }
             else {

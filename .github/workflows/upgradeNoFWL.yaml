@@ -103,89 +103,115 @@ jobs:
                           Write-Error "Package uninstallation failed: $($updatedPackage.PackageId)"
                           exit 1
                       }
+                      # Output PackageID and PackageVersion to GITHUB_ENV
+                      $packageVersion = $nuspecContent.package.metadata.version
+                      echo "PACKAGE_ID=$($updatedPackage.PackageId)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                      echo "PACKAGE_VERSION=$packageVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
                   }
                   else {
-                      Write-Warning "Could not extract package ID from nuspec file"
+                      Write-Warning "Could not extract package ID from nuspec file. Push steps will be skipped."
+                      echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                      echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
                   }
               }
               else {
-                  Write-Warning "No nuspec file found in NoFWL directory"
+                  Write-Warning "No nuspec file found in NoFWL directory. Push steps will be skipped."
+                  echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                  echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
               }
           }
           else {
-              Write-Host "No .nupkg found in NoFWL directory - no update needed"
+              Write-Host "No .nupkg found in NoFWL directory - no update needed. Push steps will be skipped."
+              echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+              echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
 
-      # Push to Chocolatey if NoFWL was updated
-      - name: Push to Chocolatey (Test Mode)
-        if: success()
+      - name: Define Package Info for Push
+        id: package_info
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          $packageId = "$env:PACKAGE_ID"
+          $localPackageVersion = "$env:PACKAGE_VERSION"
+          $packageDir = "NoFWL" # Specific package directory
+
+          if (-not $packageId -or -not $localPackageVersion) {
+            Write-Warning "PACKAGE_ID or PACKAGE_VERSION is empty. Skipping nupkg search."
+            echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            exit 0 # Exit this step gracefully
+          }
+
+          Write-Host "Preparing to check/push $packageId version $localPackageVersion from $packageDir"
+          $nupkgFileToPush = Get-ChildItem -Path (Join-Path $packageDir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          
+          if ($nupkgFileToPush) {
+            Write-Host "Nupkg to push: $($nupkgFileToPush.FullName)"
+            echo "NUPKG_FILE_PATH=$($nupkgFileToPush.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            echo "NUPKG_FOUND=true" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          } else {
+            Write-Warning "No .nupkg found for $packageId version $localPackageVersion in $packageDir"
+            echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+
+      - name: Check Chocolatey Status
+        if: env.NUPKG_FOUND == 'true' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        id: check_choco_status
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          $status = ./scripts/Check-ChocolateyStatus.ps1 -PackageId "$env:PACKAGE_ID" -PackageVersion "$env:PACKAGE_VERSION"
+          Write-Host "Check status for $env:PACKAGE_ID/$env:PACKAGE_VERSION is: $status"
+          echo "CHOCO_PUSH_STATUS=$status" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Push to Chocolatey
+        if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        id: do_choco_push
+        shell: pwsh
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+          NUPKG_FILE_PATH: ${{ env.NUPKG_FILE_PATH }}
         run: |
-          $packageDir = "NoFWL"
-          # Extract packageVersion from nuspec file
-          $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
-              
-          if ($nuspecFile) {
-              [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
-
-              $packageId = $nuspecContent.package.metadata.id
-              Write-Host "Package ID: $packageId"
-
-              $localPackageVersion = $nuspecContent.package.metadata.version
-              Write-Host "Local package version: $localPackageVersion"    # Check if the package version is already in the remote chocolatey repository
-              $chocoInfoOutput = choco info $packageId
-              # Write-Host "Chocolatey Info Output:"
-              # $chocoInfoOutput | ForEach-Object { Write-Host $_ }
-              
-              # Extract remote version from the choco info output
-              $remoteVersionLine = $chocoInfoOutput | Select-String -Pattern "^$packageId\s+([0-9]+\.[0-9]+\.[0-9]+)" | Select-Object -First 1
-              
-              if ($remoteVersionLine) {
-                  $remoteVersionMatch = $remoteVersionLine -match "^$packageId\s+([0-9]+\.[0-9]+\.[0-9]+)"
-                  $remotePackageVersion = $matches[1]
-                  Write-Host "Remote package version: $remotePackageVersion"
-                  
-                  # Compare versions correctly using System.Version for proper semantic versioning comparison
-                  $localVersion = [System.Version]$localPackageVersion
-                  $remoteVersion = [System.Version]$remotePackageVersion
-                  
-                  if ($localVersion -le $remoteVersion) {
-                      Write-Host "Local package version $localPackageVersion is not newer than remote version $remotePackageVersion."
-                      Write-Host "No need to push, exiting."
-                      exit 0
-                  }
-                  else {
-                      Write-Host "Local package version $localPackageVersion is newer than remote version $remotePackageVersion."
-                      Write-Host "Continuing with package push..."
-                  }
-              }
-              else {
-                  Write-Host "Could not find remote package version or package does not exist yet."
-                  Write-Host "Continuing with package push..."
-              }
-              
-              $nupkgFiles = Get-ChildItem -Path "$packageDir/*$localPackageVersion.nupkg" -ErrorAction SilentlyContinue | 
-              Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-1) }
-              if ($nupkgFiles.Count -gt 0) {
-                  Write-Host "Found updated NoFWL package to push"
-            
-                  foreach ($nupkg in $nupkgFiles) {
-                      Write-Host "Pushing package: $($nupkg.FullName)"
-              
-                      try {
-                          choco push $nupkg.FullName --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
-                      }
-                      catch {
-                          Write-Warning "Failed to push package: $($nupkg.FullName)"
-                          exit 0
-                      }
-                  }
-              }
-              else {
-                  Write-Host "No updated NoFWL package found to push"
-              }
+          Write-Host "Attempting to push $env:NUPKG_FILE_PATH"
+          choco push "$env:NUPKG_FILE_PATH" --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+          if ($LASTEXITCODE -ne 0) {
+              Write-Error "Failed to push package: $env:NUPKG_FILE_PATH"
+              exit 1
           }
+
+      - name: Log Successful Push
+        if: steps.do_choco_push.outcome == 'success' && env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          $logDir = "./logs"
+          $logFile = Join-Path $logDir "pushed-versions.log"
+          if (-not (Test-Path $logDir)) {
+            New-Item -ItemType Directory -Path $logDir | Out-Null
+          }
+          $pushedEntry = "$env:PACKAGE_ID/$env:PACKAGE_VERSION"
+          Add-Content -Path $logFile -Value $pushedEntry
+          Write-Host "Logged successful push of $pushedEntry to $logFile"
+
+      - name: Notify Skipped Push
+        if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'SKIP_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          Write-Host "Push for $env:PACKAGE_ID version $env:PACKAGE_VERSION was skipped because it's already on Chocolatey.org or in the local push log."
+
+      - name: Notify No Nupkg/Info Found
+        if: env.NUPKG_FOUND == 'false' || !env.PACKAGE_ID || !env.PACKAGE_VERSION
+        shell: pwsh
+        run: |
+          Write-Host "Push was skipped because no matching .nupkg file was found, or package ID/version was not determined."
 
       # Commit changes back to the repository
       - name: Commit changes
@@ -195,6 +221,13 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git pull
           git fetch origin
-          git add ./NoFWL
-          git commit -m "Auto-update NoFWL package [skip ci]" || echo "No changes to commit"
-          git push
+          # Add changes from the specific package directory and logs
+          git add ./NoFWL/* ./logs/*
+          # Check for staged changes before committing
+          $changes = git diff --staged --name-only
+          if ($changes) {
+            git commit -m "Auto-update NoFWL package [skip ci]"
+            git push
+          } else {
+            echo "No changes to commit for NoFWL package."
+          }

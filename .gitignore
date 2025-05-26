@@ -10,3 +10,7 @@
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Pester / PowerShell Test Artifacts
+TestResults/
+PesterTestResults.xml

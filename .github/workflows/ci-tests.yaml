@@ -1,0 +1,42 @@
+name: CI Pester Tests
+
+on:
+  pull_request:
+    branches:
+      - main # Or your primary branch name, e.g., master
+
+jobs:
+  test:
+    name: Run Pester Tests
+    runs-on: windows-latest
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell version:"
+          $PSVersionTable.PSVersion
+          Write-Host "Pester version (if available globally initially):"
+          try { Get-Module Pester -ListAvailable | Select-Object -Property Version, Path } catch { Write-Host "Pester not initially found." }
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted # Ensure PSGallery is trusted
+          Install-Module -Name Pester -MinimumVersion 5.0 -Force -Scope CurrentUser -SkipPublisherCheck -Confirm:$false
+          Import-Module Pester -PassThru
+
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          # Check if the tests directory exists to prevent Invoke-Pester from erroring if it's missing
+          if (Test-Path -Path ./tests) {
+            Invoke-Pester -Path ./tests -CI
+          } else {
+            Write-Warning "Test directory './tests' not found. Skipping Pester tests."
+            # Optionally, you might want to fail the step if tests are expected:
+            # exit 1
+          }
