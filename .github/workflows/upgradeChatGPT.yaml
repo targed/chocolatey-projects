@@ -36,11 +36,16 @@ jobs:
       - name: Install prerequisites
         if: success()
         run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          powershell.exe Install-PackageProvider -Name NuGet -Force
-          Install-Module AU -Force
-          choco install checksum -y
-          exit 0
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE "scripts\InstallPrerequisites.ps1"
+          Write-Host "Looking for script at: $scriptPath"
+
+          if (Test-Path $scriptPath) {
+            Write-Host "Executing Install-prerequisites.ps1"
+            & $scriptPath
+          } else {
+            Write-Error "Install-prerequisites.ps1 not found at $scriptPath"
+            exit 1
+          }
 
       - name: Set up Chocolatey environment
         shell: pwsh
@@ -142,7 +147,7 @@ jobs:
 
           Write-Host "Preparing to check/push $packageId version $localPackageVersion from $packageDir"
           $nupkgFileToPush = Get-ChildItem -Path (Join-Path $packageDir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          
+
           if ($nupkgFileToPush) {
             Write-Host "Nupkg to push: $($nupkgFileToPush.FullName)"
             echo "NUPKG_FILE_PATH=$($nupkgFileToPush.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append

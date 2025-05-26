@@ -48,6 +48,7 @@ jobs:
           Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
           refreshenv
           $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
+          Write-Host "PATH: $env:Path"
 
       # Run the Cursor update script
       - name: Run Cursor update script
