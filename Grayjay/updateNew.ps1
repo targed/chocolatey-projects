@@ -11,7 +11,8 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Create a hash table to store package information
 $packageInfo = @{
     PackageName = "Grayjay"
-    FileUrl     = "https://updater.grayjay.app/Apps/Grayjay.Desktop/Grayjay.Desktop-win-x64.zip"
+    # FileUrl     = "https://updater.grayjay.app/Apps/Grayjay.Desktop/Grayjay.Desktop-win-x64.zip"
+    FileUrl     = "https://updater.grayjay.app/Apps/Grayjay.Desktop/7/Grayjay.Desktop-win-x64-v7.zip"
     Alert       = $true
 }
 

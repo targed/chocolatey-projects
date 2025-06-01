@@ -29,6 +29,7 @@ These packages are updated automatically using the scripts in this repository:
 - LM-Studio
 - NoFWL
 - TumblThree
+- Jan
 
 ### Manually Updated
 
@@ -42,7 +43,6 @@ These packages currently require manual intervention for updates:
 
 Development is underway to automate updates for these packages:
 
-- Jan
 - JMARS
 - Windsurf
 

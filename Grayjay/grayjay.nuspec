@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
         <id>grayjay</id>
-        <version>2.0.5</version>
+        <version>7</version>
         <title>Grayjay</title>
         <authors>Futo</authors>
         <owners>ltklionel</owners>
