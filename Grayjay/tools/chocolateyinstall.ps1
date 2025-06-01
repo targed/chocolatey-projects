@@ -4,6 +4,9 @@ $VerbosePreference = 'SilentlyContinue'
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $checksum = '63C3D22842D41A9934EA034EDE04CB994B861D5AC7397CEDE9D60DC5891D5A4E'
 
+# Get package parameters
+$pp = Get-PackageParameters
+
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
@@ -24,35 +27,42 @@ $extractedPath = "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7"
 if (Test-Path $extractedPath) {
   Write-Host "Setting full permissions on Grayjay files..."
   try {
-    # Grant full control to Users group on all files and folders
+    # Grant full control to Users group - inheritance will apply to all nested files and folders
     $acl = Get-Acl $extractedPath
     $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("Users", "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow")
     $acl.SetAccessRule($accessRule)
     Set-Acl -Path $extractedPath -AclObject $acl
-        
-    # Recursively apply permissions to all files and subdirectories
-    Get-ChildItem -Path $extractedPath -Recurse | ForEach-Object {
-      try {
-        $itemAcl = Get-Acl $_.FullName
-        $itemAcl.SetAccessRule($accessRule)
-        Set-Acl -Path $_.FullName -AclObject $itemAcl
-      }
-      catch {
-        Write-Warning "Failed to set permissions on: $($_.FullName)"
-      }
-    }
     Write-Host "Permissions updated successfully."
   }
   catch {
     Write-Warning "Failed to update permissions: $($_.Exception.Message)"
   }
+
+  # Handle portable mode configuration
+  if ($pp.NoPortable) {
+    Write-Host "Disabling portable mode..."
+    
+    # Look for common portable marker files and remove them
+    $portableMarkers = @(
+      "portable",
+      "portable.txt", 
+      ".portable",
+      "Grayjay.portable",
+      "PORTABLE"
+    )
+    
+    foreach ($marker in $portableMarkers) {
+      $markerPath = Join-Path $extractedPath $marker
+      if (Test-Path $markerPath) {
+        Remove-Item $markerPath -Force
+        Write-Host "Removed portable marker file: $marker"
+        break
+      }
+    }
+  }
 }
 
-Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7"
-
-# Set "Run as Administrator" flag on the shortcut
-$shell = New-Object -ComObject WScript.Shell
-$shortcut = $shell.CreateShortcut("$env:USERPROFILE\Desktop\Grayjay.lnk")
-# $bytes = [System.IO.File]::ReadAllBytes("$env:USERPROFILE\Desktop\Grayjay.lnk")
-# $bytes[0x15] = $bytes[0x15] -bor 0x20
-# [System.IO.File]::WriteAllBytes("$env:USERPROFILE\Desktop\Grayjay.lnk", $bytes)
+# Create desktop shortcut unless NoShortcut parameter is specified
+if (-not $pp.NoShortcut) {
+  Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7"
+}

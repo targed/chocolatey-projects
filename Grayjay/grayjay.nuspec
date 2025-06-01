@@ -64,6 +64,23 @@ Harbor is a service which enables you to preserve your identity on the internet
 - Directly connect with your audience
 - Monitize your content
 
+## Package Parameters
+
+You can pass additional parameters to customize the installation:
+
+### Only on installation:
+- `/NoPortable` - Disables portable mode by removing the portable marker file. This will cause Grayjay to store user data in `%APPDATA%\Grayjay` instead of the installation directory.
+- `/NoShortcut` - Prevents creation of a desktop shortcut.
+
+### Only on uninstallation:
+- `/KeepAppData` - Keeps the user data by not removing the `%APPDATA%\Grayjay` directory during uninstallation the not portable version. This is useful if you want to preserve your settings and data for future installations. 
+
+**Example Usage:**
+```
+choco install grayjay --params="/NoPortable /NoShortcut"
+choco uninstall grayjay --params="/KeepAppData"
+```
+
 </description>
     </metadata>
     <files>
