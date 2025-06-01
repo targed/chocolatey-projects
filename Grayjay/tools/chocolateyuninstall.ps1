@@ -16,7 +16,7 @@ if (Test-Path $toolsDir) {
 }
 
 # Remove the data from the AppData directory located in AppData\Roaming
-if (-not $pp.KeepAppData) {
+if ($pp.RemoveAppData) {
     Write-Host "Removing AppData directory..."
     if (Test-Path $appDataPath) {
         Remove-Item $appDataPath -Recurse -Force

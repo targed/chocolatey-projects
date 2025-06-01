@@ -73,12 +73,12 @@ You can pass additional parameters to customize the installation:
 - `/NoShortcut` - Prevents creation of a desktop shortcut.
 
 ### Only on uninstallation:
-- `/KeepAppData` - Keeps the user data by not removing the `%APPDATA%\Grayjay` directory during uninstallation the not portable version. This is useful if you want to preserve your settings and data for future installations. 
+- `/RemoveAppData` - Removes the user data in the `%APPDATA%\Grayjay` directory during uninstallation of the not portable version. 
 
 **Example Usage:**
 ```
 choco install grayjay --params="/NoPortable /NoShortcut"
-choco uninstall grayjay --params="/KeepAppData"
+choco uninstall grayjay --params="/RemoveAppData"
 ```
 
 </description>
