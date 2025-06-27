@@ -19,7 +19,7 @@ $packageArgs = @{
   fileType       = 'EXE' 
   url            = 'https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe'
   softwareName   = 'Claude*' 
-  checksum       = '4515DAD4F08704E31D48A70216BE2B9AACD606203F7B34AECFE99685CD336E41'
+  checksum       = '79891E59E6C47BCA913B91A7CFA2B92F83A1EBB17A6203B920183EC411F6D316'
   checksumType   = 'sha256'
 
   # Need to create silentArgs that prevent the installer from popping up a window (Have not figgured that out yet)
