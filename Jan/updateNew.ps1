@@ -8,8 +8,9 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Create a hash table to store package information
 $packageInfo = @{
     PackageName   = "jan"
-    FileUrl       = "https://github.com/janhq/jan/releases/download/v{VERSION}/jan-win-x64-{VERSION}.exe"
-    GitHubRepoUrl = "https://github.com/janhq/jan"
+    # FileUrl       = "https://github.com/menloresearch/jan/releases/download/v{VERSION}/jan-win-x64-{VERSION}.exe"
+    FileUrl       = "https://github.com/menloresearch/jan/releases/download/v{VERSION}/Jan_{VERSION}_x64-setup.exe"
+    GitHubRepoUrl = "https://github.com/menloresearch/jan"
     Alert         = $true # Or $false, depending on preference for notifications
 }
 
