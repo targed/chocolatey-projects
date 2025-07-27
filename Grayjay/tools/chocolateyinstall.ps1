@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$checksum = '63C3D22842D41A9934EA034EDE04CB994B861D5AC7397CEDE9D60DC5891D5A4E'
+$checksum = '5E89759E0F5BB6CF5FF621EDFE8A564499AAE2E904F88D14D7841F7BB32B905D'
 
 # Get package parameters
 $pp = Get-PackageParameters
@@ -11,7 +11,7 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'EXE'
-  url            = 'https://updater.grayjay.app/Apps/Grayjay.Desktop/7/Grayjay.Desktop-win-x64-v7.zip'
+  url            = 'https://updater.grayjay.app/Apps/Grayjay.Desktop/9/Grayjay.Desktop-win-x64-v9.zip'
   softwareName   = 'Grayjay*'
   checksum       = $checksum
   checksumType   = 'sha256'
@@ -23,7 +23,7 @@ $packageArgs = @{
 Install-ChocolateyZipPackage @packageArgs
 
 # Set full permissions on all extracted files to fix execution issues
-$extractedPath = "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7"
+$extractedPath = "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
 if (Test-Path $extractedPath) {
   Write-Host "Setting full permissions on Grayjay files..."
   try {
@@ -64,5 +64,5 @@ if (Test-Path $extractedPath) {
 
 # Create desktop shortcut unless NoShortcut parameter is specified
 if (-not $pp.NoShortcut) {
-  Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v7"
+  Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
 }

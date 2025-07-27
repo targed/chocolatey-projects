@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+    <metadata>
+        <id>whispertyping</id>
+        <version>17.0.34511</version>
+        <title>WhisperTyping</title>
+        <authors>WhisperTyping</authors>
+        <owners>ltklionel</owners>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/WhisperTyping/logo.png</iconUrl>
+        <copyright>Copyright (c) 2025 WhisperTyping</copyright>
+        <projectUrl>https://whispertyping.com/#ai</projectUrl>
+        <licenseUrl>https://whispertyping.notion.site/Privacy-Statement-d9763667d6c445fe90c0c25a77e6ec74</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>AI WhisperTyping dictation transcription Whisper</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/WhisperTyping</packageSourceUrl>
+        <releaseNotes>https://whispertyping.notion.site/Changelog-134b9f832abd80a09e29cdd83f938cfa</releaseNotes>
+        <summary>Work faster with voice dictation and AI</summary>
+        <description>
+
+## Summary
+
+### Speaking is 3x faster than typing
+But that does not include corrections afterwards.
+That's why we created WhisperTyping,
+ultra-accurate dictation software that actually saves time.
+
+[![WhisperTyping Screenshot](http://img.youtube.com/vi/FW285zJxQOw/0.jpg)](http://www.youtube.com/watch?v=FW285zJxQOw "WhisperTyping: AI at your fingertips")
+
+</description>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
+</package>

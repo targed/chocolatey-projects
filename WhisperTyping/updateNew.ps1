@@ -1,6 +1,3 @@
-[CmdletBinding()] # Enables -Debug parameter for troubleshooting
-param ()
-
 # Set vars to the script and the parent path ($ScriptPath MUST be defined for the UpdateChocolateyPackage function to work)
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ParentPath = Split-Path -Parent $ScriptPath
@@ -8,12 +5,14 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
+# $downloadPage = Invoke-WebRequest -Uri "https://download.whispertyping.com/whispertypinginstaller.exe" | ConvertFrom-Json
+# $jsonObject = ($downloadPage.downloadUrl)
+
 # Create a hash table to store package information
 $packageInfo = @{
-    PackageName = "Grayjay"
-    # FileUrl     = "https://updater.grayjay.app/Apps/Grayjay.Desktop/Grayjay.Desktop-win-x64.zip"
-    FileUrl     = "https://updater.grayjay.app/Apps/Grayjay.Desktop/9/Grayjay.Desktop-win-x64-v9.zip"
-    Alert       = $true
+    PackageName = "WhisperTyping"
+    FileUrl     = "https://download.whispertyping.com/whispertypinginstaller.exe"
+    Alert       = $false
 }
 
 # Call the UpdateChocolateyPackage function and pass the hash table
