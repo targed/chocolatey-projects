@@ -127,34 +127,34 @@ jobs:
               echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
 
-      - name: Define Package Info for Push
-        id: package_info
-        shell: pwsh
-        env:
-          PACKAGE_ID: ${{ env.PACKAGE_ID }}
-          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
-        run: |
-          $packageId = "$env:PACKAGE_ID"
-          $localPackageVersion = "$env:PACKAGE_VERSION"
-          $packageDir = "Grayjay" # Specific package directory
+      # - name: Define Package Info for Push
+      #   id: package_info
+      #   shell: pwsh
+      #   env:
+      #     PACKAGE_ID: ${{ env.PACKAGE_ID }}
+      #     PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+      #   run: |
+      #     $packageId = "$env:PACKAGE_ID"
+      #     $localPackageVersion = "$env:PACKAGE_VERSION"
+      #     $packageDir = "Grayjay" # Specific package directory
 
-          if (-not $packageId -or -not $localPackageVersion) {
-            Write-Warning "PACKAGE_ID or PACKAGE_VERSION is empty. Skipping nupkg search."
-            echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-            exit 0 # Exit this step gracefully
-          }
+      #     if (-not $packageId -or -not $localPackageVersion) {
+      #       Write-Warning "PACKAGE_ID or PACKAGE_VERSION is empty. Skipping nupkg search."
+      #       echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      #       exit 0 # Exit this step gracefully
+      #     }
 
-          Write-Host "Preparing to check/push $packageId version $localPackageVersion from $packageDir"
-          $nupkgFileToPush = Get-ChildItem -Path (Join-Path $packageDir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      #     Write-Host "Preparing to check/push $packageId version $localPackageVersion from $packageDir"
+      #     $nupkgFileToPush = Get-ChildItem -Path (Join-Path $packageDir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 
-          if ($nupkgFileToPush) {
-            Write-Host "Nupkg to push: $($nupkgFileToPush.FullName)"
-            echo "NUPKG_FILE_PATH=$($nupkgFileToPush.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-            echo "NUPKG_FOUND=true" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          } else {
-            Write-Warning "No .nupkg found for $packageId version $localPackageVersion in $packageDir"
-            echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          }
+      #     if ($nupkgFileToPush) {
+      #       Write-Host "Nupkg to push: $($nupkgFileToPush.FullName)"
+      #       echo "NUPKG_FILE_PATH=$($nupkgFileToPush.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      #       echo "NUPKG_FOUND=true" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      #     } else {
+      #       Write-Warning "No .nupkg found for $packageId version $localPackageVersion in $packageDir"
+      #       echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      #     }
 
       # - name: Check Chocolatey Status
       #   if: env.NUPKG_FOUND == 'true' && env.PACKAGE_ID && env.PACKAGE_VERSION
