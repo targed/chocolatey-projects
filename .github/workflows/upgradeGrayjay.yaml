@@ -168,20 +168,20 @@ jobs:
           Write-Host "Check status for $env:PACKAGE_ID/$env:PACKAGE_VERSION is: $status"
           echo "CHOCO_PUSH_STATUS=$status" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Push to Chocolatey
-        if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
-        id: do_choco_push
-        shell: pwsh
-        env:
-          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
-          NUPKG_FILE_PATH: ${{ env.NUPKG_FILE_PATH }}
-        run: |
-          Write-Host "Attempting to push $env:NUPKG_FILE_PATH"
-          choco push "$env:NUPKG_FILE_PATH" --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
-          if ($LASTEXITCODE -ne 0) {
-              Write-Error "Failed to push package: $env:NUPKG_FILE_PATH"
-              exit 1
-          }
+      # - name: Push to Chocolatey
+      #   if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+      #   id: do_choco_push
+      #   shell: pwsh
+      #   env:
+      #     CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+      #     NUPKG_FILE_PATH: ${{ env.NUPKG_FILE_PATH }}
+      #   run: |
+      #     Write-Host "Attempting to push $env:NUPKG_FILE_PATH"
+      #     choco push "$env:NUPKG_FILE_PATH" --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+      #     if ($LASTEXITCODE -ne 0) {
+      #         Write-Error "Failed to push package: $env:NUPKG_FILE_PATH"
+      #         exit 1
+      #     }
 
       - name: Log Successful Push
         if: steps.do_choco_push.outcome == 'success' && env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
