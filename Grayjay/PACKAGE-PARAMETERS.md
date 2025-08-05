@@ -26,11 +26,11 @@ This document describes the available package parameters for customizing the Gra
 choco install grayjay
 ```
 - Creates desktop shortcut
-- Runs in portable mode (user data stored in installation directory)
+- Runs in non-portable mode (user data stored in installation directory)
 
-### Non-Portable Installation
+### Portable Installation
 ```bash
-choco install grayjay --params="/NoPortable"
+choco install grayjay --params="/Portable"
 ```
 - Creates desktop shortcut
 - User data stored in `%APPDATA%\Grayjay`
@@ -42,12 +42,12 @@ choco install grayjay --params="/NoShortcut"
 - No desktop shortcut created
 - Runs in portable mode
 
-### Non-Portable + No Shortcut
+### Portable + No Shortcut
 ```bash
-choco install grayjay --params="/NoPortable /NoShortcut"
+choco install grayjay --params="/Portable /NoShortcut"
 ```
 - No desktop shortcut created
-- User data stored in `%APPDATA%\Grayjay`
+- User data stored in (user data stored in installation directory)
 
 ### Remove App data
 ```bash
@@ -57,7 +57,7 @@ choco uninstall grayjay --params="/RemoveAppData"
 
 ## Notes
 
-- The `/NoPortable` parameter addresses permission issues that can occur when Grayjay runs in portable mode from the Chocolatey installation directory
-- When using `/NoPortable`, the application will have better integration with Windows user data management
-- The `/RemoveAppData` will only work when The `/NoPortable` parameter has been used during installation. Otherwise, regular instillation will automatically remove the app data contained within. 
+- The `/Portable` parameter addresses permission issues that can occur when Grayjay runs in portable mode from the Chocolatey installation directory
+- When using `/Portable`, the application will have better integration with Windows user data management
+- The `/RemoveAppData` will only work when The `/Portable` parameter has been used during installation. Otherwise, regular instillation will automatically remove the app data contained within. 
 - Package parameters are case-sensitive

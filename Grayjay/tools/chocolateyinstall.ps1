@@ -1,11 +1,25 @@
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
+
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $checksum = '5E89759E0F5BB6CF5FF621EDFE8A564499AAE2E904F88D14D7841F7BB32B905D'
 
+
+# Remove old version. Putting this in ChocolateyBeforeModify.ps1 does not work for some reason
+if (Test-Path $toolsDir) {
+  try {
+    Remove-Item "$($toolsDir)\Grayjay.Desktop-win-x64-v*" -Recurse -Force
+  }
+  catch {
+    Write-Warning "Failed to remove old version: $($_.Exception.Message)"
+  }
+}
+
+
 # Get package parameters
 $pp = Get-PackageParameters
+
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
@@ -15,12 +29,14 @@ $packageArgs = @{
   softwareName   = 'Grayjay*'
   checksum       = $checksum
   checksumType   = 'sha256'
-  
+ 
   silentArgs     = '/S'
   validExitCodes = @(0, 3010, 1641)
 }
 
+
 Install-ChocolateyZipPackage @packageArgs
+
 
 # Set full permissions on all extracted files to fix execution issues
 $extractedPath = "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
@@ -38,19 +54,20 @@ if (Test-Path $extractedPath) {
     Write-Warning "Failed to update permissions: $($_.Exception.Message)"
   }
 
+
   # Handle portable mode configuration
-  if ($pp.NoPortable) {
+  if (-Not $pp.Portable) {
     Write-Host "Disabling portable mode..."
-    
+   
     # Look for common portable marker files and remove them
     $portableMarkers = @(
       "portable",
-      "portable.txt", 
+      "portable.txt",
       ".portable",
       "Grayjay.portable",
       "PORTABLE"
     )
-    
+   
     foreach ($marker in $portableMarkers) {
       $markerPath = Join-Path $extractedPath $marker
       if (Test-Path $markerPath) {
@@ -61,6 +78,7 @@ if (Test-Path $extractedPath) {
     }
   }
 }
+
 
 # Create desktop shortcut unless NoShortcut parameter is specified
 if (-not $pp.NoShortcut) {
