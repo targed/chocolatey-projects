@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
   # Run daily at 1 AM UTC
-  schedule:
-    - cron: "0 1 * * *"
+  # schedule:
+  #   - cron: "0 1 * * *"
 
 jobs:
   update-packages:
