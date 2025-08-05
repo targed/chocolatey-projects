@@ -156,17 +156,17 @@ jobs:
             echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
 
-      - name: Check Chocolatey Status
-        if: env.NUPKG_FOUND == 'true' && env.PACKAGE_ID && env.PACKAGE_VERSION
-        id: check_choco_status
-        shell: pwsh
-        env:
-          PACKAGE_ID: ${{ env.PACKAGE_ID }}
-          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
-        run: |
-          $status = ./scripts/Check-ChocolateyStatus.ps1 -PackageId "$env:PACKAGE_ID" -PackageVersion "$env:PACKAGE_VERSION"
-          Write-Host "Check status for $env:PACKAGE_ID/$env:PACKAGE_VERSION is: $status"
-          echo "CHOCO_PUSH_STATUS=$status" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      # - name: Check Chocolatey Status
+      #   if: env.NUPKG_FOUND == 'true' && env.PACKAGE_ID && env.PACKAGE_VERSION
+      #   id: check_choco_status
+      #   shell: pwsh
+      #   env:
+      #     PACKAGE_ID: ${{ env.PACKAGE_ID }}
+      #     PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+      #   run: |
+      #     $status = ./scripts/Check-ChocolateyStatus.ps1 -PackageId "$env:PACKAGE_ID" -PackageVersion "$env:PACKAGE_VERSION"
+      #     Write-Host "Check status for $env:PACKAGE_ID/$env:PACKAGE_VERSION is: $status"
+      #     echo "CHOCO_PUSH_STATUS=$status" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       # - name: Push to Chocolatey
       #   if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
@@ -183,37 +183,37 @@ jobs:
       #         exit 1
       #     }
 
-      - name: Log Successful Push
-        if: steps.do_choco_push.outcome == 'success' && env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
-        shell: pwsh
-        env:
-          PACKAGE_ID: ${{ env.PACKAGE_ID }}
-          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
-        run: |
-          $logDir = "./logs"
-          $logFile = Join-Path $logDir "pushed-versions.log"
-          if (-not (Test-Path $logDir)) {
-            New-Item -ItemType Directory -Path $logDir | Out-Null
-          }
-          $pushedEntry = "$env:PACKAGE_ID/$env:PACKAGE_VERSION"
-          Add-Content -Path $logFile -Value $pushedEntry
-          Write-Host "Logged successful push of $pushedEntry to $logFile"
+      # - name: Log Successful Push
+      #   if: steps.do_choco_push.outcome == 'success' && env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+      #   shell: pwsh
+      #   env:
+      #     PACKAGE_ID: ${{ env.PACKAGE_ID }}
+      #     PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+      #   run: |
+      #     $logDir = "./logs"
+      #     $logFile = Join-Path $logDir "pushed-versions.log"
+      #     if (-not (Test-Path $logDir)) {
+      #       New-Item -ItemType Directory -Path $logDir | Out-Null
+      #     }
+      #     $pushedEntry = "$env:PACKAGE_ID/$env:PACKAGE_VERSION"
+      #     Add-Content -Path $logFile -Value $pushedEntry
+      #     Write-Host "Logged successful push of $pushedEntry to $logFile"
 
-      - name: Notify Skipped Push
-        if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'SKIP_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
-        shell: pwsh
-        env:
-          PACKAGE_ID: ${{ env.PACKAGE_ID }}
-          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
-        run: |
-          Write-Host "Push for $env:PACKAGE_ID version $env:PACKAGE_VERSION was skipped because it's already on Chocolatey.org or in the local push log."
+      # - name: Notify Skipped Push
+      #   if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'SKIP_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+      #   shell: pwsh
+      #   env:
+      #     PACKAGE_ID: ${{ env.PACKAGE_ID }}
+      #     PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+      #   run: |
+      #     Write-Host "Push for $env:PACKAGE_ID version $env:PACKAGE_VERSION was skipped because it's already on Chocolatey.org or in the local push log."
 
-      - name: Notify No Nupkg/Info Found
-        if: env.NUPKG_FOUND == 'false' || !env.PACKAGE_ID || !env.PACKAGE_VERSION
-        shell: pwsh
-        run: |
-          Write-Host "Push was skipped because no matching .nupkg file was found, or package ID/version was not determined."
-      # Commit changes back to the repository
+      # - name: Notify No Nupkg/Info Found
+      #   if: env.NUPKG_FOUND == 'false' || !env.PACKAGE_ID || !env.PACKAGE_VERSION
+      #   shell: pwsh
+      #   run: |
+      #     Write-Host "Push was skipped because no matching .nupkg file was found, or package ID/version was not determined."
+      # # Commit changes back to the repository
       - name: Commit changes
         if: success()
         run: |
