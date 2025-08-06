@@ -84,3 +84,8 @@ if (Test-Path $extractedPath) {
 if (-not $pp.NoShortcut) {
   Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
 }
+
+# Create start menu shortcut unless NoStartMenu parameter is specified
+if (-not $pp.NoStartMenu) {
+  Install-ChocolateyShortcut -shortcutFilePath "$env:PROGRAMDATA\Microsoft\Windows\Start Menu\Programs\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
+}

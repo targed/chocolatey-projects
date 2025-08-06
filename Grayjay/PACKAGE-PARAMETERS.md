@@ -4,15 +4,20 @@ This document describes the available package parameters for customizing the Gra
 
 ## Available Parameters
 
-### `/NoPortable`
-- **Description**: Disables portable mode by removing the portable marker file
-- **Effect**: Grayjay will store user data in `%APPDATA%\Grayjay` instead of the installation directory
-- **Use Case**: Recommended for standard installations where you want user data stored in the user profile
+### `/Portable`
+- **Description**: Enables portable mode by removing the portable marker file
+- **Effect**: Grayjay will store user data in the installation directory
+- **Use Case**: Recommended for modified installations where you want user data stored in the application directory
 
 ### `/NoShortcut`
 - **Description**: Prevents creation of a desktop shortcut
 - **Effect**: No desktop shortcut will be created during installation
 - **Use Case**: Useful for automated deployments or when you don't want desktop clutter
+
+### `/NoStartMenuShortcut`
+- **Description**: Prevents creation of a start menu shortcut
+- **Effect**: No start menu shortcut will be created during installation
+- **Use Case**: Useful for automated deployments or when you don't want start menu clutter
 
 ### `/RemoveAppData`
 - **Description**: Removes the user data directory during uninstallation of the not portable version. 

@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
         <id>grayjay</id>
-        <version>9</version>
+        <version>9.0.1</version>
         <title>Grayjay</title>
         <authors>Futo</authors>
         <owners>ltklionel</owners>
@@ -71,13 +71,14 @@ You can pass additional parameters to customize the installation:
 ### Only on installation:
 - `/Portable` - Enables portable mode by removing the portable marker file. This will cause Grayjay to store user data in the installation directory.
 - `/NoShortcut` - Prevents creation of a desktop shortcut.
+- `/NoStartMenuShortcut` - Prevents creation of a start menu shortcut.
 
 ### Only on uninstallation:
 - `/RemoveAppData` - Removes the user data in the `%APPDATA%\Grayjay` directory during uninstallation of the not portable version. 
 
 **Example Usage:**
 ```
-choco install grayjay --params="/Portable /NoShortcut"
+choco install grayjay --params="/Portable /NoShortcut /NoStartMenuShortcut"
 choco uninstall grayjay --params="/RemoveAppData"
 ```
 
