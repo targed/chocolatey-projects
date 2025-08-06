@@ -6,7 +6,7 @@ on:
 
   # Run daily at 1 AM UTC
   schedule:
-    - cron: "0 1 * * *"
+    - cron: "0 * * * *"
 
 jobs:
   update-packages:
