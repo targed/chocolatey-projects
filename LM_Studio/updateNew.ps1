@@ -7,7 +7,8 @@ $ParentPath = Split-Path -Parent $ScriptPath
 
 # Fetch the download link from the website
 $downloadPage = Invoke-WebRequest -Uri "https://lmstudio.ai"
-$downloadLink = ($downloadPage.Links | Where-Object { $_.href -like "*LM-Studio-*-x64.exe" }).href[0]
+$downloadLink = ($downloadPage.Links | Where-Object { $_.href -like "*LM-Studio-*-x64.exe" }).href
+Write-Output "Download URL: $downloadLink"
 
 # Create a hash table to store package information
 $packageInfo = @{
