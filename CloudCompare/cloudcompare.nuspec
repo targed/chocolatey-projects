@@ -13,7 +13,7 @@
     <licenseUrl>https://www.cloudcompare.org/doc/wiki/index.php/License</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>cloudcompare 3D point cloud processing</tags>
-    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/cloudcompare</packageSourceUrl>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/CloudCompare</packageSourceUrl>
     <releaseNotes>https://www.cloudcompare.org/release/notes/</releaseNotes>
     <summary>CloudCompare 3D Point Cloud Processing Software</summary>
     <description>
