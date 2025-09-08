@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>cloudcompare</id>
+    <version>2.13.2</version>
+    <title>CloudCompare</title>
+    <authors>CloudCompare Team</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/CloudCompare/logo.png</iconUrl>
+    <copyright>Copyright 2025 CloudCompare</copyright>
+    <projectUrl>https://www.cloudcompare.org/</projectUrl>
+    <licenseUrl>https://www.cloudcompare.org/doc/wiki/index.php/License</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>cloudcompare 3D point cloud processing</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/cloudcompare</packageSourceUrl>
+    <releaseNotes>https://www.cloudcompare.org/release/notes/</releaseNotes>
+    <summary>CloudCompare 3D Point Cloud Processing Software</summary>
+    <description>
+
+![CloudCompare Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/CloudCompare/screenshot.jpg)
+![CloudCompare Screenshot1](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/CloudCompare/screenshot1.jpg)
+
+CloudCompare is a 3D point cloud and mesh processing software. It is designed to handle large datasets and offers a variety of tools for editing, analyzing, and visualizing 3D data. CloudCompare supports various file formats, including LAS, PLY, OBJ, and more.
+
+</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

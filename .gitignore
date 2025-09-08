@@ -12,6 +12,10 @@
 *.vsix
 
 # MISC
-*.exe
+# *.exe
 *.dll
 /actions-runner
+/Perplexity
+perplexity-test.exe
+test.ps1
+/.kiro

@@ -1,3 +1,5 @@
 {
-  "pros.showInstallOnStartup": false
+  "pros.showInstallOnStartup": false,
+  "editor.tabCompletion": "on",
+  "diffEditor.codeLens": true
 }
