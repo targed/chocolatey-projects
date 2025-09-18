@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>grass</id>
+    <version>8.4.1</version>
+    <title>GRASS GIS</title>
+    <authors>GRASS Development Team</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/GRASS/logo.png</iconUrl>
+    <copyright>Copyright 2025 GRASS GIS</copyright>
+    <projectUrl>https://grass.osgeo.org/</projectUrl>
+    <licenseUrl>https://grass.osgeo.org/about/license/</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>grass gis geospatial</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/GRASS</packageSourceUrl>
+    <releaseNotes>https://grass.osgeo.org/grass84/binary/mswindows/native/WinGRASS-8.4.1-1-Setup.exe</releaseNotes>
+    <summary>Bringing advanced geospatial technologies to the world</summary>
+    <description>
+
+![GRASS GIS Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/GRASS/screenshot.jpg)
+![GRASS GIS Screenshot1](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/GRASS/screenshot1.jpg)
+
+GRASS GIS is a powerful open-source GIS software suite used for geospatial data management and analysis, image processing, and spatial modeling. It offers a wide range of tools for working with raster and vector data, making it suitable for various applications in environmental science, geography, and engineering.
+
+</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>googlewindowsapp</id>
+    <version>0.1.12.0</version>
+    <title>GoogleWindowsApp</title>
+    <authors>Google</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/GoogleWindowsApp/logo.png</iconUrl>
+    <copyright>Copyright 2025 Google</copyright>
+    <projectUrl>https://labs.google.com/search/experiment/40</projectUrl>
+    <licenseUrl>https://policies.google.com/terms</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>googleapp windows search</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/GoogleWindowsApp</packageSourceUrl>
+    <releaseNotes>https://blog.google/products/search/google-app-windows-labs/</releaseNotes>
+    <summary>Google app for Windows helps you find what you need, faster.</summary>
+    <description>
+
+![GoogleApp Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/GoogleWindowsApp/screenshot.jpg)
+![GoogleApp Screenshot1](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/GoogleWindowsApp/screenshot1.jpg)
+
+Search anything with the Google app. Built for Windows, made by Google. Quickly access this app with a keyboard shortcut (Alt + Space) to find what you need—information from the web, Google Drive files, installed apps, and files saved on your computer. With Google Lens built into the app, you can select and search anything on your screen at any time, making it easy to translate images or text, get help from AI Mode to solve homework problems, and more.
+
+</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
