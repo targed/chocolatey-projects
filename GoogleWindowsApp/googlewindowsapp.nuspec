@@ -12,7 +12,7 @@
     <projectUrl>https://labs.google.com/search/experiment/40</projectUrl>
     <licenseUrl>https://policies.google.com/terms</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <tags>googleapp windows search</tags>
+    <tags>googleapp google windows search</tags>
     <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/GoogleWindowsApp</packageSourceUrl>
     <releaseNotes>https://blog.google/products/search/google-app-windows-labs/</releaseNotes>
     <summary>Google app for Windows helps you find what you need, faster.</summary>

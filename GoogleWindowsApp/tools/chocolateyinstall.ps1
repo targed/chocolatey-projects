@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Continue'
+$VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 
@@ -11,27 +12,8 @@ $packageArgs = @{
   checksum       = '93E5F85EADA6E8E52950CAAF45BAB5BF5B6C5E529EE4D80DB0F2EB3AD60B0065'
   checksumType   = 'sha256'
 
-  silentArgs     = '/SILENT /NORESTART'
+  silentArgs     = '/SILENT'
   validExitCodes = @(0, 3010, 1641)
 }
 
 Install-ChocolateyPackage @packageArgs
-
-# $timeout = 60
-# $timer = [System.Diagnostics.Stopwatch]::StartNew()
-
-# Write-Host "Waiting for Google Windows App process to start..."
-# while ($timer.Elapsed.TotalSeconds -lt $timeout) {
-#   $process = Get-Process -Name "Google" -ErrorAction SilentlyContinue
-#   if ($process) {
-#     Start-Sleep -Seconds 10  # Give it a few seconds to fully initialize
-#     Write-Host "Terminating Google Windows App process..."
-#     taskkill /F /IM "google.exe" /T
-#     break
-#   }
-#   Start-Sleep -Seconds 1
-# }
-
-# if ($timer.Elapsed.TotalSeconds -ge $timeout) {
-#   Write-Warning "Timeout waiting for Google Windows App process"
-# }
