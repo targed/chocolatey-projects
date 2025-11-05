@@ -6,9 +6,9 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = 'https://downloads.cursor.com/production/7a31bffd467aa2d9adfda69076eb924e9062cb27/win32/x64/user-setup/CursorUserSetup-x64-2.0.54.exe'
+  url            = 'https://downloads.cursor.com/production/c6d93c13f57509f77eb65783b28e75a857b74c03/win32/x64/user-setup/CursorUserSetup-x64-2.0.60.exe'
   softwareName   = 'Cursor*'
-  checksum       = '8E901F1CF2500A3B4E33E3F8743E2A99226C182D24E7402D62C63D0F476CA1E9'
+  checksum       = '54B9A126CCC04B19FFDF404B93C57544FFCCD5FC44E8F124ADD8DB259C3A4F01'
   checksumType   = 'sha256'
   
   silentArgs     = '/VERYSILENT'
