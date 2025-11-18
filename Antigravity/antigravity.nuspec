@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+    <metadata>
+        <id>antigravity</id>
+        <version>1.11.2</version>
+        <title>Antigravity</title>
+        <authors>Google</authors>
+        <owners>ltklionel</owners>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Antigravity/logo.png</iconUrl>
+        <copyright>Copyright (c) 2025-2026 Google LLC/</copyright>
+        <projectUrl>https://antigravity.google/</projectUrl>
+        <licenseUrl>https://antigravity.google/terms</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>IDE AI vscode Google Gemini</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/Antigravity</packageSourceUrl>
+        <releaseNotes>https://antigravity.google/changelog/</releaseNotes>
+        <summary>Google Antigravity, a new agentic development platform.</summary>
+        <description>![Antigravity Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Antigravity/screenshot.png)
+        
+## Summary
+
+Google Antigravity is an AI-powered development platform that reimagines the traditional IDE for an "agent-first" future. It's powered by Google's Gemini 3.
+
+## Core Features:
+
+**Dual Interface System:**
+- **Editor View**: Traditional AI-powered IDE with tab completions, inline commands, and an agent in the side panel
+- **Manager View**: Mission control interface for spawning and orchestrating multiple agents across workspaces simultaneously, enabling asynchronous work
+
+## Key Tenets:
+
+1. **Trust**: Agents provide task-level context through "Artifacts" (task lists, implementation plans, walkthroughs, screenshots, browser recordings) rather than just showing raw tool calls or final code
+2. **Autonomy**: Agents can work across multiple surfaces simultaneously (code editor, terminal, browser) without constant supervision, operating more independently than traditional coding assistants
+3. **Feedback**: Google-doc-style commenting system on all artifacts and outputs, allowing users to provide feedback that's automatically incorporated without stopping the agent's work
+4. **Self-improvement**: Built-in knowledge management system where agents learn from past work and feedback, building a knowledge base over time
+
+## Key Capabilities:
+- Browser control for testing and verification
+- Asynchronous interaction patterns (agents can work in background)
+- Multi-workspace parallel operation
+- Automatic verification of agent work
+- Local operation for easier iteration
+
+</description>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
+</package>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+    <metadata>
+        <id>cursoride</id>
+        <version>1.6.27</version>
+        <title>Cursor</title>
+        <authors>getcursor</authors>
+        <owners>ltklionel, publicfacingusername</owners>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/logo.png</iconUrl>
+        <copyright>Copyright (c) 2023-2024 anysphere.inc/</copyright>
+        <projectUrl>https://github.com/getcursor/cursor</projectUrl>
+        <licenseUrl>https://web.archive.org/web/20230324042038/https://github.com/getcursor/cursor/blob/main/LICENSE</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>IDE AI vscode</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/Cursor</packageSourceUrl>
+        <releaseNotes>https://changelog.cursor.sh/</releaseNotes>
+        <summary>Cursor is an AI-first Code Editor</summary>
+        <description>![Cursor Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/screenshot.png)
+        
+## Summary
+
+Cursor is an AI-powered code editor that integrates advanced features to enhance software development efficiency. 
+It's built on top of VSCode, allowing users to easily migrate their favorite extensions, themes, and keybindings. 
+Cursor leverages OpenAI's GPT models, including GPT-4, to provide real-time coding assistance, bug detection, and fixes, as well as code generation capabilities from simple instructions
+
+## Features
+
+- **Command K**: Enables editing and writing code with AI assistance. Users can select code to edit or generate new code by typing Command K without selecting anything.
+- **Copilot++**: A native autocomplete feature that suggests mid-line completions and entire diffs, trained to predict the next edit in a codebase.
+- **Chat**: Allows users to converse with an AI that understands their codebase, offering tailored advice and solutions.
+- **@ Symbols and Codebase Answers**: Facilitate easy navigation and querying of the codebase for information or code generation.
+- **Docs and Auto-Debug**: Improve understanding of third-party libraries and offer automatic debugging solutions.
+- **Fix Lints and Terminal Command K**: Help quickly fix lint errors and write terminal commands in plain English.
+- **Vision and Apply From Chat**: Support for image prompts and applying code suggestions from chat directly into the editor.
+- **Rules for AI**: Lets users set style guidelines and common gotchas for the AI to consider.
+
+</description>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
+</package>
