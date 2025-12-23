@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
         <id>tumblthree</id>
-        <version>2.19.3</version>
+        <version>2.19.4</version>
         <title>TumblThree</title>
         <authors>thomas694, johanneszab, elipriaulx, arrowsmith001, amigre38, yfdyh000</authors>
         <owners>ltklionel</owners>
