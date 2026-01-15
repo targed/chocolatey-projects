@@ -11,7 +11,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Create a hash table to store package information
 $packageInfo = @{
     PackageName = "Antigravity"
-    FileUrl     = "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.11.2-6251250307170304/windows-x64/Antigravity.exe"
+    FileUrl     = "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.14.2-6046590149459968/windows-x64/Antigravity.exe"
     Alert       = $false
 }
 
