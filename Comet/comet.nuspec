@@ -2,12 +2,12 @@
 <!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
-        <id>cursoride</id>
+        <id>comet</id>
         <version>1.6.27</version>
-        <title>Cursor</title>
+        <title>Comet</title>
         <authors>getcursor</authors>
         <owners>ltklionel, publicfacingusername</owners>
-        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/logo.png</iconUrl>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Comet/logo.png</iconUrl>
         <copyright>Copyright (c) 2023-2024 anysphere.inc/</copyright>
         <projectUrl>https://github.com/getcursor/cursor</projectUrl>
         <licenseUrl>https://web.archive.org/web/20230324042038/https://github.com/getcursor/cursor/blob/main/LICENSE</licenseUrl>

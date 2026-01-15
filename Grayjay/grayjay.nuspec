@@ -3,12 +3,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
         <id>grayjay</id>
-        <version>9.0.1</version>
+        <version>13.0.0</version>
         <title>Grayjay</title>
         <authors>Futo</authors>
         <owners>ltklionel</owners>
         <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Grayjay/logo.png</iconUrl>
-        <copyright>Copyright © 2025 FUTO. All rights reserved.</copyright>
+        <copyright>Copyright © 2026 FUTO. All rights reserved.</copyright>
         <projectUrl>https://gitlab.futo.org/videostreaming/Grayjay.Desktop</projectUrl>
         <licenseUrl>https://gitlab.futo.org/videostreaming/Grayjay.Desktop/-/raw/master/LICENSE.md?ref_type=heads</licenseUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>

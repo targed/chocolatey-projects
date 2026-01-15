@@ -3,7 +3,7 @@ $VerbosePreference = 'SilentlyContinue'
 
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$checksum = '5E89759E0F5BB6CF5FF621EDFE8A564499AAE2E904F88D14D7841F7BB32B905D'
+$checksum = 'FED3C2259B157AFFB6CD69E0069F8AF92659519CEC69840863D049AB09D5E369'
 
 
 # Remove old version. Putting this in ChocolateyBeforeModify.ps1 does not work for some reason
@@ -25,7 +25,7 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'EXE'
-  url            = 'https://updater.grayjay.app/Apps/Grayjay.Desktop/9/Grayjay.Desktop-win-x64-v9.zip'
+  url            = 'https://updater.grayjay.app/Apps/Grayjay.Desktop/13/Grayjay.Desktop-win-x64-v13.zip'
   softwareName   = 'Grayjay*'
   checksum       = $checksum
   checksumType   = 'sha256'
@@ -39,7 +39,7 @@ Install-ChocolateyZipPackage @packageArgs
 
 
 # Set full permissions on all extracted files to fix execution issues
-$extractedPath = "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
+$extractedPath = "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v13"
 if (Test-Path $extractedPath) {
   Write-Host "Setting full permissions on Grayjay files..."
   try {
@@ -82,10 +82,10 @@ if (Test-Path $extractedPath) {
 
 # Create desktop shortcut unless NoShortcut parameter is specified
 if (-not $pp.NoShortcut) {
-  Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
+  Install-ChocolateyShortcut -shortcutFilePath "$env:USERPROFILE\Desktop\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v13\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v13"
 }
 
 # Create start menu shortcut unless NoStartMenuShortcut parameter is specified
 if (-not $pp.NoStartMenuShortcut) {
-  Install-ChocolateyShortcut -shortcutFilePath "$env:PROGRAMDATA\Microsoft\Windows\Start Menu\Programs\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v9"
+  Install-ChocolateyShortcut -shortcutFilePath "$env:PROGRAMDATA\Microsoft\Windows\Start Menu\Programs\Grayjay.lnk" -targetPath "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v13\Grayjay.exe" -workingDirectory "$($packageArgs.unzipLocation)\Grayjay.Desktop-win-x64-v13"
 }
