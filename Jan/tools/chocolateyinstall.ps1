@@ -2,9 +2,9 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$version = "0.7.6"
+$version = "0.7.7"
 $url = "https://github.com/menloresearch/jan/releases/download/v${version}/Jan_${version}_x64-setup.exe"
-$checksum = "7D4191FE747E5756451BC0A19708F708CE2F2711B807BB4B292CFEECCF377F08"
+$checksum = "97D6DFA1D0196456B8B5B52DF62FBEBD1F5701A2766A776524EE140E8D3452C5"
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
