@@ -52,8 +52,12 @@ jobs:
       # Run the update script
       - name: Run package update script
         if: success()
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
         run: |
           Unblock-File -Path .\UpdateAll.ps1
+          # Unblock the Antigravity fetch script
+          Unblock-File -Path .\Antigravity\fetchAG.ps1
           .\UpdateAll.ps1
 
       # Test the packages

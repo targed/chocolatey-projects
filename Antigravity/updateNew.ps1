@@ -5,13 +5,23 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
-# $downloadPage = Invoke-WebRequest -Uri "https://www.cursor.com/api/download?platform=win32-x64-user&releaseTrack=stable" | ConvertFrom-Json
-# $jsonObject = ($downloadPage.downloadUrl)
+# Fetch the latest Antigravity download URL using ScraperAPI
+Write-Host "Fetching latest Antigravity download URL..."
+$fetchScript = Join-Path $ScriptPath "fetchAG.ps1"
+$downloadUrl = & $fetchScript
+
+if (-not $downloadUrl) {
+    Write-Error "Failed to fetch Antigravity download URL. Using fallback URL."
+    # Fallback to a known URL in case scraping fails
+    $downloadUrl = "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.18.4-5780041996042240/windows-x64/Antigravity.exe"
+}
+
+Write-Host "`nUsing download URL: $downloadUrl`n"
 
 # Create a hash table to store package information
 $packageInfo = @{
     PackageName = "Antigravity"
-    FileUrl     = "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.14.2-6046590149459968/windows-x64/Antigravity.exe"
+    FileUrl     = $downloadUrl
     Alert       = $false
 }
 
