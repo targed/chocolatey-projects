@@ -5,13 +5,13 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
-# $downloadPage = Invoke-WebRequest -Uri "https://download.whispertyping.com/whispertypinginstaller.exe" | ConvertFrom-Json
-# $jsonObject = ($downloadPage.downloadUrl)
+$downloadPage = Invoke-WebRequest -Uri "https://api.whispertyping.com/update?channel=stable" | ConvertFrom-Json
+$jsonObject = ($downloadPage.installer)
 
 # Create a hash table to store package information
 $packageInfo = @{
     PackageName = "WhisperTyping"
-    FileUrl     = "https://download.whispertyping.com/whispertypinginstaller.exe"
+    FileUrl     = $jsonObject
     Alert       = $false
 }
 

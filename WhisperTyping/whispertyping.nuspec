@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
     <metadata>
         <id>whispertyping</id>
-        <version>17.0.34511</version>
+        <version>4.4.1</version>
         <title>WhisperTyping</title>
         <authors>WhisperTyping</authors>
         <owners>ltklionel</owners>
@@ -20,7 +20,7 @@
 
 ## Summary
 
-### Speaking is 3x faster than typing
+Speaking is 3x faster than typing
 But that does not include corrections afterwards.
 That's why we created WhisperTyping,
 ultra-accurate dictation software that actually saves time.
