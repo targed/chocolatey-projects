@@ -6,9 +6,9 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = 'https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.19.6-6514342219874304/windows-x64/Antigravity.exe'
+  url            = 'https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.20.4-5535391095848960/windows-x64/Antigravity.exe'
   softwareName   = 'Antigravity*'
-  checksum       = '013E634999C7B8FB109026CC7EFF40C80F3C158EFAA6161016C720659FB2A61E'
+  checksum       = '7F97F3353B9B873E5329FB80A5091A1C67C492D744C5CA5C1B47230D97B5864D'
   checksumType   = 'sha256'
   
   silentArgs     = '/S /VERYSILENT /SUPPRESSMSGBOXES /norestart /quiet /qn /norestart /l*v /SP- $locale'
