@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+    <metadata>
+        <id>furmark2</id>
+        <version>2.10.2</version>
+        <title>FurMark 2</title>
+        <authors>Geeks3D</authors>
+        <owners>publicfacingusername</owners>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/FurMark2/logo.png</iconUrl>
+        <projectUrl>https://www.geeks3d.com/furmark/</projectUrl>
+        <licenseUrl>https://www.geeks3d.com/furmark/</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>furmark furmark2 gpu gpu-stress-test gpu-burner opengl vulkan graphics benchmark</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/FurMark2</packageSourceUrl>
+        <releaseNotes>https://www.geeks3d.com/furmark/changelog/</releaseNotes>
+        <summary>FurMark 2 is a lightweight and very intensive graphics card / GPU stress test. It's also a handy OpenGL and Vulkan graphics benchmark.</summary>
+        <description>![FurMark 2 Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/FurMark2/screenshot.jpg)
+
+## Summary
+
+FurMark 2 (successor of the venerable FurMark 1), is a lightweight and very intensive graphics card / GPU stress test. It's also a handy OpenGL and Vulkan graphics benchmark.
+FurMark is available on Windows and Linux (x86-64 and arm64) platforms.
+
+FurMark 2 is powered by the GeeXLab engine:
+https://www.geeks3d.com/geexlab/
+        </description>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
+</package>

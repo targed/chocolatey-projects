@@ -10,6 +10,7 @@ Set-Location $scriptPath
 .\ChatGPT_Unofficial\updateNew.ps1
 .\Claude\updateNew.ps1
 .\Cursor\updateNew.ps1
+.\FurMark2\updateNew.ps1
 .\LM_Studio\updateNew.ps1
 .\NoFWL\updateNew.ps1
 .\TumblThree\updateNew.ps1
