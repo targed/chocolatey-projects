@@ -35,6 +35,14 @@ Cursor leverages OpenAI's GPT models, including GPT-4, to provide real-time codi
 - **Vision and Apply From Chat**: Support for image prompts and applying code suggestions from chat directly into the editor.
 - **Rules for AI**: Lets users set style guidelines and common gotchas for the AI to consider.
 
+### Package Parameters
+
+The following package parameters can be set:
+
+ * `/System` - System-wide install. Default without this option is to install only for the current user.
+
+To pass parameters, use `--params "''"` (e.g. `choco install cursoride --params "'/System'"`).
+
 </description>
     </metadata>
     <files>
