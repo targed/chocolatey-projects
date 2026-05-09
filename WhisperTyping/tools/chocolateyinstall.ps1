@@ -6,9 +6,9 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = 'https://download.whispertyping.com/wt/WhisperTypingInstaller-4.4.1.exe'
+  url            = 'https://download.whispertyping.com/wt/WhisperTypingInstaller-4.5.8.exe'
   softwareName   = 'WhisperTyping*'
-  checksum       = 'D4AA765DAF26095DA3A5EA87778CAD81526EEDA9AF8F089F1BA6D4C09A22641F'
+  checksum       = 'EADDF445791599CFEE306D4834AFAC195A1F219FECCFBAE5F217830007CF39B2'
   checksumType   = 'sha256'
   
   silentArgs     = '/qn'
