@@ -9,7 +9,7 @@ if (-not $ApiKey) {
 
 # Build the ScraperAPI URL
 $TargetUrl = "https://antigravity.google/download"
-$ScraperUrl = "http://api.scraperapi.com?api_key=$ApiKey&url=$TargetUrl&render=true&wait_for=5000"
+$ScraperUrl = "https://api.scraperapi.com?api_key=$ApiKey&url=$TargetUrl&render=true&wait_for=5000"
 
 Write-Host "Fetching URL: $ScraperUrl"
 

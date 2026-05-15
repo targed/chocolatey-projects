@@ -7,7 +7,7 @@ API_KEY="${SCRAPERAPI_KEY:-your_scraperapi_key_here}"
 TARGET_URL="https://antigravity.google/download"
 # Enable JavaScript rendering with render=true
 # Add wait_for=5000 to wait 5 seconds for JS to execute (in milliseconds)
-SCRAPER_URL="http://api.scraperapi.com?api_key=${API_KEY}&url=${TARGET_URL}&render=true&wait_for=5000"
+SCRAPER_URL="https://api.scraperapi.com?api_key=${API_KEY}&url=${TARGET_URL}&render=true&wait_for=5000"
 
 echo "Fetching URL: ${SCRAPER_URL}"
 
