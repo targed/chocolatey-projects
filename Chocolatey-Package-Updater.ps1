@@ -791,7 +791,7 @@ function UpdateChocolateyPackage {
         )
 
         $versionParts = $VersionNumber -split '\.'
-        $cleanedVersionParts = $versionParts | ForEach-Object { [int]$_ }
+        $cleanedVersionParts = foreach ($part in $versionParts) { [int]$part }
         $cleanedVersion = ($cleanedVersionParts -join '.')
 
         return $cleanedVersion
