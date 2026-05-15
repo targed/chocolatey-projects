@@ -36,7 +36,7 @@ while ($continueSearching -and $majorVersion -lt 10) {
     $mostUpToDateUrl = "https://www.cloudcompare.org/release/CloudCompare_v${versionNumber}_setup_x64.exe"
     
     try {
-        $response = Invoke-WebRequest -Uri $mostUpToDateUrl -Method Head -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $mostUpToDateUrl -UseBasicParsing -Method Head -ErrorAction Stop
         Write-Host "$mostUpToDateUrl is valid and reachable (Status Code: $($response.StatusCode))."
         
         $lastWorkingVersion = $versionNumber

@@ -5,7 +5,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
-# $downloadPage = Invoke-WebRequest -Uri "https://www.perplexity.ai/rest/browser/download?channel=stable&platform=win_x64&mini=1" | ConvertFrom-Json
+# $downloadPage = Invoke-WebRequest -Uri "https://www.perplexity.ai/rest/browser/download?channel=stable&platform=win_x64&mini=1" -UseBasicParsing | ConvertFrom-Json
 # $jsonObject = ($downloadPage.downloadUrl)
 
 # Create a hash table to store package information

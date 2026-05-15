@@ -7,7 +7,7 @@ $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ParentPath = Split-Path -Parent $ScriptPath
 
 # How to get the version and download URL from JSON endpoint
-$downloadPage = Invoke-WebRequest -Uri "https://www.cursor.com/api/download?platform=win32-x64-user&releaseTrack=stable" | ConvertFrom-Json
+$downloadPage = Invoke-WebRequest -Uri "https://www.cursor.com/api/download?platform=win32-x64-user&releaseTrack=stable" -UseBasicParsing | ConvertFrom-Json
 $jsonObject = ($downloadPage.downloadUrl)
 
 # Import the UpdateChocolateyPackage function

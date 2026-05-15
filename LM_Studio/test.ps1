@@ -1,4 +1,4 @@
-$downloadPage = Invoke-WebRequest -Uri "https://lmstudio.ai/download"
+$downloadPage = Invoke-WebRequest -Uri "https://lmstudio.ai/download" -UseBasicParsing
 $downloadUrl = $downloadPage.Links | 
     Where-Object { $_.href -like "*LM-Studio*x64.exe" } | 
     Select-Object -ExpandProperty href

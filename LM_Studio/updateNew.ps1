@@ -6,7 +6,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
 # Fetch the download link from the website
-$downloadPage = Invoke-WebRequest -Uri "https://lmstudio.ai"
+$downloadPage = Invoke-WebRequest -Uri "https://lmstudio.ai" -UseBasicParsing
 $downloadLink = ($downloadPage.Links | Where-Object { $_.href -like "*LM-Studio-*-x64.exe" }).href
 Write-Output "Download URL: $downloadLink"
 

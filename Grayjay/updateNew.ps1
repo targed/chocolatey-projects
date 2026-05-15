@@ -17,7 +17,7 @@ try {
     do {
         $versionNumber++
         $mostUpToDateUrl = "https://updater.grayjay.app/Apps/Grayjay.Desktop/${versionNumber}/Grayjay.Desktop-win-x64-v${versionNumber}.zip"
-        $response = Invoke-WebRequest -Uri $mostUpToDateUrl -Method Head -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $mostUpToDateUrl -UseBasicParsing -Method Head -ErrorAction Stop
         Write-Host "$mostUpToDateUrl is valid and reachable (Status Code: $($response.StatusCode))."
 
 

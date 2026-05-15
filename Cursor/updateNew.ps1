@@ -6,11 +6,11 @@ $ParentPath = Split-Path -Parent $ScriptPath
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
 # Get User Installer URL
-$downloadPageUser = Invoke-WebRequest -Uri "https://www.cursor.com/api/download?platform=win32-x64-user&releaseTrack=stable" | ConvertFrom-Json
+$downloadPageUser = Invoke-WebRequest -Uri "https://www.cursor.com/api/download?platform=win32-x64-user&releaseTrack=stable" -UseBasicParsing | ConvertFrom-Json
 $urlUser = ($downloadPageUser.downloadUrl)
 
 # Get System Installer URL
-$downloadPageSystem = Invoke-WebRequest -Uri "https://cursor.com/api/download?platform=win32-x64&releaseTrack=stable" | ConvertFrom-Json
+$downloadPageSystem = Invoke-WebRequest -Uri "https://cursor.com/api/download?platform=win32-x64&releaseTrack=stable" -UseBasicParsing | ConvertFrom-Json
 $urlSystem = ($downloadPageSystem.downloadUrl)
 
 # Create a hash table to store package information

@@ -5,7 +5,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
-$downloadPage = Invoke-WebRequest -Uri "https://api.whispertyping.com/update?channel=stable" | ConvertFrom-Json
+$downloadPage = Invoke-WebRequest -Uri "https://api.whispertyping.com/update?channel=stable" -UseBasicParsing | ConvertFrom-Json
 $jsonObject = ($downloadPage.installer)
 
 # Create a hash table to store package information
