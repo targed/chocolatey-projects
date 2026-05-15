@@ -6,7 +6,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
 # Fetch the download link from the website
-$downloadPage = Invoke-WebRequest -Uri "https://windsurf-stable.codeium.com/api/update/win32-x64-user/stable/latesti" | ConvertFrom-Json
+$downloadPage = Invoke-WebRequest -Uri "https://windsurf-stable.codeium.com/api/update/win32-x64-user/stable/latesti" -UseBasicParsing | ConvertFrom-Json
 $jsonObject = ($downloadPage.url)
 
 # Create a hash table to store package information

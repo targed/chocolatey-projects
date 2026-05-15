@@ -699,7 +699,7 @@ function UpdateChocolateyPackage {
         }
         else {
             Write-Debug "Using Invoke-WebRequest to download the file."
-            Invoke-WebRequest -Uri $url -OutFile $tempPath
+            Invoke-WebRequest -Uri $url -OutFile $tempPath -UseBasicParsing
         }
 
         # Verify the file exists
@@ -828,7 +828,7 @@ function UpdateChocolateyPackage {
             Write-Debug "Scraping URL: $ScrapeUrl"
             Write-Debug "Scrape pattern: $ScrapePattern"
 
-            $page = Invoke-WebRequest -Uri $ScrapeUrl
+            $page = Invoke-WebRequest -Uri $ScrapeUrl -UseBasicParsing
             if ($page.Content -match $ScrapePattern -and $matches[0] -match '^\d+(\.\d+){1,3}$') {
                 Write-Output "Scraped version: $($matches[0])"
                 $ForceVersionNumber = $matches[0]
@@ -843,7 +843,7 @@ function UpdateChocolateyPackage {
             Write-Debug "Scraping URL: $ScrapeUrl"
             Write-Debug "Download URL scrape pattern: $DownloadUrlScrapePattern"
 
-            $page = Invoke-WebRequest -Uri $ScrapeUrl
+            $page = Invoke-WebRequest -Uri $ScrapeUrl -UseBasicParsing
             if ($page.Content -match $DownloadUrlScrapePattern) {
                 Write-Output "Scraped download URL: $($matches[0])"
                 $FileUrl = $matches[0]
@@ -857,7 +857,7 @@ function UpdateChocolateyPackage {
                 Write-Debug "Scraping URL: $ScrapeUrl"
                 Write-Debug "Download URL scrape pattern (64-bit): $DownloadUrlScrapePattern"
 
-                $page = Invoke-WebRequest -Uri $ScrapeUrl
+                $page = Invoke-WebRequest -Uri $ScrapeUrl -UseBasicParsing
                 if ($page.Content -match $DownloadUrlScrapePattern64) {
                     Write-Output "Scraped 64-bit download URL: $($matches[0])"
                     $FileUrl64 = $matches[0]

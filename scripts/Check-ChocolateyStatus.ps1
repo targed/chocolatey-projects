@@ -21,7 +21,7 @@ if (-not (Test-Path $logDir)) {
 # Write-Host "Checking Chocolatey URL: $url"
 
 try {
-    $response = Invoke-WebRequest -Uri $url -Method Get -TimeoutSec 20 # Added timeout
+    $response = Invoke-WebRequest -Uri $url -UseBasicParsing -Method Get -TimeoutSec 20 # Added timeout
     
     # Check for HTTP status codes that indicate the page exists
     # 200 (OK), 201 (Created), 202 (Accepted) are good indicators.
