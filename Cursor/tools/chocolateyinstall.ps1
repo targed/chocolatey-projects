@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 
@@ -11,10 +11,10 @@ $pp = Get-PackageParameters
 # We don't pass all four to Install-ChocolateyPackage directly because they are both x64, 
 # and it would prioritize url64bit incorrectly if the user wants the User installer.
 $updaterDummyVariables = @{
-  url        = 'https://downloads.cursor.com/production/e48ee6102a199492b0c9964699bf011886708ba3/win32/x64/user-setup/CursorUserSetup-x64-3.7.27.exe'
-  checksum   = '2BF9811C7158E7A8643D5A1BB04B4F36599F9909E1974A13B80FBFEA2BEBC83A'
-  url64bit   = 'https://downloads.cursor.com/production/e48ee6102a199492b0c9964699bf011886708ba3/win32/x64/system-setup/CursorSetup-x64-3.7.27.exe'
-  checksum64 = '9ED8F75379BAF84B75A6539CB1296E5C7C3386C41F7F50FEE8FE310B6E5EBE7D'
+  url        = 'https://downloads.cursor.com/production/776d1f9d76df50a4e0aeca61819a88e7c1b861e2/win32/x64/user-setup/CursorUserSetup-x64-3.7.36.exe'
+  checksum   = 'DA8FD2A304CD6A56BCAF36C6B053C10419863A09A70A98198F3E94B898A4D89E'
+  url64bit   = 'https://downloads.cursor.com/production/776d1f9d76df50a4e0aeca61819a88e7c1b861e2/win32/x64/system-setup/CursorSetup-x64-3.7.36.exe'
+  checksum64 = '0E96ADEE52FB6ECC693A461984FF51DB3A43705F653E950B38C86BBAA05ECB49'
 }
 
 if ($pp.System) {
