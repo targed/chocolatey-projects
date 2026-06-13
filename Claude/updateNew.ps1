@@ -6,15 +6,33 @@ $ErrorActionPreference = 'Stop'
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ParentPath = Split-Path -Parent $ScriptPath
 
+# Resolve the latest download URL from the redirect endpoint using curl.exe to bypass .NET TLS fingerprinting blocks
+$redirectUrl = "https://claude.ai/api/desktop/win32/x64/exe/latest/redirect"
+Write-Host "Resolving redirect for Claude..."
+$userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+$headers = curl.exe -i -A $userAgent -s $redirectUrl
+$fileUrl = $null
+foreach ($line in $headers) {
+    if ($line -match '^location:\s*(.+)$') {
+        $fileUrl = $matches[1].Trim()
+        break
+    }
+}
+
+if (-not $fileUrl) {
+    throw "Failed to resolve redirect URL for Claude."
+}
+
+Write-Host "Resolved URL: $fileUrl"
+
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
 # Create a hash table to store package information
 $packageInfo = @{
     PackageName = "claude"
-    # FileUrl     = "https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe"
-    # FileUrl     = "https://claude.ai/api/desktop/win32/x64/exe/latest/redirect"
-    FileUrl     = "https://downloads.claude.ai/releases/win32/x64/1.1.1520/Claude-48ced7a78a74c4c1b03d1dab181d1b0dc21d8fc8.exe"
+    FileUrl     = $fileUrl
     Alert       = $false
 }
 

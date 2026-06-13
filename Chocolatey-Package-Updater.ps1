@@ -227,7 +227,7 @@ function UpdateFileContent {
     Write-Debug "Working with file: $absolutePath"
 
     if (Test-Path $absolutePath) {
-        $fileContent = Get-Content $absolutePath -Raw
+        $fileContent = Get-Content $absolutePath -Raw -Encoding UTF8
 
         if ($fileContent -match $Pattern) {
             Write-Debug "Pattern found in file"
@@ -239,8 +239,8 @@ function UpdateFileContent {
             }
             else {
                 $updatedContent = $fileContent -replace $Pattern, $Replacement
-                [System.IO.File]::WriteAllText($absolutePath, $updatedContent)
-                $verifyContent = Get-Content $absolutePath -Raw
+                [System.IO.File]::WriteAllText($absolutePath, $updatedContent, [System.Text.Encoding]::UTF8)
+                $verifyContent = Get-Content $absolutePath -Raw -Encoding UTF8
 
                 # Escape special characters in the replacement string for regex matching
                 $escapedReplacement = [regex]::Escape($Replacement)
@@ -646,16 +646,15 @@ function UpdateChocolateyPackage {
     }
 
     function CleanupFileDownload {
-        # Check if FileDownloadTempDelete is not set
         # Check if the file exists at the specified path
-        if (Test-Path $FileDownloadTempPath) {
+        if ($FileDownloadTempPath -and (Test-Path $FileDownloadTempPath)) {
             # Remove the file
             Write-Debug "Removing temporary file: $FileDownloadTempPath"
             WaitForReleaseAndDelete -filePath $FileDownloadTempPath -maxTimeout 10
         }
 
         # If FileUrl64 is used, check if the file exists at the specified path
-        if ($FileUrl64 -and (Test-Path $FileDownloadTempPath64)) {
+        if ($FileUrl64 -and $FileDownloadTempPath64 -and (Test-Path $FileDownloadTempPath64)) {
             Write-Debug "Removing temporary file: $FileDownloadTempPath64"
             WaitForReleaseAndDelete -filePath $FileDownloadTempPath64 -maxTimeout 10
         }
@@ -730,7 +729,11 @@ function UpdateChocolateyPackage {
                 $matches = [regex]::Match($fileInfo.ProductVersion, $versionPattern)
                 if ($matches.Success) {
                     $majorMinor = $matches.Groups[1].Value
-                    $patch = $matches.Groups[2].Success ? $matches.Groups[2].Value : ".0"
+                    if ($matches.Groups[2].Success) {
+                        $patch = $matches.Groups[2].Value
+                    } else {
+                        $patch = ".0"
+                    }
                     $ProductVersion = $majorMinor + $patch
                 }
             }
@@ -739,7 +742,11 @@ function UpdateChocolateyPackage {
                 $matches = [regex]::Match($fileInfo.FileVersion, $versionPattern)
                 if ($matches.Success) {
                     $majorMinor = $matches.Groups[1].Value
-                    $patch = $matches.Groups[2].Success ? $matches.Groups[2].Value : ".0"
+                    if ($matches.Groups[2].Success) {
+                        $patch = $matches.Groups[2].Value
+                    } else {
+                        $patch = ".0"
+                    }
                     $ProductVersion = $majorMinor + $patch
                 }
             }
