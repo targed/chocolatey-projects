@@ -14,7 +14,7 @@ def index():
 def get_results():
     if os.path.exists('results.json'):
         try:
-            with open('results.json', 'r') as f:
+            with open('results.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
             return jsonify(data)
         except Exception as e:

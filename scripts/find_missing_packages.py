@@ -121,7 +121,7 @@ def generate_package(repo_url):
     os.makedirs(os.path.join(package_path, "tools"))
 
     # Read and replace template contents
-    with open(os.path.join(templates_dir, 'template.nuspec'), 'r') as f:
+    with open(os.path.join(templates_dir, 'template.nuspec'), 'r', encoding='utf-8') as f:
         nuspec_content = f.read()
 
     nuspec_content = nuspec_content.replace('{{PACKAGE_ID}}', package_id)
@@ -130,24 +130,24 @@ def generate_package(repo_url):
     nuspec_content = nuspec_content.replace('{{URL}}', repo_url)
     nuspec_content = nuspec_content.replace('{{DESCRIPTION}}', desc)
 
-    with open(os.path.join(package_path, f"{package_id}.nuspec"), 'w') as f:
+    with open(os.path.join(package_path, f"{package_id}.nuspec"), 'w', encoding='utf-8') as f:
         f.write(nuspec_content)
 
-    with open(os.path.join(templates_dir, 'updateNew.ps1'), 'r') as f:
+    with open(os.path.join(templates_dir, 'updateNew.ps1'), 'r', encoding='utf-8') as f:
         update_content = f.read()
 
     update_content = update_content.replace('{{PACKAGE_ID}}', package_id)
     update_content = update_content.replace('{{GITHUB_REPO}}', f"{owner}/{repo_name}")
 
-    with open(os.path.join(package_path, "updateNew.ps1"), 'w') as f:
+    with open(os.path.join(package_path, "updateNew.ps1"), 'w', encoding='utf-8') as f:
         f.write(update_content)
 
-    with open(os.path.join(templates_dir, 'tools', 'chocolateyinstall.ps1'), 'r') as f:
+    with open(os.path.join(templates_dir, 'tools', 'chocolateyinstall.ps1'), 'r', encoding='utf-8') as f:
         install_content = f.read()
 
     install_content = install_content.replace('{{PACKAGE_ID}}', package_id)
 
-    with open(os.path.join(package_path, "tools", "chocolateyinstall.ps1"), 'w') as f:
+    with open(os.path.join(package_path, "tools", "chocolateyinstall.ps1"), 'w', encoding='utf-8') as f:
         f.write(install_content)
 
     print(f"Successfully generated template for {package_id} in {package_path}")
@@ -199,7 +199,7 @@ def main():
         })
         print(f"  -> Found potential package: {name} ({ease})")
 
-    with open(args.out, 'w') as f:
+    with open(args.out, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2)
 
     print(f"\nSaved {len(results)} potential packages to {args.out}")
