@@ -15,7 +15,7 @@ def search_github_repos(limit=50, lang=None):
     if lang:
         query += f" language:{lang}"
     else:
-        query += " (topic:windows OR topic:desktop)"
+        query += " topic:windows"
 
     url = f"https://api.github.com/search/repositories?q={urllib.parse.quote(query)}&sort=stars&order=desc&per_page={limit}"
     response = requests.get(url, headers=HEADERS)
