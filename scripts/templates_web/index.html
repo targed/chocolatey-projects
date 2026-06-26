@@ -22,14 +22,50 @@
         .ease-Unknown { color: #dc3545; }
         #loading, #error { font-size: 1.2em; color: #666; margin-top: 20px; }
         #error { color: #dc3545; display: none; }
+
+        .generate-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .generate-btn:hover {
+            background-color: #218838;
+        }
+        .generate-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        #notification {
+            display: none;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
     </style>
 </head>
 <body>
     <h1>Potential Chocolatey Packages</h1>
     <p>This table displays high-starred GitHub projects with Windows installers that are not currently available on the Chocolatey Community Repository.</p>
 
-    <div id="loading">Loading data from results.json...</div>
-    <div id="error">Error loading results.json. Have you run the python script yet?</div>
+    <div id="notification"></div>
+    <div id="loading">Loading data from /api/results...</div>
+    <div id="error">Error loading results. Have you run the python discovery script yet?</div>
 
     <table id="resultsTable" style="display: none;">
         <thead>
@@ -39,6 +75,7 @@
                 <th>Ease of Installation</th>
                 <th>Description</th>
                 <th>Links</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -46,7 +83,54 @@
     </table>
 
     <script>
-        fetch('results.json')
+
+        function escapeHtml(unsafe) {
+            return (unsafe || '').toString()
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        function showNotification(message, isError=false) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = isError ? 'alert-danger' : 'alert-success';
+            notif.style.display = 'block';
+            setTimeout(() => { notif.style.display = 'none'; }, 5000);
+        }
+
+        function generatePackage(url, btn) {
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    showNotification(data.message);
+                    btn.textContent = 'Generated';
+                } else {
+                    showNotification(data.message || 'Error generating package', true);
+                    btn.textContent = 'Failed';
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                showNotification('Network error while generating', true);
+                btn.textContent = 'Error';
+                btn.disabled = false;
+            });
+        }
+
+        fetch('/api/results')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -57,7 +141,7 @@
                 document.getElementById('loading').style.display = 'none';
 
                 if (data.length === 0) {
-                    document.getElementById('error').textContent = 'results.json is empty. No packages found.';
+                    document.getElementById('error').textContent = 'results.json is empty or not found. No packages found.';
                     document.getElementById('error').style.display = 'block';
                     return;
                 }
@@ -74,13 +158,16 @@
                     else if (pkg.ease_of_installation.startsWith('Moderate')) easeClass = 'ease-Moderate';
 
                     tr.innerHTML = `
-                        <td><strong>${pkg.name}</strong></td>
+                        <td><strong>${escapeHtml(pkg.name)}</strong></td>
                         <td class="stars">★ ${pkg.stars.toLocaleString()}</td>
                         <td class="ease ${easeClass}">${pkg.ease_of_installation}</td>
-                        <td>${pkg.description || 'No description provided.'}</td>
+                        <td>${escapeHtml(pkg.description || 'No description provided.')}</td>
                         <td>
                             <a href="${pkg.url}" target="_blank">GitHub</a>
                             ${pkg.download_url ? `<br><a href="${pkg.download_url}">Download</a>` : ''}
+                        </td>
+                        <td>
+                            <button class="generate-btn" onclick="generatePackage('${pkg.url}', this)">Generate Package</button>
                         </td>
                     `;
                     tbody.appendChild(tr);

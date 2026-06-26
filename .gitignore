@@ -19,3 +19,7 @@
 perplexity-test.exe
 test.ps1
 /.kiro
+# Ignore Python artifacts and local generated data
+__pycache__/
+*.pyc
+results.json

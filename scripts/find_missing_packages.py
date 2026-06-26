@@ -85,8 +85,7 @@ def generate_package(repo_url):
     # Parse URL to get owner and repo
     match = re.search(r"github\.com/([^/]+)/([^/]+)", repo_url)
     if not match:
-        print(f"Invalid GitHub URL: {repo_url}")
-        return
+        raise ValueError(f"Invalid GitHub URL: {repo_url}")
 
     owner, repo_name = match.groups()
     repo_name = repo_name.replace('.git', '')
@@ -95,32 +94,34 @@ def generate_package(repo_url):
     api_url = f"https://api.github.com/repos/{owner}/{repo_name}"
     response = requests.get(api_url, headers=HEADERS)
     if response.status_code != 200:
-        print(f"Failed to fetch repo info for {owner}/{repo_name}")
-        return
+        raise Exception(f"Failed to fetch repo info for {owner}/{repo_name}")
 
     repo_info = response.json()
     desc = repo_info.get('description', '') or ''
     author = repo_info.get('owner', {}).get('login', 'Unknown')
     package_id = repo_name.lower()
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    templates_dir = os.path.join(script_dir, "templates")
+    repo_root = os.path.dirname(script_dir)
+    package_path = os.path.join(repo_root, package_id)
+
     # Check if package folder exists
-    if os.path.exists(package_id):
-        print(f"Directory {package_id} already exists.")
-        return
+    if os.path.exists(package_path):
+        raise Exception(f"Directory {package_id} already exists.")
 
     # Ensure templates exist
-    if not os.path.exists('scripts/templates') or not os.path.exists('scripts/templates/template.nuspec'):
-        print("Templates directory or files not found. Please create them first.")
-        return
+    if not os.path.exists(templates_dir) or not os.path.exists(os.path.join(templates_dir, "template.nuspec")):
+        raise Exception("Templates directory or files not found. Please create them first.")
 
     print(f"Generating package {package_id}...")
 
     # Copy template folder structure
-    os.makedirs(package_id)
-    os.makedirs(f"{package_id}/tools")
+    os.makedirs(package_path)
+    os.makedirs(os.path.join(package_path, "tools"))
 
     # Read and replace template contents
-    with open('scripts/templates/template.nuspec', 'r') as f:
+    with open(os.path.join(templates_dir, 'template.nuspec'), 'r') as f:
         nuspec_content = f.read()
 
     nuspec_content = nuspec_content.replace('{{PACKAGE_ID}}', package_id)
@@ -129,27 +130,27 @@ def generate_package(repo_url):
     nuspec_content = nuspec_content.replace('{{URL}}', repo_url)
     nuspec_content = nuspec_content.replace('{{DESCRIPTION}}', desc)
 
-    with open(f"{package_id}/{package_id}.nuspec", 'w') as f:
+    with open(os.path.join(package_path, f"{package_id}.nuspec"), 'w') as f:
         f.write(nuspec_content)
 
-    with open('scripts/templates/updateNew.ps1', 'r') as f:
+    with open(os.path.join(templates_dir, 'updateNew.ps1'), 'r') as f:
         update_content = f.read()
 
     update_content = update_content.replace('{{PACKAGE_ID}}', package_id)
     update_content = update_content.replace('{{GITHUB_REPO}}', f"{owner}/{repo_name}")
 
-    with open(f"{package_id}/updateNew.ps1", 'w') as f:
+    with open(os.path.join(package_path, "updateNew.ps1"), 'w') as f:
         f.write(update_content)
 
-    with open('scripts/templates/tools/chocolateyinstall.ps1', 'r') as f:
+    with open(os.path.join(templates_dir, 'tools', 'chocolateyinstall.ps1'), 'r') as f:
         install_content = f.read()
 
     install_content = install_content.replace('{{PACKAGE_ID}}', package_id)
 
-    with open(f"{package_id}/tools/chocolateyinstall.ps1", 'w') as f:
+    with open(os.path.join(package_path, "tools", "chocolateyinstall.ps1"), 'w') as f:
         f.write(install_content)
 
-    print(f"Successfully generated template for {package_id} in /{package_id}")
+    print(f"Successfully generated template for {package_id} in {package_path}")
 
 def main():
     parser = argparse.ArgumentParser(description="Find missing Chocolatey packages from GitHub")

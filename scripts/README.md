@@ -36,28 +36,13 @@ python find_missing_packages.py --limit 50
 * `--out <filename>`: The name of the output JSON file (default: `results.json`).
 * `--generate <github_url>`: Skips discovery and directly scaffolds a Chocolatey package from the provided GitHub URL.
 
-## Scaffolding Packages
+## Local Web UI (`app.py`)
 
-If you find a repository that you'd like to package, you can generate a base Chocolatey template structure for it:
+To view a formatted, sortable table of the discovered packages and easily generate packages via your browser, you can run the local web server:
 
 ```sh
-python find_missing_packages.py --generate "https://github.com/owner/repository_name"
+python app.py
 ```
 
-This command will:
-1. Fetch repository details via the GitHub API (description, author, etc.).
-2. Create a new directory named after the repository (lowercased) at the current working path.
-3. Utilize the files in `scripts/templates/` to generate `[package].nuspec`, `updateNew.ps1`, and `tools/chocolateyinstall.ps1`.
-4. Automatically replace placeholders (like `{{PACKAGE_ID}}`, `{{AUTHOR}}`) in the generated files.
-
-*Note: This command generates the folder in your current working directory. You may want to run it from the root of your project.*
-
-## Visualization (`index.html`)
-
-After generating `results.json` from the discovery script, you can open `index.html` in your web browser to view a formatted, sortable table of the discovered packages. It displays the package name, GitHub stars, a calculated "Ease of Installation" score, and relevant links.
-
-*If your browser blocks loading local JSON files due to CORS policies (like Chrome often does), you can run a simple local web server to view it:*
-```sh
-python -m http.server
-```
-Then navigate to `http://localhost:8000/index.html`.
+Then navigate to `http://localhost:8000`.
+This web UI uses the `results.json` file generated from `find_missing_packages.py` and provides a "Generate Package" button next to each result to automatically scaffold it using the provided templates.
