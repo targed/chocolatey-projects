@@ -109,7 +109,7 @@ def generate_package(repo_url):
         return
 
     # Ensure templates exist
-    if not os.path.exists('templates') or not os.path.exists('templates/template.nuspec'):
+    if not os.path.exists('scripts/templates') or not os.path.exists('scripts/templates/template.nuspec'):
         print("Templates directory or files not found. Please create them first.")
         return
 
@@ -120,7 +120,7 @@ def generate_package(repo_url):
     os.makedirs(f"{package_id}/tools")
 
     # Read and replace template contents
-    with open('templates/template.nuspec', 'r') as f:
+    with open('scripts/templates/template.nuspec', 'r') as f:
         nuspec_content = f.read()
 
     nuspec_content = nuspec_content.replace('{{PACKAGE_ID}}', package_id)
@@ -132,7 +132,7 @@ def generate_package(repo_url):
     with open(f"{package_id}/{package_id}.nuspec", 'w') as f:
         f.write(nuspec_content)
 
-    with open('templates/updateNew.ps1', 'r') as f:
+    with open('scripts/templates/updateNew.ps1', 'r') as f:
         update_content = f.read()
 
     update_content = update_content.replace('{{PACKAGE_ID}}', package_id)
@@ -141,7 +141,7 @@ def generate_package(repo_url):
     with open(f"{package_id}/updateNew.ps1", 'w') as f:
         f.write(update_content)
 
-    with open('templates/tools/chocolateyinstall.ps1', 'r') as f:
+    with open('scripts/templates/tools/chocolateyinstall.ps1', 'r') as f:
         install_content = f.read()
 
     install_content = install_content.replace('{{PACKAGE_ID}}', package_id)
