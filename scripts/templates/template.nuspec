@@ -6,7 +6,7 @@
     <version>1.0.0</version>
     <title>{{PACKAGE_NAME}}</title>
     <authors>{{AUTHOR}}</authors>
-    <owners>{{AUTHOR}}</owners>
+    <owners>ltklionel</owners>
     <projectUrl>{{URL}}</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>{{PACKAGE_ID}} gui</tags>

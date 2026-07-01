@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>waveterm</id>
+    <version>0.14.5</version>
+    <title>waveterm</title>
+    <authors>wavetermdev</authors>
+    <owners>ltklionel</owners>
+    <projectUrl>https://github.com/wavetermdev/waveterm</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>waveterm gui</tags>
+    <summary>An open-source, AI-integrated, cross-platform terminal for seamless workflows</summary>
+    <description>
+    
+Wave is an open-source, AI-integrated terminal for macOS, Linux, and Windows. It works with any AI model. Bring your own API keys for OpenAI, Claude, or Gemini, or run local models via Ollama and LM Studio. No accounts required.
+
+Wave also supports durable SSH sessions that survive network interruptions and restarts, with automatic reconnection. Edit remote files with a built-in graphical editor and preview files inline without leaving the terminal.
+
+![Wave Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/waveterm/wave-screenshot.png)
+
+</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
