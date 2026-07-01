@@ -108,7 +108,7 @@ def generate_package(repo_url):
 
     # Check if package folder exists
     if os.path.exists(package_path):
-        raise Exception(f"Directory {package_id} already exists.")
+        print(f"Warning: Directory {package_id} already exists. Templates will be overwritten/updated.")
 
     # Ensure templates exist
     if not os.path.exists(templates_dir) or not os.path.exists(os.path.join(templates_dir, "template.nuspec")):
@@ -117,8 +117,8 @@ def generate_package(repo_url):
     print(f"Generating package {package_id}...")
 
     # Copy template folder structure
-    os.makedirs(package_path)
-    os.makedirs(os.path.join(package_path, "tools"))
+    os.makedirs(package_path, exist_ok=True)
+    os.makedirs(os.path.join(package_path, "tools"), exist_ok=True)
 
     # Read and replace template contents
     with open(os.path.join(templates_dir, 'template.nuspec'), 'r', encoding='utf-8') as f:
@@ -149,6 +149,27 @@ def generate_package(repo_url):
 
     with open(os.path.join(package_path, "tools", "chocolateyinstall.ps1"), 'w', encoding='utf-8') as f:
         f.write(install_content)
+
+    # Generate GitHub Actions Workflow
+    workflow_template_path = os.path.join(templates_dir, 'upgrade.yaml')
+    if os.path.exists(workflow_template_path):
+        with open(workflow_template_path, 'r', encoding='utf-8') as f:
+            workflow_content = f.read()
+
+        workflow_content = workflow_content.replace('{{PACKAGE_ID}}', package_id)
+        workflow_content = workflow_content.replace('{{PACKAGE_NAME}}', repo_name)
+
+        workflows_dir = os.path.join(repo_root, ".github", "workflows")
+        os.makedirs(workflows_dir, exist_ok=True)
+
+        # Capitalize the first letter of repo_name for the file name like others
+        workflow_filename = f"upgrade{repo_name.capitalize()}.yaml"
+        workflow_path = os.path.join(workflows_dir, workflow_filename)
+
+        with open(workflow_path, 'w', encoding='utf-8') as f:
+            f.write(workflow_content)
+
+        print(f"Successfully generated GitHub Actions workflow in {workflow_path}")
 
     print(f"Successfully generated template for {package_id} in {package_path}")
 
