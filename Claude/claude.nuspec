@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>claude</id>
-    <version>1.17377.1</version>
+    <version>1.18286.0</version>
     <title>Claude Desktop</title>
     <authors>Anthropic</authors>
     <owners>ltklionel</owners>
