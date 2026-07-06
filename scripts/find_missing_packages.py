@@ -101,6 +101,10 @@ def generate_package(repo_url):
     author = repo_info.get('owner', {}).get('login', 'Unknown')
     package_id = repo_name.lower()
 
+    repo_mock = {'full_name': f"{owner}/{repo_name}"}
+    assets = check_windows_assets(repo_mock)
+    download_url = assets[0]['browser_download_url'] if assets else ""
+
     script_dir = os.path.dirname(os.path.abspath(__file__))
     templates_dir = os.path.join(script_dir, "templates")
     repo_root = os.path.dirname(script_dir)
@@ -138,6 +142,7 @@ def generate_package(repo_url):
 
     update_content = update_content.replace('{{PACKAGE_ID}}', package_id)
     update_content = update_content.replace('{{GITHUB_REPO}}', f"{owner}/{repo_name}")
+    update_content = update_content.replace('{{DOWNLOAD_URL}}', download_url)
 
     with open(os.path.join(package_path, "updateNew.ps1"), 'w', encoding='utf-8') as f:
         f.write(update_content)
@@ -145,7 +150,10 @@ def generate_package(repo_url):
     with open(os.path.join(templates_dir, 'tools', 'chocolateyinstall.ps1'), 'r', encoding='utf-8') as f:
         install_content = f.read()
 
+    file_type = 'MSI' if download_url.lower().endswith('.msi') else 'EXE'
     install_content = install_content.replace('{{PACKAGE_ID}}', package_id)
+    install_content = install_content.replace('{{FILE_TYPE}}', file_type)
+    install_content = install_content.replace('{{DOWNLOAD_URL}}', download_url)
 
     with open(os.path.join(package_path, "tools", "chocolateyinstall.ps1"), 'w', encoding='utf-8') as f:
         f.write(install_content)

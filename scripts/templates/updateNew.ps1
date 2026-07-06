@@ -1,8 +1,3 @@
-[CmdletBinding()]
-param (
-    [switch]$debug = $false
-)
-
 $ErrorActionPreference = 'Stop'
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ParentPath = Split-Path -Parent $ScriptPath
@@ -12,7 +7,8 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # The Chocolatey-Package-Updater handles parsing GitHub API automatically if you pass GitHubRepoUrl
 $packageInfo = @{
     PackageName   = "{{PACKAGE_ID}}"
-    GitHubRepoUrl = "https://api.github.com/repos/{{GITHUB_REPO}}"
+    GitHubRepoUrl = "https://github.com/{{GITHUB_REPO}}"
+    FileUrl       = "{{DOWNLOAD_URL}}"
     Alert         = $false
 }
 

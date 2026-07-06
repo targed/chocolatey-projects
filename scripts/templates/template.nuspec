@@ -7,9 +7,14 @@
     <title>{{PACKAGE_NAME}}</title>
     <authors>{{AUTHOR}}</authors>
     <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/{{PACKAGE_ID}}/logo.png</iconUrl>
+    <copyright></copyright>
     <projectUrl>{{URL}}</projectUrl>
+    <licenseUrl></licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>{{PACKAGE_ID}} gui</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/{{PACKAGE_ID}}</packageSourceUrl>
+    <releaseNotes></releaseNotes>
     <summary>{{DESCRIPTION}}</summary>
     <description>{{DESCRIPTION}}</description>
   </metadata>
