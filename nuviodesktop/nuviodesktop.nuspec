@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>nuviodesktop</id>
+    <version>0.1.13</version>
+    <title>NuvioDesktop</title>
+    <authors>NuvioMedia</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/nuviodesktop/logo.png</iconUrl>
+    <copyright>GNU GPLv3</copyright>
+    <projectUrl>https://github.com/NuvioMedia/NuvioDesktop/</projectUrl>
+    <licenseUrl>https://github.com/NuvioMedia/NuvioDesktop?tab=GPL-3.0-1-ov-file</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>nuvio nuviodesktop gui streaming</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/nuviodesktop</packageSourceUrl>
+    <releaseNotes>https://github.com/NuvioMedia/NuvioDesktop/releases</releaseNotes>
+    <summary>Watch your library, anywhere</summary>
+    <description>Nuvio Desktop is a media client for browsing metadata, managing collections and watch progress, downloading media, and playing streams from user-installed extensions or user-provided sources.</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

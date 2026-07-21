@@ -539,13 +539,34 @@ function Get-LatestGitHubReleaseVersion {
     $response = Invoke-RestMethod -Uri $apiUrl
     $latestVersionTag = $response.tag_name
 
-    # Use regex to extract version number
+    # Extract the numeric version from the release tag so package versioning stays stable.
     if ($latestVersionTag -match '(\d+\.\d+\.\d+)') {
         return $matches[1]
     }
     else {
         throw "Failed to extract version from tag: $latestVersionTag"
     }
+}
+
+function Get-LatestGitHubReleaseTag {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$GitHubRepoUrl
+    )
+
+    # Extract the username and repo name from the provided URL
+    $repoDetails = $GitHubRepoUrl -replace '^https://github.com/', '' -split '/'
+
+    $username = $repoDetails[0]
+    $repoName = $repoDetails[1]
+
+    $apiUrl = "https://api.github.com/repos/$username/$repoName/releases/latest"
+
+    $response = Invoke-RestMethod -Uri $apiUrl
+    $latestVersionTag = $response.tag_name
+
+    # Preserve prerelease suffixes, but drop a leading "v" so release templates can use either style.
+    return $latestVersionTag -replace '^v', ''
 }
 
 function UpdateChocolateyPackage {
@@ -698,7 +719,7 @@ function UpdateChocolateyPackage {
         }
         else {
             Write-Debug "Using Invoke-WebRequest to download the file."
-            Invoke-WebRequest -Uri $url -OutFile $tempPath -UseBasicParsing
+            $null = Invoke-WebRequest -Uri $url -OutFile $tempPath
         }
 
         # Verify the file exists
@@ -731,7 +752,8 @@ function UpdateChocolateyPackage {
                     $majorMinor = $matches.Groups[1].Value
                     if ($matches.Groups[2].Success) {
                         $patch = $matches.Groups[2].Value
-                    } else {
+                    }
+                    else {
                         $patch = ".0"
                     }
                     $ProductVersion = $majorMinor + $patch
@@ -744,7 +766,8 @@ function UpdateChocolateyPackage {
                     $majorMinor = $matches.Groups[1].Value
                     if ($matches.Groups[2].Success) {
                         $patch = $matches.Groups[2].Value
-                    } else {
+                    }
+                    else {
                         $patch = ".0"
                     }
                     $ProductVersion = $majorMinor + $patch
@@ -797,9 +820,12 @@ function UpdateChocolateyPackage {
             [string]$VersionNumber
         )
 
-        $versionParts = $VersionNumber -split '\.'
-        $cleanedVersionParts = foreach ($part in $versionParts) { [int]$part }
-        $cleanedVersion = ($cleanedVersionParts -join '.')
+        $versionParts = $VersionNumber -split '-', 2
+        $numericVersion = $versionParts[0]
+        $prereleaseSuffix = if ($versionParts.Count -gt 1) { "-$($versionParts[1])" } else { '' }
+
+        $cleanedVersionParts = foreach ($part in ($numericVersion -split '\.')) { [int]$part }
+        $cleanedVersion = ($cleanedVersionParts -join '.') + $prereleaseSuffix
 
         return $cleanedVersion
     }
@@ -875,13 +901,21 @@ function UpdateChocolateyPackage {
             }
         }
 
-        # If GitHubRepoUrl is specified, get the latest version from GitHub
+        # If GitHubRepoUrl is specified, get the latest release tag from GitHub for URL templating.
         if ($GitHubRepoUrl) {
             Write-Debug "GitHub repo URL: $GitHubRepoUrl"
+            $GitHubReleaseTag = Get-LatestGitHubReleaseTag -GitHubRepoUrl $GitHubRepoUrl
             $ForceVersionNumber = Get-LatestGitHubReleaseVersion -GitHubRepoUrl $GitHubRepoUrl
         }
 
         # URL Modification with Version Number
+        if ($GitHubReleaseTag -and $FileUrl) {
+            $FileUrl = $FileUrl -replace '{VERSION}', $GitHubReleaseTag
+        }
+        if ($GitHubReleaseTag -and $FileUrl64) {
+            $FileUrl64 = $FileUrl64 -replace '{VERSION}', $GitHubReleaseTag
+        }
+
         if ($ForceVersionNumber -and $FileUrl) {
             $FileUrl = $FileUrl -replace '{VERSION}', $ForceVersionNumber
         }
@@ -981,7 +1015,9 @@ function UpdateChocolateyPackage {
         }
 
         # Validate version strings
-        if ($ProductVersion -match '^\d+(\.\d+){1,3}$' -and $NuspecVersion -match '^\d+(\.\d+){1,3}$') {
+        $versionPattern = '^\d+(\.\d+){1,3}(-[0-9A-Za-z.-]+)?$'
+
+        if ($ProductVersion -match $versionPattern -and $NuspecVersion -match $versionPattern) {
             Write-Debug "Version strings are valid."
 
             # Compare versions, compare ChocolateyInstall.ps1 checksum, and compare VERIFICATION.txt checksum if $VerificationPath is set and the file exists
