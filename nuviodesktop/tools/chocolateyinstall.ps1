@@ -9,7 +9,7 @@ $packageArgs = @{
   softwareName   = 'nuviodesktop*'
   checksum       = '820BF39613B67632796A15436A03412E1B2CA607D8C113BA0ECCDCDA8DF23ABF'
   checksumType   = 'sha256'
-  silentArgs     = '/quiet /qn /norestart\'
+  silentArgs     = '/quiet /qn /norestart'
   validExitCodes = @(0, 3010, 1641)
 }
 
