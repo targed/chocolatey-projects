@@ -7,7 +7,7 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # The Chocolatey-Package-Updater handles parsing GitHub API automatically if you pass GitHubRepoUrl
 $packageInfo = @{
     PackageName   = "waveterm"
-    FileUrl       = "https://github.com/wavetermdev/waveterm/releases/download/v0.14.5/Wave-win32-x64-0.14.5.msi"
+    FileUrl       = "https://github.com/wavetermdev/waveterm/releases/download/v{VERSION}/Wave-win32-x64-{VERSION}.msi"
     GitHubRepoUrl = "https://github.com/wavetermdev/waveterm"
     Alert         = $false
 }

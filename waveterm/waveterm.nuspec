@@ -7,9 +7,12 @@
     <title>waveterm</title>
     <authors>wavetermdev</authors>
     <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/waveterm/logo.png</iconUrl>
+    <copyright>Apache-2.0 License</copyright>
     <projectUrl>https://github.com/wavetermdev/waveterm</projectUrl>
+    <licenseUrl>https://github.com/wavetermdev/waveterm?tab=Apache-2.0-1-ov-file</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <tags>waveterm gui</tags>
+    <tags>waveterm gui terminal ai</tags>
     <summary>An open-source, AI-integrated, cross-platform terminal for seamless workflows</summary>
     <description>
     
