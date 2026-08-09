@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>reasonix-cli</id>
+    <version>1.21.5</version>
+    <title>Reasonix CLI</title>
+    <authors>esengine</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/reasonix-cli/logo.png</iconUrl>
+    <copyright></copyright>
+    <projectUrl>https://github.com/esengine/DeepSeek-Reasonix</projectUrl>
+    <licenseUrl>https://github.com/esengine/DeepSeek-Reasonix/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>reasonix-cli cli</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/reasonix-cli</packageSourceUrl>
+    <releaseNotes></releaseNotes>
+    <summary>DeepSeek-native AI coding agent CLI for your terminal. Engineered around prefix-cache stability.</summary>
+    <description>One local engine, four ways in — terminal, desktop app, browser, or your editor over ACP. Plan mode, permissions, a workspace sandbox and per-turn checkpoints keep a long autonomous run something you can still read and undo.
+    
+    ![desktop Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/reasonix-cli/screenshot.png)
+    
+    </description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

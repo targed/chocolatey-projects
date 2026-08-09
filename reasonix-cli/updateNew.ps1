@@ -6,9 +6,9 @@ $ParentPath = Split-Path -Parent $ScriptPath
 
 # The Chocolatey-Package-Updater handles parsing GitHub API automatically if you pass GitHubRepoUrl
 $packageInfo = @{
-    PackageName   = "deepseek-reasonix"
+    PackageName   = "reasonix-cli"
     GitHubRepoUrl = "https://github.com/esengine/DeepSeek-Reasonix"
-    FileUrl       = "https://github.com/esengine/DeepSeek-Reasonix/releases/download/desktop-v1.21.4/Reasonix-darwin-amd64.zip"
+    FileUrl       = "https://github.com/esengine/DeepSeek-Reasonix/releases/download/{VERSION}/reasonix-windows-amd64.zip"
     Alert         = $false
 }
 

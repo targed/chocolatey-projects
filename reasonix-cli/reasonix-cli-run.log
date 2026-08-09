@@ -1,0 +1,12 @@
+Chocolatey Package Updater 0.1.1
+To check for updates, run Chocolatey-Package-Updater -CheckForUpdate
+
+################################################################################
+# Updating package: deepseek-reasonix                                          #
+################################################################################
+Downloading file: https://github.com/esengine/DeepSeek-Reasonix/releases/download/v1.21.5/reasonix-windows-amd64.zip
+Alert disabled. Skipping alert.
+[33;1mWARNING: An error occurred: Cannot find path 'C:\Users\ltkli\Documents\GitHub\chocolatey-projects\reasonix-cli\deepseek-reasonix.nuspec' because it does not exist.[0m
+[33;1mWARNING: Line number : 944[0m
+deepseek-reasonix_setup_temp.exe deleted
+Done.
