@@ -17,9 +17,9 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'EXE' 
-  url            = 'https://downloads.claude.ai/releases/win32/x64/1.25927.0/Claude-003700efafbc2ccb4b1177a5e637b14da381799e.exe'
+  url            = 'https://downloads.claude.ai/releases/win32/x64/1.26832.0/Claude-056ee2be623b207f6a4d24dfb1b2fb5a82db0ecf.exe'
   softwareName   = 'Claude*' 
-  checksum       = 'BD45B1307385EEF00E88AA8A3CC597ECFD33BF04DA93682ACA9C334D05236C6D'
+  checksum       = 'E98274FF9B6C972CD6C46814CAADB3C9F991439CB469E0F6E079D377DA95F614'
   checksumType   = 'sha256'
 
   # Need to create silentArgs that prevent the installer from popping up a window (Have not figgured that out yet)
