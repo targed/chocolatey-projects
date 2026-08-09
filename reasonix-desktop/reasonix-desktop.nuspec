@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>reasonix-desktop</id>
+    <version>1.21.5</version>
+    <title>Reasonix Desktop</title>
+    <authors>esengine</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/reasonix-desktop/logo.svg</iconUrl>
+    <copyright>Copyright (c) 2026 Reasonix Contributors</copyright>
+    <projectUrl>https://github.com/esengine/DeepSeek-Reasonix</projectUrl>
+    <licenseUrl>https://github.com/esengine/DeepSeek-Reasonix?tab=MIT-1-ov-file</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>reasonix-desktop gui</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/reasonix-desktop</packageSourceUrl>
+    <releaseNotes>https://reasonix.io/changelog/</releaseNotes>
+    <summary>DeepSeek-native AI coding agent for your terminal. Engineered around prefix-cache stability.</summary>
+    <description>One local engine, four ways in — terminal, desktop app, browser, or your editor over ACP. Plan mode, permissions, a workspace sandbox and per-turn checkpoints keep a long autonomous run something you can still read and undo.
+    
+    ![desktop Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/reasonix-desktop/screenshot.jpg)
+    
+    </description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

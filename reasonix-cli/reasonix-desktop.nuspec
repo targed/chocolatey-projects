@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>deepseek-reasonix</id>
+    <version>1.0.0</version>
+    <title>DeepSeek-Reasonix</title>
+    <authors>esengine</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/deepseek-reasonix/logo.png</iconUrl>
+    <copyright></copyright>
+    <projectUrl>https://github.com/esengine/DeepSeek-Reasonix</projectUrl>
+    <licenseUrl></licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>deepseek-reasonix gui</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/deepseek-reasonix</packageSourceUrl>
+    <releaseNotes></releaseNotes>
+    <summary>DeepSeek-native AI coding agent for your terminal. Engineered around prefix-cache stability — leave it running.</summary>
+    <description>DeepSeek-native AI coding agent for your terminal. Engineered around prefix-cache stability — leave it running.</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
