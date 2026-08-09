@@ -7,8 +7,8 @@ $ParentPath = Split-Path -Parent $ScriptPath
 # The Chocolatey-Package-Updater handles parsing GitHub API automatically if you pass GitHubRepoUrl
 $packageInfo = @{
     PackageName   = "reasonix-desktop"
+    FileUrl       = "https://github.com/esengine/DeepSeek-Reasonix/releases/download/{VERSION}/Reasonix-windows-amd64-installer.exe"
     GitHubRepoUrl = "https://github.com/esengine/DeepSeek-Reasonix"
-    FileUrl       = "https://dl.reasonix.io/desktop-v1.21.4/Reasonix-windows-amd64-installer.exe"
     Alert         = $false
 }
 

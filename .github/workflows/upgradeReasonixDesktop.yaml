@@ -1,4 +1,4 @@
-name: DeepSeek-Reasonix Package Update
+name: Reasonix Desktop Package Update
 
 on:
   # Run on manual trigger
@@ -49,26 +49,26 @@ jobs:
           refreshenv
           $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
 
-      # Run the DeepSeek-Reasonix update script
-      - name: Run DeepSeek-Reasonix update script
+      # Run the Reasonix Desktop update script
+      - name: Run Reasonix Desktop update script
         if: success()
         run: |
           # Paths are now relative to the checkout root
-          Unblock-File -Path ./deepseek-reasonix/updateNew.ps1
+          Unblock-File -Path ./reasonix-desktop/updateNew.ps1
           # Assuming UpdateAll.ps1 is in the root. Adjust if it's elsewhere.
           Unblock-File -Path ./UpdateAll.ps1
           # Execute the script using its path relative to the root
-          ./deepseek-reasonix/updateNew.ps1 -debug
+          ./reasonix-desktop/updateNew.ps1 -debug
 
-      # Test the DeepSeek-Reasonix package if updated
-      - name: Test DeepSeek-Reasonix package
+      # Test the Reasonix Desktop package if updated
+      - name: Test Reasonix Desktop package
         if: success()
         run: |
-          $packageDir = "deepseek-reasonix"
+          $packageDir = "reasonix-desktop"
           $updatedPackage = $null
 
           if (Test-Path (Join-Path $packageDir "*.nupkg")) {
-              Write-Host "Found .nupkg in DeepSeek-Reasonix directory"
+              Write-Host "Found .nupkg in Reasonix Desktop directory"
 
               # Extract packageId from nuspec file
               $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
@@ -115,13 +115,13 @@ jobs:
                   }
               }
               else {
-                  Write-Warning "No nuspec file found in DeepSeek-Reasonix directory. Push steps will be skipped."
+                  Write-Warning "No nuspec file found in Reasonix Desktop directory. Push steps will be skipped."
                   echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
                   echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
               }
           }
           else {
-              Write-Host "No .nupkg found in DeepSeek-Reasonix directory - no update needed. Push steps will be skipped."
+              Write-Host "No .nupkg found in Reasonix Desktop directory - no update needed. Push steps will be skipped."
               echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
               echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
@@ -135,7 +135,7 @@ jobs:
         run: |
           $packageId = "$env:PACKAGE_ID"
           $localPackageVersion = "$env:PACKAGE_VERSION"
-          $packageDir = "deepseek-reasonix" # Specific package directory
+          $packageDir = "reasonix-desktop" # Specific package directory
 
           if (-not $packageId -or -not $localPackageVersion) {
             Write-Warning "PACKAGE_ID or PACKAGE_VERSION is empty. Skipping nupkg search."
@@ -222,12 +222,12 @@ jobs:
           git pull
           git fetch origin
           # Add changes from the specific package directory and logs
-          git add ./deepseek-reasonix/* ./logs/*
+          git add ./reasonix-desktop/* ./logs/*
           # Check for staged changes before committing
           $changes = git diff --staged --name-only
           if ($changes) {
-            git commit -m "Auto-update DeepSeek-Reasonix package [skip ci]"
+            git commit -m "Auto-update Reasonix Desktop package [skip ci]"
             git push
           } else {
-            echo "No changes to commit for DeepSeek-Reasonix package."
+            echo "No changes to commit for Reasonix Desktop package."
           }
