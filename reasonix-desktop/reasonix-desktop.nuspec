@@ -18,7 +18,7 @@
     <summary>DeepSeek-native AI coding agent for your terminal. Engineered around prefix-cache stability.</summary>
     <description>One local engine, four ways in — terminal, desktop app, browser, or your editor over ACP. Plan mode, permissions, a workspace sandbox and per-turn checkpoints keep a long autonomous run something you can still read and undo.
     
-    ![desktop Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/reasonix-desktop/screenshot.jpg)
+    ![desktop Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/reasonix-desktop/screenshot.png)
     
     </description>
   </metadata>
