@@ -2,9 +2,9 @@
 $VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$version = "2.21.0"
+$version = "2.22.0"
 $url = "https://github.com/TumblThreeApp/TumblThree/releases/download/v${version}/TumblThree-v${version}-x64-Application.zip"
-$checksum = "9DAE9A881C7186FC2FD249BBAF4B4A985327A646637BEB92DE2812D5EABED3C0"
+$checksum = "7C2386006144DC6B275BAA57449D57B8C14C6C28FBB646F5758AAFEE25E6E05B"
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
