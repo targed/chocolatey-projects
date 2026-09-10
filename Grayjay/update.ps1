@@ -10,32 +10,31 @@ function global:au_SearchReplace {
 }
 
 function global:au_GetLatest {
-    $domain = "https://download.cursor.sh/windows/nsis/x64"
-    $pattern = "v(\d+\.\d+\.\d+)"
+    $versionNumber = 7
+    $lastWorkingVersion = $versionNumber
+    $lastWorkingUrl = ""
+
     try {
-        $download_page = Invoke-WebRequest -Uri $domain -UseBasicParsing
+        do {
+            $versionNumber++
+            $mostUpToDateUrl = "https://updater.grayjay.app/Apps/Grayjay.Desktop/${versionNumber}/Grayjay.Desktop-win-x64-v${versionNumber}.zip"
+            $response = Invoke-WebRequest -Uri $mostUpToDateUrl -UseBasicParsing -Method Head -ErrorAction Stop
+            $lastWorkingVersion = $versionNumber
+            $lastWorkingUrl = $mostUpToDateUrl
+        }
+        while ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300)
     }
     catch {
-        Write-Host "Failed to retrieve releases page: $_"
-        return $null
+        # Reached the end of available versions
     }
-    $re = '\.zip$'
-    $url = $download_page.Links | Where-Object href -match $re | Select-Object -First 1 -ExpandProperty href
-    $url = $domain + $url
 
-    if ($url -match $pattern) {
-        $version = $Matches[1]
-        Write-Host "Version: $version"
-    }
-    else {
-        Write-Host "No version found in URL."
+    if (-not $lastWorkingUrl) {
+        Write-Host "No version found."
         return $null
     }
 
-    # Placeholder for checksum retrieval or calculation
-    $checksum = "YourMethodToGetChecksum"
-
-    return @{ Version = $version; URL32 = $url; Checksum32 = $checksum }
+    Write-Host "Version: $lastWorkingVersion"
+    return @{ Version = $lastWorkingVersion; URL32 = $lastWorkingUrl }
 }
 
 try {

@@ -32,10 +32,7 @@ function global:au_GetLatest {
         return $null
     }
 
-    # Placeholder for checksum retrieval or calculation
-    $checksum = "YourMethodToGetChecksum"
-
-    return @{ Version = $version; URL32 = $url; Checksum32 = $checksum }
+    return @{ Version = $version; URL32 = $url }
 }
 
 try {
