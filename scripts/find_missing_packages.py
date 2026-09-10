@@ -5,6 +5,7 @@ import argparse
 import urllib.parse
 import shutil
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 HEADERS = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"} if GITHUB_TOKEN else {"Accept": "application/vnd.github.v3+json"}
@@ -181,6 +182,30 @@ def generate_package(repo_url):
 
     print(f"Successfully generated template for {package_id} in {package_path}")
 
+def check_repo(repo):
+    name = repo['name']
+    # Check if it has windows releases
+    assets = check_windows_assets(repo)
+    if not assets:
+        return None
+
+    # Check if it exists on Chocolatey
+    if check_chocolatey(name):
+        print(f"  -> {name} already on Chocolatey")
+        return None
+
+    ease = calculate_ease(assets)
+    print(f"  -> Found potential package: {name} ({ease})")
+
+    return {
+        "name": name,
+        "url": repo['html_url'],
+        "stars": repo['stargazers_count'],
+        "description": repo['description'],
+        "ease_of_installation": ease,
+        "download_url": assets[0]['browser_download_url'] if assets else None
+    }
+
 def main():
     parser = argparse.ArgumentParser(description="Find missing Chocolatey packages from GitHub")
     parser.add_argument("--limit", type=int, default=50, help="Number of GitHub repos to check")
@@ -200,33 +225,9 @@ def main():
     print(f"Searching top {args.limit} repos (Language: {args.lang or 'Any'})...")
     repos = search_github_repos(limit=args.limit, lang=args.lang)
 
-    results = []
-
-    for repo in repos:
-        name = repo['name']
-        print(f"Checking {name}...")
-
-        # Check if it has windows releases
-        assets = check_windows_assets(repo)
-        if not assets:
-            continue
-
-        # Check if it exists on Chocolatey
-        if check_chocolatey(name):
-            print(f"  -> {name} already on Chocolatey")
-            continue
-
-        ease = calculate_ease(assets)
-
-        results.append({
-            "name": name,
-            "url": repo['html_url'],
-            "stars": repo['stargazers_count'],
-            "description": repo['description'],
-            "ease_of_installation": ease,
-            "download_url": assets[0]['browser_download_url'] if assets else None
-        })
-        print(f"  -> Found potential package: {name} ({ease})")
+    print(f"Checking {len(repos)} repositories in parallel...")
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        results = [res for res in executor.map(check_repo, repos) if res is not None]
 
     with open(args.out, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2)
