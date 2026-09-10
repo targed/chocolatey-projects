@@ -29,6 +29,8 @@ Invoke-Pester -Path ./tests/PushtoChocolatey.Tests.ps1 -Output Detailed
 
 # Run Chocolatey status check tests
 Invoke-Pester -Path ./tests/Check-ChocolateyStatus.Tests.ps1 -Output Detailed
+# Run Claude uninstall tests
+Invoke-Pester -Path ./tests/ClaudeUninstall.Tests.ps1 -Output Detailed
 ```
 
 ## Structure
@@ -38,6 +40,7 @@ tests/
 ├── README.md                              # Test suite documentation & instructions
 ├── Chocolatey-Package-Updater.Tests.ps1   # Unit tests for Chocolatey-Package-Updater.ps1 (Get-GitHubRelease, CheckForUpdate, SendEmailMailjet, UpdateFileContent)
 ├── Check-ChocolateyStatus.Tests.ps1       # Integration / status check tests for scripts/Check-ChocolateyStatus.ps1
+├── ClaudeUninstall.Tests.ps1              # Path sanitization and safe removal tests for Claude/tools/chocolateyuninstall.ps1
 └── PushtoChocolatey.Tests.ps1             # Unit tests for scripts/PushtoChocolatey.ps1
 ```
 
