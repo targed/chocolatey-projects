@@ -525,7 +525,10 @@ function Write-Section {
 function Get-LatestGitHubReleaseVersion {
     param (
         [Parameter(Mandatory = $true)]
-        [string]$GitHubRepoUrl
+        [string]$GitHubRepoUrl,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$IncludePrerelease
     )
 
     # Extract the username and repo name from the provided URL
@@ -538,6 +541,15 @@ function Get-LatestGitHubReleaseVersion {
 
     $response = Invoke-RestMethod -Uri $apiUrl
     $latestVersionTag = $response.tag_name
+
+    if ($IncludePrerelease) {
+        # Drop a leading "v", preserve prerelease suffix (e.g., 0.1.23-alpha)
+        $tagWithoutV = $latestVersionTag -replace '^v', ''
+        if ($tagWithoutV -match '^(\d+(\.\d+){1,3}(-[0-9A-Za-z.-]+)?)') {
+            return $matches[1]
+        }
+        return $tagWithoutV
+    }
 
     # Extract the numeric version from the release tag so package versioning stays stable.
     if ($latestVersionTag -match '(\d+\.\d+\.\d+)') {
@@ -622,6 +634,9 @@ function UpdateChocolateyPackage {
 
         [Parameter(Mandatory = $false)]
         [string]$GitHubRepoUrl,
+
+        [Parameter(Mandatory = $false)]
+        [boolean]$IncludePrerelease = $false,
 
         [Parameter(Mandatory = $false)]
         [string]$IgnoreVersion,
@@ -905,7 +920,7 @@ function UpdateChocolateyPackage {
         if ($GitHubRepoUrl) {
             Write-Debug "GitHub repo URL: $GitHubRepoUrl"
             $GitHubReleaseTag = Get-LatestGitHubReleaseTag -GitHubRepoUrl $GitHubRepoUrl
-            $ForceVersionNumber = Get-LatestGitHubReleaseVersion -GitHubRepoUrl $GitHubRepoUrl
+            $ForceVersionNumber = Get-LatestGitHubReleaseVersion -GitHubRepoUrl $GitHubRepoUrl -IncludePrerelease:$IncludePrerelease
         }
 
         # URL Modification with Version Number
@@ -1041,8 +1056,10 @@ function UpdateChocolateyPackage {
                 HandleUpdateResult -Result $chocolateyInstallVersionResult -SuccessMessage "Updated version in ChocolateyInstall.ps1 script" -FailureMessage "Did not update version in ChocolateyInstall.ps1 script, ignore error if not used`nMessage: $chocolateyInstallVersionResult"
 
                 # ChocolateyInstall.ps1
-                # Update url if ForceVersionNumber is not set, unless DownloadUrlScrapePattern or DownloadUrlScrapePattern64 is set
-                if (-not $ForceVersionNumber -or $DownloadUrlScrapePattern -or $DownloadUrlScrapePattern64) {
+                # Update url if ForceVersionNumber is not set, unless DownloadUrlScrapePattern or DownloadUrlScrapePattern64 is set, or if the install script directly specifies url without a version variable
+                $installScriptContent = if (Test-Path $InstallScriptPath) { Get-Content $InstallScriptPath -Raw } else { '' }
+                $hasVersionVariable = $installScriptContent -match '(?i)(version\s*=\s*["''])'
+                if (-not $ForceVersionNumber -or $DownloadUrlScrapePattern -or $DownloadUrlScrapePattern64 -or -not $hasVersionVariable) {
                     Write-Output "Updating URL in ChocolateyInstall.ps1 script (if it exists)..."
                     $chocolateyInstallUrlPattern = '(?i)(?<=(url\s*=\s*)["''])(.*?)(?=["''])'
                     $chocolateyInstallUrlResult = UpdateFileContent -FilePath $InstallScriptPath -Pattern $chocolateyInstallUrlPattern -Replacement $FileUrl
@@ -1061,8 +1078,8 @@ function UpdateChocolateyPackage {
                 # ChocolateyInstall.ps1
                 # Update url64 and checksum64
                 if ($FileUrl64 -and $FileDownloadTempPath64) {
-                    # Update the url64 or url64bit in ChocolateyInstall.ps1 if ForceVersionNumber is not set
-                    if (-not $ForceVersionNumber) {
+                    # Update the url64 or url64bit in ChocolateyInstall.ps1 if ForceVersionNumber is not set or version variable is not used
+                    if (-not $ForceVersionNumber -or -not $hasVersionVariable) {
                         Write-Output "Updating url64 or url64bit in ChocolateyInstall.ps1 script (if it exists)..."
                         $chocolateyInstallUrl64Pattern = '(?i)(?<=(url64bit\s*=\s*)["''])(.*?)(?=["''])|(?i)(?<=(url64\s*=\s*)["''])(.*?)(?=["''])'
                         $chocolateyInstallUrl64Result = UpdateFileContent -FilePath $InstallScriptPath -Pattern $chocolateyInstallUrl64Pattern -Replacement $FileUrl64
