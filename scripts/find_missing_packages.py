@@ -46,27 +46,21 @@ def calculate_ease(assets):
     if not assets:
         return "Unknown"
 
+    best_ease = None
+    best_rank = 999
+
     for asset in assets:
         name = asset['name'].lower()
         if name.endswith('.msi'):
             return "Very Easy (MSI)"
+        elif name.endswith('.exe') and best_rank > 2:
+            best_ease, best_rank = "Easy (EXE)", 2
+        elif (name.endswith('.appx') or name.endswith('.msix')) and best_rank > 3:
+            best_ease, best_rank = "Moderate (Appx/MSIX)", 3
+        elif name.endswith('.zip') and best_rank > 4:
+            best_ease, best_rank = "Moderate (ZIP)", 4
 
-    for asset in assets:
-        name = asset['name'].lower()
-        if name.endswith('.exe'):
-            return "Easy (EXE)"
-
-    for asset in assets:
-        name = asset['name'].lower()
-        if name.endswith('.appx') or name.endswith('.msix'):
-            return "Moderate (Appx/MSIX)"
-
-    for asset in assets:
-        name = asset['name'].lower()
-        if name.endswith('.zip'):
-            return "Moderate (ZIP)"
-
-    return "Unknown"
+    return best_ease or "Unknown"
 
 def check_chocolatey(package_name):
     url = f"https://community.chocolatey.org/api/v2/Search()?$filter=IsLatestVersion&searchTerm='{urllib.parse.quote(package_name)}'&targetFramework=''&includePrerelease=false"

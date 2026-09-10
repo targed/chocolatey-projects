@@ -503,18 +503,19 @@ function Write-Section {
     & $writeCmd $divider
 
     $words = $Message -split ' '
-    $line = "# "
+    $lineBuilder = [System.Text.StringBuilder]::new("# ")
     foreach ($word in $words) {
-        if (($line.Length + $word.Length + 1) -gt ($consoleWidth - $prependLength - 1)) {
-            $line = $line.PadRight($consoleWidth - $prependLength - 1) + "#"
+        if (($lineBuilder.Length + $word.Length + 1) -gt ($consoleWidth - $prependLength - 1)) {
+            $line = $lineBuilder.ToString().PadRight($consoleWidth - $prependLength - 1) + "#"
             & $writeCmd $line
-            $line = "# "
+            [void]$lineBuilder.Clear()
+            [void]$lineBuilder.Append("# ")
         }
-        $line += "$word "
+        [void]$lineBuilder.Append("$word ")
     }
 
-    if ($line.Trim().Length -gt 1) {
-        $line = $line.PadRight($consoleWidth - $prependLength - 1) + "#"
+    if ($lineBuilder.ToString().Trim().Length -gt 1) {
+        $line = $lineBuilder.ToString().PadRight($consoleWidth - $prependLength - 1) + "#"
         & $writeCmd $line
     }
 
