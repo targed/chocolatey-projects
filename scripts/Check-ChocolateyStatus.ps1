@@ -9,6 +9,9 @@ param(
 $ErrorActionPreference = 'SilentlyContinue' # Continue on non-terminating errors for Invoke-WebRequest
 $OutputEncoding = [System.Text.Encoding]::UTF8 # Ensure consistent output encoding
 
+# Enforce TLS 1.2 and TLS 1.3 for secure server certificate validation
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12 -bor [System.Net.SecurityProtocolType]::Tls13
+
 $url = "https://community.chocolatey.org/packages/$PackageId/$PackageVersion"
 $logDir = Join-Path $PSScriptRoot ".." "logs" # Place logs dir one level up from scripts, in repo root
 $logFile = Join-Path $logDir "pushed-versions.log"
@@ -21,7 +24,16 @@ if (-not (Test-Path $logDir)) {
 # Write-Host "Checking Chocolatey URL: $url"
 
 try {
-    $response = Invoke-WebRequest -Uri $url -UseBasicParsing -Method Get -TimeoutSec 20 # Added timeout
+    $iwrParams = @{
+        Uri        = $url
+        Method     = 'Get'
+        TimeoutSec = 20
+    }
+    # Only supply -UseBasicParsing on Windows PowerShell 5.1 (non-Core) where required to prevent IE DOM initialization
+    if ($PSVersionTable.PSEdition -ne 'Core') {
+        $iwrParams['UseBasicParsing'] = $true
+    }
+    $response = Invoke-WebRequest @iwrParams
     
     # Check for HTTP status codes that indicate the page exists
     # 200 (OK), 201 (Created), 202 (Accepted) are good indicators.

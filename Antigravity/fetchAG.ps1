@@ -1,5 +1,8 @@
 # PowerShell script to fetch Antigravity download URL using ScraperAPI
 
+# Enforce TLS 1.2 and TLS 1.3 for secure server certificate validation
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12 -bor [System.Net.SecurityProtocolType]::Tls13
+
 # Get API key from environment variable (GitHub secret)
 $ApiKey = $env:SCRAPERAPI_KEY
 if (-not $ApiKey) {
@@ -15,12 +18,32 @@ Write-Host "Fetching URL: $ScraperUrl"
 
 try {
     # Call ScraperAPI
-    $response = Invoke-WebRequest -Uri $ScraperUrl -UseBasicParsing
-    $htmlContent = $response.Content
+    $iwrParams = @{
+        Uri        = $ScraperUrl
+        TimeoutSec = 30
+    }
+    # Only supply -UseBasicParsing on Windows PowerShell 5.1 (non-Core) where required to prevent IE DOM initialization
+    if ($PSVersionTable.PSEdition -ne 'Core') {
+        $iwrParams['UseBasicParsing'] = $true
+    }
+    $response = Invoke-WebRequest @iwrParams
+    $htmlContent = [string]$response.Content
     
-    # Save HTML to local file for inspection
-    $OutputFile = Join-Path $PSScriptRoot "antigravity_response.html"
-    $htmlContent | Out-File -FilePath $OutputFile -Encoding UTF8
+    # Strictly validate and bound output file path within script directory to prevent arbitrary writes
+    $canonicalRoot = [System.IO.Path]::GetFullPath($PSScriptRoot)
+    $outputFileName = "antigravity_response.html"
+    $OutputFile = [System.IO.Path]::GetFullPath((Join-Path $canonicalRoot $outputFileName))
+    $expectedPrefix = $canonicalRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+
+    if (-not $OutputFile.StartsWith($expectedPrefix, [System.StringComparison]::OrdinalIgnoreCase) -or (Split-Path -Leaf $OutputFile) -ne $outputFileName) {
+        throw "Invalid output file path resolved: '$OutputFile'"
+    }
+
+    # Sanitize content: strip null bytes and invalid control characters to prevent file corruption
+    $sanitizedHtml = $htmlContent -replace "[\x00]", ""
+
+    # Save sanitized HTML to local file for inspection
+    [System.IO.File]::WriteAllText($OutputFile, $sanitizedHtml, [System.Text.Encoding]::UTF8)
     Write-Host "HTML saved to: $OutputFile"
     
     # Parse the HTML to extract download URL
