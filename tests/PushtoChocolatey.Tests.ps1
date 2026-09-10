@@ -1,5 +1,6 @@
 BeforeAll {
-    $script:pushScriptPath = Join-Path $PSScriptRoot 'PushtoChocolatey.ps1'
+    $script:repoRoot = Split-Path $PSScriptRoot -Parent
+    $script:pushScriptPath = Join-Path $script:repoRoot 'scripts/PushtoChocolatey.ps1'
     if (-not (Get-Command -Name choco -CommandType Function -ErrorAction SilentlyContinue)) {
         function global:choco { }
     }

@@ -1,5 +1,6 @@
 BeforeAll {
-    $script:updaterPath = Join-Path $PSScriptRoot 'Chocolatey-Package-Updater.ps1'
+    $script:repoRoot = Split-Path $PSScriptRoot -Parent
+    $script:updaterPath = Join-Path $script:repoRoot 'Chocolatey-Package-Updater.ps1'
     . $script:updaterPath
 }
 
