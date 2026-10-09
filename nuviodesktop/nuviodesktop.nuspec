@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>nuviodesktop</id>
-    <version>0.1.27-alpha</version>
+    <version>0.1.29-alpha</version>
     <title>NuvioDesktop</title>
     <authors>NuvioMedia</authors>
     <owners>ltklionel</owners>
