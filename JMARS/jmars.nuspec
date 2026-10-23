@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one.-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+    <metadata>
+        <id>jmars</id>
+        <version>5.5.1</version>
+        <title>JMARS</title>
+        <authors>Arizona State University</authors>
+        <owners>ltklionel</owners>
+        <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/JMARS/logo.png</iconUrl>
+        <copyright>JMARS has been released as an Open Source project, under the GPL license.</copyright>
+        <projectUrl>https://jmars.asu.edu/</projectUrl>
+        <licenseUrl>https://jmars.asu.edu/GPL.TXT</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>Mars GIS NASA Space</tags>
+        <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/JMARS</packageSourceUrl>
+        <releaseNotes>https://jmars.asu.edu/releasenotes</releaseNotes>
+        <summary>A Martian NASA GIS System</summary>
+        <description>![JMARS Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/JMARS/screenshot.png)
+        
+## Summary
+
+JMARS is an acronym that stands for Java Mission-planning and Analysis for Remote Sensing. 
+It is a geospatial information system (GIS) developed by ASU's Mars Space Flight Facility 
+to provide mission planning and data-analysis tools to NASA scientists, instrument team members, 
+students of all ages and the general public. JMARS has been available to the public since 2003. 
+It is used in over 100 countries and has over 6,000 active users.
+
+
+</description>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
+</package>

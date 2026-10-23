@@ -1,0 +1,226 @@
+name: Chocolatey Package Update
+
+on:
+  # Run on manual trigger
+  workflow_dispatch:
+
+  # Run daily at 1PM UTC
+  schedule:
+    - cron: "0 13 * * *"
+
+jobs:
+  update-packages:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full git history for potential version tagging
+
+      # Check PowerShell version to confirm we're using PowerShell Core (7+)
+      - name: Check PowerShell version
+        run: |
+          $PSVersionTable.PSVersion
+          if ($PSVersionTable.PSVersion.Major -lt 7) {
+            Write-Error "PowerShell 7 or higher is required"
+            exit 1
+          }
+
+      # Install Chocolatey AU (Automatic Updater) module
+      - name: Install prerequisites
+        if: success()
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          powershell.exe Install-PackageProvider -Name NuGet -Force
+          Install-Module AU -Force
+          choco install checksum -y
+          exit 0
+
+      - name: Set up Chocolatey environment
+        shell: pwsh
+        run: |
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
+
+      # Run the update script
+      - name: Run package update script
+        if: success()
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+        run: |
+          Unblock-File -Path .\UpdateAll.ps1
+          # Unblock the Antigravity fetch script
+          Unblock-File -Path .\Antigravity\fetchAG.ps1
+          .\UpdateAll.ps1
+
+      # Test the packages
+      - name: Test updated packages
+        if: success()
+        run: |
+          # Extract package directories from UpdateAll.ps1
+          $updateAllContent = Get-Content -Path .\UpdateAll.ps1 -Raw
+          $packageDirs = $updateAllContent -split "`n" | 
+                        Where-Object { $_ -match '\\([^\\]+)\\updateNew\.ps1' } | 
+                        ForEach-Object { $matches[1] }
+
+          Write-Host "Packages to check based on UpdateAll.ps1: $($packageDirs -join ', ')"
+
+          # Find updated packages (those with new .nupkg files) from our target list
+          $updatedPackages = @()
+
+          foreach ($dir in $packageDirs) {
+            if (Test-Path (Join-Path $dir "*.nupkg")) {
+              Write-Host "Found .nupkg in directory: $dir"
+              
+              # Extract packageId from nuspec file
+              $nuspecFile = Get-ChildItem -Path "$dir/*.nuspec" | Select-Object -First 1
+              
+              if ($nuspecFile) {
+                [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+                $packageId = $nuspecContent.package.metadata.id
+                
+                if ($packageId) {
+                  $updatedPackages += [PSCustomObject]@{
+                    Directory = $dir
+                    PackageId = $packageId
+                    NupkgFile = (Get-ChildItem -Path "$dir/*.nupkg" | Select-Object -First 1).FullName
+                  }
+                } else {
+                  Write-Warning "Could not extract package ID from nuspec file in $dir"
+                }
+              } else {
+                Write-Warning "No nuspec file found in $dir"
+              }
+            }
+          }
+
+          Write-Host "Updated packages found: $($updatedPackages.Count)"
+
+          # Test each updated package
+          foreach ($package in $updatedPackages) {
+            Write-Host "Testing package: $($package.PackageId) from directory $($package.Directory)"
+            
+            # Install package by ID, not directory name
+            Write-Host "Installing package: $($package.PackageId)"
+            choco install $($package.PackageId) -y --debug --verbose --source .
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Package installation failed: $($package.PackageId)"
+              exit 1
+            }
+            
+            # Uninstall the package 
+            Write-Host "Uninstalling package: $($package.PackageId)"
+            choco uninstall $($package.PackageId) -y
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Package uninstallation failed: $($package.PackageId)"
+              exit 1
+            }
+          }
+
+        # Push to Chocolatey if updates were found
+      - name: Push to Chocolatey (Test Mode)
+        if: success()
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+          DRY_RUN: flase # Set to false when ready for production
+        run: |
+          # Extract package directories from UpdateAll.ps1
+          $updateAllContent = Get-Content -Path .\UpdateAll.ps1 -Raw
+          $packageDirs = $updateAllContent -split "`n" | 
+                        Where-Object { $_ -match '\\([^\\]+)\\updateNew\.ps1' } | 
+                        ForEach-Object { $matches[1] }
+
+          Write-Host "Found package directories: $($packageDirs -join ', ')"
+
+          # Process each package directory
+          foreach ($dir in $packageDirs) {
+            Write-Host "Processing package directory: $dir"
+            
+            # Extract packageVersion from nuspec file
+            $nuspecFile = Get-ChildItem -Path "$dir/*.nuspec" | Select-Object -First 1
+                
+            if ($nuspecFile) {
+                [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+
+                $packageId = $nuspecContent.package.metadata.id
+                Write-Host "Package ID: $packageId"
+
+                $localPackageVersion = $nuspecContent.package.metadata.version
+                Write-Host "Local package version for $packageId is: $localPackageVersion"
+
+                # Call Check-ChocolateyStatus.ps1
+                $statusScriptPath = Resolve-Path (Join-Path $env:GITHUB_WORKSPACE "scripts/Check-ChocolateyStatus.ps1")
+                Write-Host "Checking Chocolatey status for $packageId version $localPackageVersion using $statusScriptPath..."
+                $pushStatus = & $statusScriptPath -PackageId $packageId -PackageVersion $localPackageVersion
+                Write-Host "Push status for $packageId/$localPackageVersion is: $pushStatus"
+
+                if ($pushStatus -eq "SKIP_PUSH") {
+                    Write-Host "Skipping push for $packageId version $localPackageVersion as per status check."
+                    continue # Skip to the next package in the loop
+                }
+
+                # If PROCEED_WITH_PUSH:
+                # Find nupkg file that matches this version.
+                $nupkgFileToPush = Get-ChildItem -Path (Join-Path $dir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+                
+                if ($nupkgFileToPush) {
+                    Write-Host "Found $packageId package to push: $($nupkgFileToPush.FullName)"
+                    
+                    if ($env:DRY_RUN -ne "true") {
+                        try {
+                            Write-Host "Pushing package: $($nupkgFileToPush.FullName)"
+                            choco push $($nupkgFileToPush.FullName) --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+                            if ($LASTEXITCODE -ne 0) {
+                                Write-Warning "Push failed for $packageId with exit code: $LASTEXITCODE"
+                                # Do not log if push failed
+                            } else {
+                                Write-Host "Successfully pushed $packageId v$localPackageVersion to Chocolatey"
+                                # Log successful push
+                                $logDir = Join-Path $env:GITHUB_WORKSPACE "logs"
+                                $logFile = Join-Path $logDir "pushed-versions.log"
+                                if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+                                Add-Content -Path $logFile -Value "$packageId/$localPackageVersion"
+                                Write-Host "Logged successful push of $packageId/$localPackageVersion to $logFile"
+                            }
+                        }
+                        catch {
+                            Write-Warning "Exception during push for package: $($nupkgFileToPush.FullName)"
+                            Write-Warning "Error: $_"
+                        }
+                    } else {
+                        Write-Host "DRY RUN: Would have pushed $($nupkgFileToPush.FullName) to Chocolatey"
+                        # Optional: Simulate logging for dry run if needed for testing workflow logic
+                        # $logDir = Join-Path $env:GITHUB_WORKSPACE "logs"; $logFile = Join-Path $logDir "pushed-versions.log"
+                        # if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+                        # Add-Content -Path $logFile -Value "$packageId/$localPackageVersion"
+                        # Write-Host "DRY RUN: Logged (simulated) push of $packageId/$localPackageVersion to $logFile"
+                    }
+                }
+                else {
+                    Write-Warning "No .nupkg found for $packageId version $localPackageVersion in $dir to push."
+                }
+            }
+            else {
+                Write-Warning "No nuspec file found for $dir"
+            }
+          }
+
+      # Commit changes back to the repository
+      - name: Commit changes
+        if: success()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull
+          git add .
+          git commit -m "Auto-update packages [skip ci]" -a || echo "No changes to commit"
+          git push

@@ -1,0 +1,30 @@
+Chocolatey Package Updater 0.1.1
+To check for updates, run Chocolatey-Package-Updater -CheckForUpdate
+
+################################################################################
+# Updating package: deepseek-reasonix                                          #
+################################################################################
+Downloading file: https://github.com/esengine/DeepSeek-Reasonix/releases/download/v1.21.5/reasonix-windows-amd64.zip
+Product version: 1.21.5
+Nuspec version: 1.0.0
+New checksum: 3C34350798772F408C0D8ADEE15800E4EB6B9A6D8A5324D75D04B72B47BCCF81
+ChocolateyInstall.ps1 checksum: 
+Comparing versions and checksums...
+Version or checksum is different. Updating package...
+Updating version in nuspec file...
+Updated version in nuspec file
+Updating version in ChocolateyInstall.ps1 script (if it exists)...
+Did not update version in ChocolateyInstall.ps1 script, ignore error if not used
+Message: Pattern not found in file
+Version replacement is occurring in ChocolateyInstall.ps1 script. Skipping URL update in script.
+Updating checksum in ChocolateyInstall.ps1 script...
+Updated checksum in ChocolateyInstall.ps1 script
+Updated to version 1.21.5
+Creating nupkg file...
+Chocolatey v2.7.3
+ERROR: CHCR0001: The licenseUrl element in the package nuspec file cannot be empty.
+
+One or more issues found with C:\Users\ltkli\Documents\GitHub\chocolatey-projects\reasonix-cli\reasonix-desktop.nuspec, please fix all validation items above listed as errors.
+Alert disabled. Skipping alert.
+deepseek-reasonix_setup_temp.exe deleted
+Done.

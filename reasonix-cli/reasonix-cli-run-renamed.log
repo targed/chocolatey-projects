@@ -1,0 +1,15 @@
+Chocolatey Package Updater 0.1.1
+To check for updates, run Chocolatey-Package-Updater -CheckForUpdate
+
+################################################################################
+# Updating package: reasonix-cli                                               #
+################################################################################
+Downloading file: https://github.com/esengine/DeepSeek-Reasonix/releases/download/v1.21.5/reasonix-windows-amd64.zip
+Product version: 1.21.5
+Nuspec version: 1.21.5
+New checksum: 3C34350798772F408C0D8ADEE15800E4EB6B9A6D8A5324D75D04B72B47BCCF81
+ChocolateyInstall.ps1 checksum: 3C34350798772F408C0D8ADEE15800E4EB6B9A6D8A5324D75D04B72B47BCCF81
+Comparing versions and checksums...
+No update needed. No alert sent.
+reasonix-cli_setup_temp.exe deleted
+Done.

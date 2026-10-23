@@ -1,0 +1,236 @@
+name: Antigravity Package Update
+
+on:
+  # Run on manual trigger
+  workflow_dispatch:
+
+  # Run daily at 2 AM UTC
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  update-packages:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full git history for potential version tagging
+
+      # Check PowerShell version to confirm we're using PowerShell Core (7+)
+      - name: Check PowerShell version
+        run: |
+          $PSVersionTable.PSVersion
+          if ($PSVersionTable.PSVersion.Major -lt 7) {
+            Write-Error "PowerShell 7 or higher is required"
+            exit 1
+          }
+
+      # Install Chocolatey AU (Automatic Updater) module
+      - name: Install prerequisites
+        if: success()
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          powershell.exe Install-PackageProvider -Name NuGet -Force
+          Install-Module AU -Force
+          choco install checksum -y
+          exit 0
+
+      - name: Set up Chocolatey environment
+        shell: pwsh
+        run: |
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          $env:Path += ';C:\ProgramData\chocolatey\bin;C:\ProgramData\chocolatey\lib\checksum\tools'
+
+      # Run the Antigravity update script
+      - name: Run Antigravity update script
+        if: success()
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+        run: |
+          # Paths are now relative to the checkout root
+          Unblock-File -Path ./Antigravity/updateNew.ps1
+          Unblock-File -Path ./Antigravity/fetchAG.ps1
+          # Assuming UpdateAll.ps1 is in the root. Adjust if it's elsewhere.
+          Unblock-File -Path ./UpdateAll.ps1
+          # Execute the script using its path relative to the root
+          ./Antigravity/updateNew.ps1 -debug
+
+      # Test the Antigravity package if updated
+      - name: Test Antigravity package
+        if: success()
+        run: |
+          $packageDir = "Antigravity"
+          $updatedPackage = $null
+
+          if (Test-Path (Join-Path $packageDir "*.nupkg")) {
+              Write-Host "Found .nupkg in Antigravity directory"
+                      
+              # Extract packageId from nuspec file
+              $nuspecFile = Get-ChildItem -Path "$packageDir/*.nuspec" | Select-Object -First 1
+                      
+              if ($nuspecFile) {
+                  [xml]$nuspecContent = Get-Content -Path $nuspecFile.FullName
+                  $packageId = $nuspecContent.package.metadata.id
+                        
+                  if ($packageId) {
+                      $updatedPackage = [PSCustomObject]@{
+                          Directory = $packageDir
+                          PackageId = $packageId
+                          NupkgFile = (Get-ChildItem -Path "$packageDir/*.nupkg" | Select-Object -First 1).FullName
+                      }
+                          
+                      Write-Host "Updated package found: $packageId"
+                          
+                      # Install package by ID
+                      Write-Host "Installing package: $($updatedPackage.PackageId)"
+                      choco install $($updatedPackage.PackageId) -y --debug --verbose --source .
+                          
+                      if ($LASTEXITCODE -ne 0) {
+                          Write-Error "Package installation failed: $($updatedPackage.PackageId)"
+                          exit 1
+                      }
+                          
+                      # Uninstall the package 
+                      Write-Host "Uninstalling package: $($updatedPackage.PackageId)"
+                      choco uninstall $($updatedPackage.PackageId) -y
+                          
+                      if ($LASTEXITCODE -ne 0) {
+                          Write-Error "Package uninstallation failed: $($updatedPackage.PackageId)"
+                          exit 1
+                      }
+                      # Output PackageID and PackageVersion to GITHUB_ENV
+                      $packageVersion = $nuspecContent.package.metadata.version
+                      echo "PACKAGE_ID=$($updatedPackage.PackageId)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                      echo "PACKAGE_VERSION=$packageVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                  }
+                  else {
+                      Write-Warning "Could not extract package ID from nuspec file. Push steps will be skipped."
+                      echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                      echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                  }
+              }
+              else {
+                  Write-Warning "No nuspec file found in Antigravity directory. Push steps will be skipped."
+                  echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                  echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+              }
+          }
+          else {
+              Write-Host "No .nupkg found in Antigravity directory - no update needed. Push steps will be skipped."
+              echo "PACKAGE_ID=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+              echo "PACKAGE_VERSION=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+
+      - name: Define Package Info for Push
+        id: package_info
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          $packageId = "$env:PACKAGE_ID"
+          $localPackageVersion = "$env:PACKAGE_VERSION"
+          $packageDir = "Antigravity" # Specific package directory
+
+          if (-not $packageId -or -not $localPackageVersion) {
+            Write-Warning "PACKAGE_ID or PACKAGE_VERSION is empty. Skipping nupkg search."
+            echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            exit 0 # Exit this step gracefully
+          }
+
+          Write-Host "Preparing to check/push $packageId version $localPackageVersion from $packageDir"
+          $nupkgFileToPush = Get-ChildItem -Path (Join-Path $packageDir "$packageId.$localPackageVersion.nupkg") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+          if ($nupkgFileToPush) {
+            Write-Host "Nupkg to push: $($nupkgFileToPush.FullName)"
+            echo "NUPKG_FILE_PATH=$($nupkgFileToPush.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            echo "NUPKG_FOUND=true" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          } else {
+            Write-Warning "No .nupkg found for $packageId version $localPackageVersion in $packageDir"
+            echo "NUPKG_FOUND=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+
+      - name: Check Chocolatey Status
+        if: env.NUPKG_FOUND == 'true' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        id: check_choco_status
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          $status = ./scripts/Check-ChocolateyStatus.ps1 -PackageId "$env:PACKAGE_ID" -PackageVersion "$env:PACKAGE_VERSION"
+          Write-Host "Check status for $env:PACKAGE_ID/$env:PACKAGE_VERSION is: $status"
+          echo "CHOCO_PUSH_STATUS=$status" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Push to Chocolatey
+        if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        id: do_choco_push
+        shell: pwsh
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+          NUPKG_FILE_PATH: ${{ env.NUPKG_FILE_PATH }}
+        run: |
+          Write-Host "Attempting to push $env:NUPKG_FILE_PATH"
+          choco push "$env:NUPKG_FILE_PATH" --source=https://push.chocolatey.org/ --api-key=$env:CHOCO_API_KEY
+          if ($LASTEXITCODE -ne 0) {
+              Write-Error "Failed to push package: $env:NUPKG_FILE_PATH"
+              exit 1
+          }
+
+      - name: Log Successful Push
+        if: steps.do_choco_push.outcome == 'success' && env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'PROCEED_WITH_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          $logDir = "./logs"
+          $logFile = Join-Path $logDir "pushed-versions.log"
+          if (-not (Test-Path $logDir)) {
+            New-Item -ItemType Directory -Path $logDir | Out-Null
+          }
+          $pushedEntry = "$env:PACKAGE_ID/$env:PACKAGE_VERSION"
+          Add-Content -Path $logFile -Value $pushedEntry
+          Write-Host "Logged successful push of $pushedEntry to $logFile"
+
+      - name: Notify Skipped Push
+        if: env.NUPKG_FOUND == 'true' && env.CHOCO_PUSH_STATUS == 'SKIP_PUSH' && env.PACKAGE_ID && env.PACKAGE_VERSION
+        shell: pwsh
+        env:
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          Write-Host "Push for $env:PACKAGE_ID version $env:PACKAGE_VERSION was skipped because it's already on Chocolatey.org or in the local push log."
+
+      - name: Notify No Nupkg/Info Found
+        if: env.NUPKG_FOUND == 'false' || !env.PACKAGE_ID || !env.PACKAGE_VERSION
+        shell: pwsh
+        run: |
+          Write-Host "Push was skipped because no matching .nupkg file was found, or package ID/version was not determined."
+
+      # Commit changes back to the repository
+      - name: Commit changes
+        if: success()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull
+          git fetch origin
+          # Add changes from the specific package directory and logs
+          git add ./Antigravity/* ./logs/*
+          # Check for staged changes before committing
+          $changes = git diff --staged --name-only
+          if ($changes) {
+            git commit -m "Auto-update Antigravity package [skip ci]"
+            git push
+          } else {
+            echo "No changes to commit for Antigravity package."
+          }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>windsurf</id>
+    <version>1.7.1</version>
+    <title>Windsurf</title>
+    <authors>Windsurf</authors>
+    <owners>ltklionel</owners>
+    <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Windsurf/logo.png</iconUrl>
+    <copyright>Copyright 2025 Windsurf</copyright>
+    <projectUrl>https://windsurf.com/</projectUrl>
+    <licenseUrl>https://windsurf.com/terms-of-service-individual</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>chatbot chat bot LLM AI machine-learning GUI IDE</tags>
+    <packageSourceUrl>https://github.com/targed/chocolatey-projects/tree/main/Windsurf</packageSourceUrl>
+    <releaseNotes>https://windsurf.com/changelog</releaseNotes>
+    <summary>The new purpose-built IDE to harness magic</summary>
+    <description>
+
+![Windsurf Screenshot](https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Windsurf/screenshot.jpg)
+
+An AI editor that doesn't just meet your needs, it anticipates them
+
+The editor stays 10 steps ahead — fixing test failures before you even write the test, resolving issues before they surface, and keeping you in flow.
+
+</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
