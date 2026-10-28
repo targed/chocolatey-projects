@@ -22,32 +22,12 @@ $packageArgs = @{
   checksum       = '669B6C60B1A56028DF49D745D045658F51BE5CF787B7D17792DA632ED0D2EB1C'
   checksumType   = 'sha256'
 
-  # Need to create silentArgs that prevent the installer from popping up a window (Have not figgured that out yet)
-  silentArgs     = '/S /VERYSILENT /SUPPRESSMSGBOXES /norestart /quiet /qn /norestart /l*v /SP- $locale'
+  # The installer is Squirrel (Setup.exe), which ignores the NSIS/Inno switches; --silent hides its install window
+  silentArgs     = '--silent'
   validExitCodes = @(0, 3010, 1641)
 }
 
 Install-ChocolateyPackage @packageArgs
-
-# Wait for Claude process to appear (timeout after 60 seconds)
-$timeout = 60
-$timer = [System.Diagnostics.Stopwatch]::StartNew()
-
-Write-Host "Waiting for Claude process to start..."
-while ($timer.Elapsed.TotalSeconds -lt $timeout) {
-  $process = Get-Process -Name "claude" -ErrorAction SilentlyContinue
-  if ($process) {
-    Start-Sleep -Seconds 10  # Give it a few seconds to fully initialize
-    Write-Host "Terminating Claude process..."
-    taskkill /F /IM "claude.exe" /T
-    break
-  }
-  Start-Sleep -Seconds 1
-}
-
-if ($timer.Elapsed.TotalSeconds -ge $timeout) {
-  Write-Warning "Timeout waiting for Claude process"
-}
 
 # Exho where claude-Setup-x64.exe is located
 # Write-Host "Claude-Setup-x64.exe is located at: $unzipLocation"
