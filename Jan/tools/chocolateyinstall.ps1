@@ -2,9 +2,9 @@
 $VerbosePreference = 'SilentlyContinue'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$version = "0.8.7"
+$version = "0.8.8"
 $url = "https://github.com/menloresearch/jan/releases/download/v${version}/Jan_${version}_x64-setup.exe"
-$checksum = "D44C587C53E6EFF8C00A01C171D23EFF31D3A4ECAA88936C0D253B0BD5248952"
+$checksum = "08ACA371733B76200E44E95D677CDD15E96609F86F919DE57B97A5358CA21E9B"
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
