@@ -13,6 +13,7 @@ $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 # $unzipLocation = [System.IO.Path]::Combine($env:ChocolateyInstall, "lib", $folderName)
 
 $pp = Get-PackageParameters
+$disableAutoUpdates = if ($pp.ContainsKey("disableAutoUpdates")) { $true } else { $false }
 $enableVirtualizationPlatform = if ($pp.ContainsKey("enableVirtualizationPlatform")) { $true } else { $false }
 
 
@@ -35,6 +36,10 @@ try {
 
     Add-AppxProvisionedPackage -Online -PackagePath $downloadPath -SkipLicense -Regions 'all' -LogPath "$($env:TEMP)\$($env:ChocolateyPackageName).$($env:chocolateyPackageVersion).MsixInstall.log"
     Write-Host "Installed Claude MSIX package systemwide!"
+    if ($disableAutoUpdates) {
+	New-Item -Path "HKLM:\SOFTWARE\Policies\Claude" -Force
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Claude" -Name "disableAutoUpdates" -Value 1 -Type DWord
+    }
     if ($enableVirtualizationPlatform) {
         Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -All -NoRestart
         Write-Host "Virtual Machine Platform is enabled. Windows restart required."
