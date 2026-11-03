@@ -12,6 +12,10 @@ $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 # # Set new install location to ChocolateyInstall\lib\Claude
 # $unzipLocation = [System.IO.Path]::Combine($env:ChocolateyInstall, "lib", $folderName)
 
+$pp = Get-PackageParameters
+$enableVirtualizationPlatform = if ($pp.ContainsKey("enableVirtualizationPlatform")) { $true } else { $false }
+
+
 $packageName  = $env:ChocolateyPackageName
 $url          = 'https://downloads.claude.ai/releases/win32/x64/4.4212.0/Claude-cbfe3c56d49c49332ad5a9588303c9dbc70a5e7f.msix'
 $downloadPath = Join-Path $env:TEMP "$packageName.msix"
@@ -31,6 +35,10 @@ try {
 
     Add-AppxProvisionedPackage -Online -PackagePath $downloadPath -SkipLicense -Regions 'all' -LogPath "$($env:TEMP)\$($env:ChocolateyPackageName).$($env:chocolateyPackageVersion).MsixInstall.log"
     Write-Host "Installed Claude MSIX package systemwide!"
+    if ($enableVirtualizationPlatform) {
+        Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -All -NoRestart
+        Write-Host "Virtual Machine Platform is enabled. Windows restart required."
+    }
 }
 catch {
     Write-Error "Error during MSIX-Installation: $_"
