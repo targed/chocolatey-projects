@@ -1,5 +1,4 @@
-﻿$ErrorActionPreference = 'Continue'
-
+﻿$ErrorActionPreference = 'Stop'
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 
 # $folderName = "AnthropicClaude"
@@ -13,40 +12,34 @@ $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 # # Set new install location to ChocolateyInstall\lib\Claude
 # $unzipLocation = [System.IO.Path]::Combine($env:ChocolateyInstall, "lib", $folderName)
 
-$packageArgs = @{
-  packageName    = $env:ChocolateyPackageName
-  unzipLocation  = $toolsDir
-  fileType       = 'EXE' 
-  url            = 'https://downloads.claude.ai/releases/win32/x64/4.4212.0/Claude-cbfe3c56d49c49332ad5a9588303c9dbc70a5e7f.exe'
-  softwareName   = 'Claude*' 
-  checksum       = 'D2436C15D1964B17E4DBFB8B8A9D121BA154D1825FBFF3725CEEDC089074AFF4'
-  checksumType   = 'sha256'
+$packageName  = $env:ChocolateyPackageName
+$url          = 'https://downloads.claude.ai/releases/win32/x64/4.4212.0/Claude-cbfe3c56d49c49332ad5a9588303c9dbc70a5e7f.msix'
+$downloadPath = Join-Path $env:TEMP "$packageName.msix"
 
-  # Need to create silentArgs that prevent the installer from popping up a window (Have not figgured that out yet)
-  silentArgs     = '/S /VERYSILENT /SUPPRESSMSGBOXES /norestart /quiet /qn /norestart /l*v /SP- $locale'
-  validExitCodes = @(0, 3010, 1641)
+$checksum     = '5e7cd0edfe4a5561e6f69b0249757d23de752a74151e016fe81bc939ddc5439e'
+$checksumtype = 'sha256'
+
+try {
+    Get-ChocolateyWebFile -PackageName $packageName `
+                          -FileFullPath $downloadPath `
+                          -Url $url `
+                          -Checksum $checksum `
+                          -ChecksumType $checksumtype
+    # Stop Claude processes and services before installation
+    . (Join-Path $toolsDir 'helpers.ps1')
+    Stop-ClaudeComponents
+
+    Add-AppxProvisionedPackage -Online -PackagePath $downloadPath -SkipLicense -Regions 'all' -LogPath "$($env:TEMP)\$($env:ChocolateyPackageName).$($env:chocolateyPackageVersion).MsixInstall.log"
+    Write-Host "Installed Claude MSIX package systemwide!"
 }
-
-Install-ChocolateyPackage @packageArgs
-
-# Wait for Claude process to appear (timeout after 60 seconds)
-$timeout = 60
-$timer = [System.Diagnostics.Stopwatch]::StartNew()
-
-Write-Host "Waiting for Claude process to start..."
-while ($timer.Elapsed.TotalSeconds -lt $timeout) {
-  $process = Get-Process -Name "claude" -ErrorAction SilentlyContinue
-  if ($process) {
-    Start-Sleep -Seconds 10  # Give it a few seconds to fully initialize
-    Write-Host "Terminating Claude process..."
-    taskkill /F /IM "claude.exe" /T
-    break
-  }
-  Start-Sleep -Seconds 1
+catch {
+    Write-Error "Error during MSIX-Installation: $_"
+    throw $_
 }
-
-if ($timer.Elapsed.TotalSeconds -ge $timeout) {
-  Write-Warning "Timeout waiting for Claude process"
+finally {
+    if (Test-Path $downloadPath) {
+        Remove-Item -Path $downloadPath -Force
+    }
 }
 
 # Exho where claude-Setup-x64.exe is located
