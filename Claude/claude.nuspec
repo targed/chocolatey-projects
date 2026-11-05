@@ -35,14 +35,15 @@ Do more on your PC with Claude:
 
 ## Package Notes
 
-By default this package installs the MSIX build that Anthropic recommends for managed deployments. It is installed for all users on the machine (administrator rights are required, which Chocolatey already has) and includes the background service that Cowork needs. Windows 10 version 2004 (build 19041) or later is required.
+By default this package installs the MSIX build that Anthropic recommends for managed deployments. It is installed for all users on the machine (administrator rights are required, which Chocolatey already has) and includes the background service that Cowork needs. Windows 10 version 2004 (build 19041) or later is required. On ARM64 Windows the ARM64 build is installed.
 
 ## Package Parameters
 
 - `/Legacy` - install the previous per-user installer (Squirrel) instead of the MSIX. Cowork is not available with it.
 - `/DisableAutoUpdates` - set Claude's `disableAutoUpdates` policy so that Chocolatey manages the version (MSIX only).
+- `/EnableVirtualizationPlatform` - enable the Windows Virtual Machine Platform that Cowork needs, if it is not already enabled; restart Windows afterwards (MSIX only).
 
-Example: `choco install claude --params "'/DisableAutoUpdates'"`
+Example: `choco install claude --params "'/DisableAutoUpdates /EnableVirtualizationPlatform'"`
 
 Switching between the two installers does not remove the other one: if you install with or without `/Legacy` over an existing install, both stay installed. Uninstalling the package removes both.
 
