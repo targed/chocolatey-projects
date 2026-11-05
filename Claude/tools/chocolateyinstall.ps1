@@ -1,24 +1,23 @@
-﻿$ErrorActionPreference = 'Continue'
+﻿$ErrorActionPreference = 'Stop'
 
-$toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
+$toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
-# $folderName = "AnthropicClaude"
+# Package parameters:
+#   /Legacy                        install the per-user Squirrel installer (.exe) instead of the MSIX
+#   /DisableAutoUpdates            MSIX only: set Claude's disableAutoUpdates policy so Chocolatey manages the version
+$pp = Get-PackageParameters
 
-# # Remove Claude directory in old location if it exists (ProgramData/$USER$)
-# $oldUnzipLocation = Join-Path ([Environment]::GetFolderPath("CommonApplicationData")) $folderName
-# if (Test-Path $oldUnzipLocation) {
-#   Remove-Item -Path $oldUnzipLocation -Recurse -Force -ErrorAction SilentlyContinue
-# }
+# MSIX build of the same release as the .exe below: machine-wide, includes the Cowork service
+$msixSource = 'https://downloads.claude.ai/releases/win32/x64/4.16336.0/Claude-61c5bb50afdeb36ef1152e82f33cdb2f46fccdee.msix'
+$msixSha256 = '3136efa19c9f2e8ddaec7e09684dd4909199e917f7cb0c38705af7d571b4ca53'
 
-# # Set new install location to ChocolateyInstall\lib\Claude
-# $unzipLocation = [System.IO.Path]::Combine($env:ChocolateyInstall, "lib", $folderName)
-
+# Squirrel installer, used with /Legacy
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
-  fileType       = 'EXE' 
+  fileType       = 'EXE'
   url            = 'https://downloads.claude.ai/releases/win32/x64/4.16336.0/Claude-61c5bb50afdeb36ef1152e82f33cdb2f46fccdee.exe'
-  softwareName   = 'Claude*' 
+  softwareName   = 'Claude*'
   checksum       = '8D03D2D73A4284656DF7BF4380A0E7CF2C9BCD09BBA856011DD0299D704178FB'
   checksumType   = 'sha256'
 
@@ -27,49 +26,51 @@ $packageArgs = @{
   validExitCodes = @(0, 3010, 1641)
 }
 
-Install-ChocolateyPackage @packageArgs
+if ($pp.Legacy) {
+  Write-Warning 'Installing the legacy per-user Claude installer (/Legacy). Cowork needs the default MSIX install.'
+  Install-ChocolateyPackage @packageArgs
+  return
+}
 
-# Exho where claude-Setup-x64.exe is located
-# Write-Host "Claude-Setup-x64.exe is located at: $unzipLocation"
-# # ls the dir to see what is in it
-# ls $unzipLocation
+# The MSIX needs Windows 10 version 2004 (build 19041) or later and an elevated shell
+if ([Environment]::OSVersion.Version.Build -lt 19041) {
+  throw 'The Claude MSIX needs Windows 10 version 2004 (build 19041) or later. Use /Legacy for the older installer.'
+}
 
-# Stop-Process -Name Claude-Setup-x64 -Force -ErrorAction SilentlyContinue
+. (Join-Path $toolsDir 'helpers.ps1')
 
-# Start-Process -WindowStyle Hidden -FilePath $oldUnzipLocation\Claude-Setup-x64.exe -ArgumentList '/S /VERYSILENT /SUPPRESSMSGBOXES /norestart /quiet /qn /norestart /l*v /SP- $locale'
+# A leftover per-user install from the /Legacy installer (or an earlier version of this package) would sit beside the MSIX
+[array]$squirrel = Get-UninstallRegistryKey -SoftwareName 'Claude*' -WarningAction SilentlyContinue | Where-Object { $_.UninstallString -match 'Update\.exe' }
+if ($squirrel.Count -gt 0) {
+  Write-Warning 'A per-user Claude installation from the legacy installer was found. It is left in place; uninstall it from Apps & features if you no longer need it.'
+}
 
-# Kill the pop-up window that the installer creates without stopping the installation
-# $process = Get-Process | Where-Object { $_.MainWindowTitle -eq "Claude" }
-# if ($process) {
-#   Stop-Process -Id $process.Id
-# }
-# Stop-Process -Name Claude-Setup-x64 -Force -ErrorAction SilentlyContinue
-# Stop-Process -Name Claude -Force -ErrorAction SilentlyContinue
+$downloadDir = Join-Path $env:TEMP "$($env:ChocolateyPackageName).$($env:ChocolateyPackageVersion)"
+$msixFile = Join-Path $downloadDir 'Claude.msix'
+New-Item -ItemType Directory -Path $downloadDir -Force | Out-Null
 
-# Download the installer
-# $installerPath = Join-Path $env:TEMP 'Claude-Setup-x64.exe'
-# Invoke-WebRequest -Uri $packageArgs.url -OutFile $installerPath -UseBasicParsing
+try {
+  Get-ChocolateyWebFile -PackageName $env:ChocolateyPackageName `
+    -FileFullPath $msixFile `
+    -Url $msixSource `
+    -Checksum $msixSha256 `
+    -ChecksumType 'sha256'
 
-# # Run the installer with hidden window style
-# $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-# $startInfo.FileName = $installerPath
-# $startInfo.Arguments = '/S /VERYSILENT /SUPPRESSMSGBOXES /norestart /quiet /qn /norestart /l*v /SP- $locale'
-# $startInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
-# $process = [System.Diagnostics.Process]::Start($startInfo)
-# $process.WaitForExit()
+  # The Cowork service and a running Claude hold the files of the installed build
+  Stop-ClaudeComponents
 
-# # Clean up the installer
-# Remove-Item -Path $installerPath -Force
+  # Stages the package for every user and registers it for the signed-in user
+  Add-AppxProvisionedPackage -Online -PackagePath $msixFile -SkipLicense -Regions 'all' `
+    -LogPath (Join-Path $downloadDir 'MsixInstall.log') | Out-Null
+  Write-Host 'Claude was installed machine-wide (MSIX).'
+} finally {
+  Remove-Item -Path $downloadDir -Recurse -Force -ErrorAction SilentlyContinue
+}
 
-#wait for the installer to finish
-# $process = Get-Process | Where-Object { $_.MainWindowTitle -eq "Claude" }
-# if ($process) {
-#   $process.WaitForExit()
-#   $process.MainWindowHandle | ForEach-Object { (New-Object -TypeName System.Windows.Forms.Form -Property @{ Visible = $true; TopMost = $true; WindowState = 'Minimized'; Opacity = 0 }).Show() }
-# }
-
-# Set the pop-up window that the installer creates to hidden and run in the background
-# $process = Get-Process | Where-Object { $_.MainWindowTitle -eq "Claude" }
-# if ($process) {
-#   $process.MainWindowHandle | ForEach-Object { (New-Object -TypeName System.Windows.Forms.Form -Property @{ Visible = $true; TopMost = $true; WindowState = 'Minimized'; Opacity = 0 }).Show() }
-# }
+if ($pp.DisableAutoUpdates) {
+  $policyKey = 'HKLM:\SOFTWARE\Policies\Claude'
+  # New-Item -Force on an existing key would empty it, which would drop any other Claude policies
+  if (-not (Test-Path $policyKey)) { New-Item -Path $policyKey | Out-Null }
+  Set-ItemProperty -Path $policyKey -Name 'disableAutoUpdates' -Value 1 -Type DWord
+  Write-Host 'Claude automatic updates are disabled (HKLM policy); Chocolatey now manages the version.'
+}

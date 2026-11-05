@@ -41,6 +41,28 @@ if (-not $fileUrl) {
     throw "Failed to resolve redirect URL for Claude from all candidate endpoints. Details: $($lastErrorDetails -join '; ')"
 }
 
+# The MSIX of the same release sits beside the .exe (same folder and hash, other extension).
+# Set its URL and SHA-256 in the install script before UpdateChocolateyPackage packs the nupkg.
+if ($fileUrl -notmatch '\.exe$') {
+    throw "Expected an .exe download URL, got: $fileUrl"
+}
+$msixUrlNew = $fileUrl -replace '\.exe$', '.msix'
+$installScript = Join-Path $ScriptPath 'tools\chocolateyinstall.ps1'
+$installContent = Get-Content $installScript -Raw -Encoding UTF8
+if ($installContent -notmatch [regex]::Escape("'$msixUrlNew'")) {
+    Write-Host "Hashing the MSIX: $msixUrlNew"
+    $msixTemp = Join-Path ([System.IO.Path]::GetTempPath()) 'claude-update.msix'
+    curl.exe --fail -sSL -A $userAgent -o $msixTemp $msixUrlNew
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not download the MSIX from $msixUrlNew"
+    }
+    $msixHash = (Get-FileHash -Path $msixTemp -Algorithm SHA256).Hash.ToLower()
+    Remove-Item $msixTemp -Force
+    $installContent = [regex]::Replace($installContent, "(?m)^(\`$msixSource\s*=\s*)'[^']*'", { param($m) "$($m.Groups[1].Value)'$msixUrlNew'" })
+    $installContent = [regex]::Replace($installContent, "(?m)^(\`$msixSha256\s*=\s*)'[^']*'", { param($m) "$($m.Groups[1].Value)'$msixHash'" })
+    [System.IO.File]::WriteAllText($installScript, $installContent, (New-Object System.Text.UTF8Encoding $true))
+}
+
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 

@@ -2,6 +2,30 @@ $ErrorActionPreference = 'Stop'
 
 Get-Process -Name 'claude' -ErrorAction SilentlyContinue | Stop-Process -Force
 
+# MSIX build (the default install): stop the app and the Cowork service, then remove the package for all users
+. (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Definition) 'helpers.ps1')
+Stop-ClaudeComponents
+
+# Match on the publisher id too, so a different package called "Claude" is never touched
+$msixName = 'Claude_*__pzs8sxrjxfjjc'
+foreach ($p in @(Get-AppxProvisionedPackage -Online | Where-Object { $_.PackageName -like $msixName })) {
+  Write-Host "Removing the provisioned package $($p.PackageName)"
+  Remove-AppxProvisionedPackage -Online -PackageName $p.PackageName | Out-Null
+}
+foreach ($p in @(Get-AppxPackage -AllUsers -Name 'Claude' | Where-Object { $_.PackageFamilyName -eq 'Claude_pzs8sxrjxfjjc' })) {
+  Write-Host "Removing the package $($p.PackageFullName) for all users"
+  Remove-AppxPackage -Package $p.PackageFullName -AllUsers
+}
+
+# Only the value this package can set (/DisableAutoUpdates); other Claude policies stay
+$policyKey = 'HKLM:\SOFTWARE\Policies\Claude'
+if (Get-ItemProperty -Path $policyKey -Name 'disableAutoUpdates' -ErrorAction SilentlyContinue) {
+  Remove-ItemProperty -Path $policyKey -Name 'disableAutoUpdates'
+  if (-not (Get-ChildItem -Path $policyKey) -and -not (Get-Item -Path $policyKey).ValueCount) {
+    Remove-Item -Path $policyKey
+  }
+}
+
 # Run the Squirrel uninstaller first, so the Add/Remove Programs and Start menu entries are removed.
 # It lives inside the folder that the cleanup below deletes.
 [array]$key = Get-UninstallRegistryKey -SoftwareName 'Claude*' |
