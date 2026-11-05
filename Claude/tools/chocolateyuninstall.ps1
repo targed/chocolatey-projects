@@ -1,5 +1,23 @@
 $ErrorActionPreference = 'Stop'
 
+Get-Process -Name 'claude' -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# Run the Squirrel uninstaller first, so the Add/Remove Programs and Start menu entries are removed.
+# It lives inside the folder that the cleanup below deletes.
+[array]$key = Get-UninstallRegistryKey -SoftwareName 'Claude*' |
+  Where-Object { $_.UninstallString -match 'Update\.exe' }
+if ($key.Count -eq 1) {
+  # UninstallString looks like: "C:\...\Update.exe" --uninstall
+  $file = $key[0].UninstallString -replace '\s*--\S+.*$', '' -replace '^"(.*)"$', '$1'
+  Uninstall-ChocolateyPackage -PackageName $env:ChocolateyPackageName `
+    -FileType 'exe' `
+    -SilentArgs '--uninstall' `
+    -ValidExitCodes @(0) `
+    -File $file
+} elseif ($key.Count -gt 1) {
+  Write-Warning "$($key.Count) Squirrel uninstall entries found for 'Claude*' - skipping the uninstaller."
+}
+
 $folderName = "AnthropicClaude"
 
 # Validate $folderName strictly: must be non-empty alphanumeric with optional underscores or dashes
@@ -41,6 +59,12 @@ if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
 # Remove the desktop shortcut
 if (-not [string]::IsNullOrWhiteSpace($shortcutPath) -and $shortcutPath.EndsWith('.lnk') -and (Test-Path $shortcutPath)) {
     Remove-Item $shortcutPath -Force
+}
+
+# Claude creates this Start menu shortcut itself on first run, and the Squirrel uninstaller leaves it behind
+$startMenuShortcut = Join-Path ([Environment]::GetFolderPath('Programs')) 'Claude.lnk'
+if (Test-Path $startMenuShortcut) {
+    Remove-Item $startMenuShortcut -Force
 }
 
 # Remove package tools directory only if it is inside the Chocolatey lib folder
