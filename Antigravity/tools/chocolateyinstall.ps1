@@ -1,6 +1,6 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 
-$toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
+$toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
@@ -11,27 +11,21 @@ $packageArgs = @{
   checksum       = '944B109BCB377F9F94F86EEEA7CFA9315D4B42D84FB9D5BAD689058FC11C12BA'
   checksumType   = 'sha256'
   
-  silentArgs     = '/S /VERYSILENT /SUPPRESSMSGBOXES /norestart /quiet /qn /norestart /l*v /SP- $locale'
+  # NSIS installer: /S enables silent installation; /currentuser targets the user profile
+  silentArgs     = '/S /currentuser'
   validExitCodes = @(0, 3010, 1641)
 }
 
 Install-ChocolateyPackage @packageArgs
 
-$timeout = 60
-$timer = [System.Diagnostics.Stopwatch]::StartNew()
-
-Write-Host "Waiting for Antigravity process to start..."
-while ($timer.Elapsed.TotalSeconds -lt $timeout) {
-  $process = Get-Process -Name "antigravity" -ErrorAction SilentlyContinue
-  if ($process) {
-    Start-Sleep -Seconds 10  # Give it a few seconds to fully initialize
-    Write-Host "Terminating Antigravity process..."
-    taskkill /F /IM "antigravity.exe" /T
+# electron-builder NSIS installers launch the app upon finish; terminate it cleanly without delaying the install
+$deadline = (Get-Date).AddSeconds(15)
+while ((Get-Date) -lt $deadline) {
+  $proc = Get-Process -Name 'antigravity' -ErrorAction SilentlyContinue
+  if ($proc) {
+    Start-Sleep -Milliseconds 500
+    Stop-Process -Name 'antigravity', 'language_server' -Force -ErrorAction SilentlyContinue
     break
   }
-  Start-Sleep -Seconds 1
-}
-
-if ($timer.Elapsed.TotalSeconds -ge $timeout) {
-  Write-Warning "Timeout waiting for Antigravity process"
+  Start-Sleep -Milliseconds 500
 }
