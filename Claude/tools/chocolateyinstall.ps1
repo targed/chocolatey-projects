@@ -12,21 +12,21 @@ $pp = Get-PackageParameters
 $isArm64 = $env:PROCESSOR_IDENTIFIER -like 'ARMv*'
 
 # MSIX build of the same release as the .exe below: machine-wide, includes the Cowork service
-$msixSource = 'https://downloads.claude.ai/releases/win32/x64/4.16336.0/Claude-61c5bb50afdeb36ef1152e82f33cdb2f46fccdee.msix'
-$msixSha256 = '3136efa19c9f2e8ddaec7e09684dd4909199e917f7cb0c38705af7d571b4ca53'
-$msixSourceArm64 = 'https://downloads.claude.ai/releases/win32/arm64/4.16336.0/Claude-61c5bb50afdeb36ef1152e82f33cdb2f46fccdee.msix'
-$msixSha256Arm64 = '9720cc1251a9a47f5732ed7a8955676f12231d092b75525ace0c89c54dc9d4c0'
+$msixSource = 'https://downloads.claude.ai/releases/win32/x64/4.23118.0/Claude-8175c354eda704cea00fdeddfa69cea329dd321a.msix'
+$msixSha256 = '0432bd1247d4ee241432553d581a89931ea77ffb2abf05165cce23684b610165'
+$msixSourceArm64 = 'https://downloads.claude.ai/releases/win32/arm64/4.23118.0/Claude-8175c354eda704cea00fdeddfa69cea329dd321a.msix'
+$msixSha256Arm64 = '1927a0767d7c3167010ad08572c245182b3c3515194e1981092600b8f8b2a53d'
 
 # Squirrel installer, used with /Legacy
-$exeSourceArm64 = 'https://downloads.claude.ai/releases/win32/arm64/4.16336.0/Claude-61c5bb50afdeb36ef1152e82f33cdb2f46fccdee.exe'
-$exeSha256Arm64 = 'fd86ac8bee25517629cd8e0bd5c4d4441e930251770358a58aef5ff8e5324377'
+$exeSourceArm64 = 'https://downloads.claude.ai/releases/win32/arm64/4.23118.0/Claude-8175c354eda704cea00fdeddfa69cea329dd321a.exe'
+$exeSha256Arm64 = '2a45ada4a06e2a1988f80aa101622aaab4105ef0980477031ca186d54ccc360d'
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'EXE'
-  url            = 'https://downloads.claude.ai/releases/win32/x64/4.16336.0/Claude-61c5bb50afdeb36ef1152e82f33cdb2f46fccdee.exe'
+  url            = 'https://downloads.claude.ai/releases/win32/x64/4.23118.0/Claude-8175c354eda704cea00fdeddfa69cea329dd321a.exe'
   softwareName   = 'Claude*'
-  checksum       = '8D03D2D73A4284656DF7BF4380A0E7CF2C9BCD09BBA856011DD0299D704178FB'
+  checksum       = '75B79EB9505CCDE1F31DF29F2EC494399C7B0ECDC06E2145AD90AA9EB8FE18C7'
   checksumType   = 'sha256'
 
   # The installer is Squirrel (Setup.exe), which ignores the NSIS/Inno switches; --silent hides its install window
