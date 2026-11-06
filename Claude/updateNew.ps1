@@ -41,6 +41,36 @@ if (-not $fileUrl) {
     throw "Failed to resolve redirect URL for Claude from all candidate endpoints. Details: $($lastErrorDetails -join '; ')"
 }
 
+# The MSIX and the ARM64 builds of the same release sit beside the x64 .exe (same hash in the file name, other folder or extension).
+# Set their URLs and SHA-256 in the install script before UpdateChocolateyPackage packs the nupkg.
+if ($fileUrl -notmatch '/x64/.+\.exe$') {
+    throw "Expected an x64 .exe download URL, got: $fileUrl"
+}
+$installScript = Join-Path $ScriptPath 'tools\chocolateyinstall.ps1'
+$installContent = Get-Content $installScript -Raw -Encoding UTF8
+$extraBuilds = @(
+    @{ Source = 'msixSource';      Sha = 'msixSha256';      Url = ($fileUrl -replace '\.exe$', '.msix') }
+    @{ Source = 'msixSourceArm64'; Sha = 'msixSha256Arm64'; Url = ($fileUrl -replace '/x64/', '/arm64/' -replace '\.exe$', '.msix') }
+    @{ Source = 'exeSourceArm64';  Sha = 'exeSha256Arm64';  Url = ($fileUrl -replace '/x64/', '/arm64/') }
+)
+foreach ($build in $extraBuilds) {
+    $current = [regex]::Match($installContent, "(?m)^\`$$($build.Source)\s*=\s*'([^']*)'").Groups[1].Value
+    $currentSha = [regex]::Match($installContent, "(?m)^\`$$($build.Sha)\s*=\s*'([^']*)'").Groups[1].Value
+    if ($current -eq $build.Url -and $currentSha) { continue }
+    Write-Host "Hashing $($build.Url)"
+    $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) 'claude-update.bin'
+    curl.exe --fail -sSL -A $userAgent -o $tempFile $build.Url
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not download $($build.Url)"
+    }
+    $hash = (Get-FileHash -Path $tempFile -Algorithm SHA256).Hash.ToLower()
+    Remove-Item $tempFile -Force
+    $newUrl = $build.Url
+    $installContent = [regex]::Replace($installContent, "(?m)^(\`$$($build.Source)\s*=\s*)'[^']*'", { param($m) "$($m.Groups[1].Value)'$newUrl'" })
+    $installContent = [regex]::Replace($installContent, "(?m)^(\`$$($build.Sha)\s*=\s*)'[^']*'", { param($m) "$($m.Groups[1].Value)'$hash'" })
+    [System.IO.File]::WriteAllText($installScript, $installContent, (New-Object System.Text.UTF8Encoding $true))
+}
+
 # Import the UpdateChocolateyPackage function
 . (Join-Path $ParentPath 'Chocolatey-Package-Updater.ps1')
 
