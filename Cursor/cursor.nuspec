@@ -6,7 +6,7 @@
         <version>3.29.9</version>
         <title>Cursor</title>
         <authors>getcursor</authors>
-        <owners>ltklionel, publicfacingusername</owners>
+        <owners>ltklionel</owners>
         <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/logo.png</iconUrl>
         <copyright>Copyright (c) 2023-2024 anysphere.inc/</copyright>
         <projectUrl>https://github.com/getcursor/cursor</projectUrl>

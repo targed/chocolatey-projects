@@ -6,7 +6,7 @@
     <version>4.16336.0</version>
     <title>Claude Desktop</title>
     <authors>Anthropic</authors>
-    <owners>ltklionel</owners>
+    <owners>ltklionel, virtualex</owners>
     <iconUrl>https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Claude/logo.png</iconUrl>
     <copyright>Copyright 2024 Anthropic</copyright>
     <projectUrl>https://claude.ai/download</projectUrl>
