@@ -42,6 +42,10 @@ Google Antigravity is an AI-powered development platform that reimagines the tra
 - Automatic verification of agent work
 - Local operation for easier iteration
 
+## Package Notes
+
+This package installs Google Antigravity per-user into "%LOCALAPPDATA%\Programs\antigravity".
+
 </description>
     </metadata>
     <files>
