@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
@@ -6,9 +6,9 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = 'https://storage.googleapis.com/antigravity-public/antigravity-hub/2.29.0-5723181030440960/windows-x64/Antigravity-x64.exe'
+  url            = 'https://storage.googleapis.com/antigravity-public/antigravity-hub/2.29.1-5241471524274176/windows-x64/Antigravity-x64.exe'
   softwareName   = 'Antigravity*'
-  checksum       = '944B109BCB377F9F94F86EEEA7CFA9315D4B42D84FB9D5BAD689058FC11C12BA'
+  checksum       = 'A842B73218CB35E029E8425A28C79A388280E03D389C50FD93FF75AF1A7F50BB'
   checksumType   = 'sha256'
   
   # NSIS installer: /S enables silent installation; /currentuser targets the user profile
