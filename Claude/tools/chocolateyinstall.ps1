@@ -3,7 +3,7 @@
 $toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 # Package parameters:
-#   /Legacy                        install the per-user Squirrel installer (.exe) instead of the MSIX
+#   /Legacy                        install the per-user Squirrel installer (.exe) instead of the MSIX (used automatically below Windows 10 2004)
 #   /DisableAutoUpdates            MSIX only: set Claude's disableAutoUpdates policy so Chocolatey manages the version
 #   /EnableVirtualizationPlatform  MSIX only: enable the Windows Virtual Machine Platform that Cowork needs (restart required)
 $pp = Get-PackageParameters
@@ -34,19 +34,21 @@ $packageArgs = @{
   validExitCodes = @(0, 3010, 1641)
 }
 
-if ($pp.Legacy) {
-  Write-Warning 'Installing the legacy per-user Claude installer (/Legacy). Cowork needs the default MSIX install.'
+# The MSIX needs Windows 10 version 2004 (build 19041) or later and an elevated shell; older builds get the legacy installer
+$useLegacy = [bool]$pp.Legacy
+if (-not $useLegacy -and [Environment]::OSVersion.Version.Build -lt 19041) {
+  Write-Warning 'The Claude MSIX needs Windows 10 version 2004 (build 19041) or later. Falling back to the legacy installer.'
+  $useLegacy = $true
+}
+
+if ($useLegacy) {
+  Write-Warning 'Installing the legacy per-user Claude installer. Cowork needs the default MSIX install.'
   if ($isArm64) {
     $packageArgs.url = $exeSourceArm64
     $packageArgs.checksum = $exeSha256Arm64
   }
   Install-ChocolateyPackage @packageArgs
   return
-}
-
-# The MSIX needs Windows 10 version 2004 (build 19041) or later and an elevated shell
-if ([Environment]::OSVersion.Version.Build -lt 19041) {
-  throw 'The Claude MSIX needs Windows 10 version 2004 (build 19041) or later. Use /Legacy for the older installer.'
 }
 
 . (Join-Path $toolsDir 'helpers.ps1')

@@ -39,7 +39,7 @@ By default this package installs the MSIX build that Anthropic recommends for ma
 
 ## Package Parameters
 
-- `/Legacy` - install the previous per-user installer (Squirrel) instead of the MSIX. Cowork is not available with it.
+- `/Legacy` - install the previous per-user installer (Squirrel) instead of the MSIX. Cowork is not available with it. It is used automatically on Windows builds older than 19041 (Windows 10 2004), which cannot install the MSIX.
 - `/DisableAutoUpdates` - set Claude's `disableAutoUpdates` policy so that Chocolatey manages the version (MSIX only).
 - `/EnableVirtualizationPlatform` - enable the Windows Virtual Machine Platform that Cowork needs, if it is not already enabled; restart Windows afterwards (MSIX only).
 
