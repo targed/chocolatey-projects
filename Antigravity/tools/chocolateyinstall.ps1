@@ -6,9 +6,9 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = 'https://storage.googleapis.com/antigravity-public/antigravity-hub/2.29.1-5241471524274176/windows-x64/Antigravity-x64.exe'
+  url            = 'https://storage.googleapis.com/antigravity-public/antigravity-hub/2.31.0-6379060755038208/windows-x64/Antigravity-x64.exe'
   softwareName   = 'Antigravity*'
-  checksum       = 'A842B73218CB35E029E8425A28C79A388280E03D389C50FD93FF75AF1A7F50BB'
+  checksum       = 'FA00FD2D97808CF6D280D248FDD707212F18EF3FE282335FB97872FE248AF1B0'
   checksumType   = 'sha256'
   
   # NSIS installer: /S enables silent installation; /currentuser targets the user profile
