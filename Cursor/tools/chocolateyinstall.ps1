@@ -11,10 +11,10 @@ $pp = Get-PackageParameters
 # We don't pass all four to Install-ChocolateyPackage directly because they are both x64, 
 # and it would prioritize url64bit incorrectly if the user wants the User installer.
 $updaterDummyVariables = @{
-  url        = 'https://downloads.cursor.com/production/4a44c846d0b817fab060823f93c63ea2861ac192/win32/x64/user-setup/CursorUserSetup-x64-3.30.8.exe'
-  checksum   = '770D52500201A812588D11A709CBC31BA15F02AD69D46EB4032E25A2A2D1355D'
-  url64bit   = 'https://downloads.cursor.com/production/4a44c846d0b817fab060823f93c63ea2861ac192/win32/x64/system-setup/CursorSetup-x64-3.30.8.exe'
-  checksum64 = '39186160F14BC84674D335F9577F027A802B6FFCB83EF840AA154C0E23E41777'
+  url        = 'https://downloads.cursor.com/production/5f54c8173e5552412beb40702adac16275677fa0/win32/x64/user-setup/CursorUserSetup-x64-3.30.14.exe'
+  checksum   = 'A4B93B507922388EAAD428B9E4F440ED4EDA92038D52DE5A7FB1497EB7823EBB'
+  url64bit   = 'https://downloads.cursor.com/production/5f54c8173e5552412beb40702adac16275677fa0/win32/x64/system-setup/CursorSetup-x64-3.30.14.exe'
+  checksum64 = 'E5D22847205E551638B1EC3F563BC3C7B145EC65459C0F4FB3726BFD6F6C4155'
 }
 
 if ($pp.System) {
