@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 
@@ -6,9 +6,9 @@ $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
   fileType       = 'exe'
-  url            = 'https://download.whispertyping.com/wt/WhisperTypingInstaller-4.5.8.exe'
+  url            = 'https://download.whispertyping.com/wt/WhisperTypingInstaller-4.7.1.exe'
   softwareName   = 'WhisperTyping*'
-  checksum       = 'EADDF445791599CFEE306D4834AFAC195A1F219FECCFBAE5F217830007CF39B2'
+  checksum       = 'D71D96EC46843C4AC5E07C21480A55136423BC5F8E0738C24479375341C1897D'
   checksumType   = 'sha256'
   
   silentArgs     = '/qn'
